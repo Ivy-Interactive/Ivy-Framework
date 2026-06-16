@@ -23,7 +23,7 @@ public record PluginIcon
 
 public enum PluginIconKind
 {
-    Named,
-    Url,
-    File
+    Named = 0,
+    Url = 1,
+    File = 2,
 }

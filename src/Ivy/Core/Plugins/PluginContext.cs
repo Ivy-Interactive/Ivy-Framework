@@ -7,6 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
 
+/// <summary>
+/// Base class for plugin context implementations. NOT intended for use by plugins directly.
+/// This is an internal implementation detail of the plugin hosting infrastructure.
+/// Plugins should only depend on the <see cref="IIvyPluginContext"/> (or derived) interfaces.
+/// </summary>
 public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
     protected AppRepository AppRepository { get; }

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.Json;
 using Ivy.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,12 @@ public class PluginLoader : IPluginManager
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
             "Ivy.Plugin.Abstractions",
-            "Ivy"
+            "Ivy",
+            // Microsoft.Extensions types appear in the plugin contract surface
+            // (IServiceCollection, ILogger, etc.) and must share type identity with the host.
+            "Microsoft.Extensions.DependencyInjection",
+            "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Microsoft.Extensions.Logging.Abstractions",
         };
     }
 
@@ -73,7 +79,7 @@ public class PluginLoader : IPluginManager
                 if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
                     SourcePluginBuilder.BuildSync(directory, _logger);
 
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider);
+                var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
                 if (loaded is null)
                 {
                     // Track that this directory failed to load
@@ -81,7 +87,7 @@ public class PluginLoader : IPluginManager
                     try
                     {
                         _failedPlugins[directory] = (
-                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
+                            reason ?? "No valid plugin found",
                             DateTime.UtcNow);
                     }
                     finally
@@ -155,14 +161,14 @@ public class PluginLoader : IPluginManager
                 if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
                     SourcePluginBuilder.BuildSync(directory, _logger);
 
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider);
+                var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
                 if (loaded is null)
                 {
                     _lock.EnterWriteLock();
                     try
                     {
                         _failedPlugins[directory] = (
-                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
+                            reason ?? "No valid plugin found",
                             DateTime.UtcNow);
                     }
                     finally
@@ -224,14 +230,16 @@ public class PluginLoader : IPluginManager
     }
 
     private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)? LoadPluginFromDirectory(
-        string directory, IServiceProvider serviceProvider)
+        string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
+        failureReason = null;
         var dllFiles = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
             .ToArray();
         if (dllFiles.Length == 0)
         {
             _logger.LogWarning("No DLL files found in plugin directory: {Directory}", directory);
+            failureReason = "No DLL files found";
             return null;
         }
 
@@ -264,6 +272,15 @@ public class PluginLoader : IPluginManager
 
         // Final fallback: first DLL
         mainDllPath ??= shadowFiles[0];
+
+        // Pre-flight check: verify the plugin's shared assembly dependencies are satisfied by the host
+        var compatError = CheckSharedAssemblyCompatibility(shadowDir, directory);
+        if (compatError is not null)
+        {
+            _logger.LogError("Plugin in '{Directory}' is incompatible: {Error}", directory, compatError);
+            failureReason = compatError;
+            return null;
+        }
 
         // Create a single load context for the entire plugin
         var loadContext = new PluginAssemblyLoadContext(mainDllPath, _sharedAssemblyNames);
@@ -302,6 +319,7 @@ public class PluginLoader : IPluginManager
                 _logger.LogError(
                     "Assembly {Dll} has [IvyPlugin({Type})] but that type does not implement IIvyPlugin. Skipping directory.",
                     dllPath, attr.PluginType.FullName);
+                failureReason = $"[IvyPlugin({attr.PluginType.FullName})] does not implement IIvyPlugin";
                 return null;
             }
 
@@ -311,6 +329,7 @@ public class PluginLoader : IPluginManager
         if (found.Count == 0)
         {
             _logger.LogDebug("No [assembly: IvyPlugin] attribute found in {Directory}. Skipping.", directory);
+            failureReason = "No [IvyPlugin] attribute found";
             return null;
         }
 
@@ -319,6 +338,7 @@ public class PluginLoader : IPluginManager
             _logger.LogError(
                 "Multiple [assembly: IvyPlugin] attributes found in {Directory} ({Assemblies}). Skipping.",
                 directory, string.Join(", ", found.Select(f => Path.GetFileName(f.Assembly.Location))));
+            failureReason = "Multiple [IvyPlugin] attributes found";
             return null;
         }
 
@@ -449,10 +469,10 @@ public class PluginLoader : IPluginManager
         _lock.EnterWriteLock();
         try
         {
-            var loaded = LoadPluginFromDirectory(pluginPath, _serviceProviderFactory());
+            var loaded = LoadPluginFromDirectory(pluginPath, _serviceProviderFactory(), out var loadFailReason);
             if (loaded is null)
             {
-                _logger.LogError("Failed to load plugin from {Path}.", pluginPath);
+                _logger.LogError("Failed to load plugin from {Path}: {Reason}", pluginPath, loadFailReason ?? "unknown");
                 return false;
             }
 
@@ -602,10 +622,10 @@ public class PluginLoader : IPluginManager
             SourcePluginBuilder.BuildSync(directory, _logger);
 
         // Load the new plugin assembly first, before unloading the old one
-        var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!());
+        var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!(), out var reloadFailReason);
         if (loaded is null)
         {
-            _logger.LogError("Failed to reload plugin '{Id}': new version could not be loaded.", pluginId);
+            _logger.LogError("Failed to reload plugin '{Id}': {Reason}", pluginId, reloadFailReason ?? "new version could not be loaded");
             return false;
         }
 
@@ -1158,6 +1178,87 @@ public class PluginLoader : IPluginManager
         public void SetValue(string key, string value) => inner.SetValue(key, value);
         public void RemoveValue(string key) => inner.RemoveValue(key);
         public void Save() => inner.Save();
+    }
+
+    /// <summary>
+    /// Checks that the plugin's deps.json does not require newer versions of shared assemblies
+    /// than what the host currently provides. Returns an error message if incompatible, null if OK.
+    /// </summary>
+    private string? CheckSharedAssemblyCompatibility(string shadowDir, string originalDirectory)
+    {
+        // Find all .deps.json files in the shadow directory
+        var depsFiles = Directory.GetFiles(shadowDir, "*.deps.json");
+        if (depsFiles.Length == 0)
+            return null; // No deps.json — can't verify, allow loading (will fail naturally if incompatible)
+
+        foreach (var depsFile in depsFiles)
+        {
+            try
+            {
+                using var stream = File.OpenRead(depsFile);
+                using var doc = JsonDocument.Parse(stream);
+
+                if (!doc.RootElement.TryGetProperty("libraries", out var libraries))
+                    continue;
+
+                foreach (var library in libraries.EnumerateObject())
+                {
+                    // Library keys are in the format "PackageName/Version"
+                    var slashIndex = library.Name.LastIndexOf('/');
+                    if (slashIndex < 0) continue;
+
+                    var packageName = library.Name[..slashIndex];
+
+                    // Only check assemblies that are in our shared set
+                    if (!_sharedAssemblyNames.Contains(packageName))
+                        continue;
+
+                    var versionStr = library.Name[(slashIndex + 1)..];
+                    if (!Version.TryParse(versionStr, out var requiredVersion))
+                        continue;
+
+                    // Get the host's version of this assembly
+                    var hostAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(a => a.GetName().Name == packageName);
+
+                    if (hostAssembly is null)
+                    {
+                        // Try loading it to get its version
+                        try
+                        {
+                            hostAssembly = Assembly.Load(new AssemblyName(packageName));
+                        }
+                        catch
+                        {
+                            // Assembly not available in host — plugin may still work if it's optional
+                            continue;
+                        }
+                    }
+
+                    var hostVersion = hostAssembly.GetName().Version;
+                    if (hostVersion is null)
+                        continue;
+
+                    // Compare major.minor.build (ignore revision for flexibility)
+                    // A plugin requiring 2.0.0 should not load on a host with 1.x
+                    if (requiredVersion.Major > hostVersion.Major ||
+                        (requiredVersion.Major == hostVersion.Major && requiredVersion.Minor > hostVersion.Minor))
+                    {
+                        return $"Requires {packageName} >= {requiredVersion} but host provides {hostVersion}";
+                    }
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogDebug(ex, "Could not parse {DepsFile}, skipping compatibility check.", depsFile);
+            }
+            catch (IOException ex)
+            {
+                _logger.LogDebug(ex, "Could not read {DepsFile}, skipping compatibility check.", depsFile);
+            }
+        }
+
+        return null;
     }
 }
 

@@ -2,6 +2,6 @@ namespace Ivy.Plugins;
 
 public enum PluginStatus
 {
-    Active,
-    Unconfigured
+    Active = 0,
+    Unconfigured = 1,
 }

@@ -2,8 +2,8 @@ namespace Ivy.Plugins;
 
 public enum ConfigFieldType
 {
-    String,
-    Integer,
-    Boolean,
-    Secret // For sensitive values like tokens
+    String = 0,
+    Integer = 1,
+    Boolean = 2,
+    Secret = 3, // For sensitive values like tokens
 }
