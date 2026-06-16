@@ -1239,7 +1239,12 @@ public class PluginLoader : IPluginManager
                     if (hostVersion is null)
                         continue;
 
-                    // Compare major.minor.build (ignore revision for flexibility)
+                    // Version 0.0.0.0 means the host was built from source without assembly
+                    // versioning (e.g. local dev with GenerateAssemblyInfo=false) — skip check.
+                    if (hostVersion == new Version(0, 0, 0, 0))
+                        continue;
+
+                    // Compare major.minor (ignore patch/revision for flexibility)
                     // A plugin requiring 2.0.0 should not load on a host with 1.x
                     if (requiredVersion.Major > hostVersion.Major ||
                         (requiredVersion.Major == hostVersion.Major && requiredVersion.Minor > hostVersion.Minor))
