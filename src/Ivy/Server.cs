@@ -582,14 +582,15 @@ public class Server
         {
             var watcherLogger = loggerFactory.CreateLogger<PluginWatcher>();
             _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger, buildSourcePlugins);
-            _pluginWatcher.Start();
 
             var refsWatcherLogger = loggerFactory.CreateLogger<PluginReferencesWatcher>();
             var referencesFilePath = Path.Combine(pluginsDirectory, PluginReferencesWatcher.FileName);
             var initialRefs = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, pluginsDirectory, refsWatcherLogger);
             _pluginReferencesWatcher = new PluginReferencesWatcher(pluginsDirectory, loader, refsWatcherLogger, buildSourcePlugins);
             _pluginReferencesWatcher.SetInitialReferences(initialRefs);
-            _pluginReferencesWatcher.Start();
+            // Watchers are started later in BuildWebApplication after SetServiceProviderFactory
+            // to avoid a race condition where DLL changes from initial builds trigger reloads
+            // before the PluginLoader is fully initialized.
         }
 
         return this;
@@ -782,6 +783,10 @@ public class Server
         ServiceProvider = app.Services;
 
         _pluginLoader?.SetServiceProviderFactory(() => app.Services);
+
+        // Start plugin watchers now that the PluginLoader is fully initialized
+        _pluginWatcher?.Start();
+        _pluginReferencesWatcher?.Start();
 
         pluginContext?.Apply(app);
 
