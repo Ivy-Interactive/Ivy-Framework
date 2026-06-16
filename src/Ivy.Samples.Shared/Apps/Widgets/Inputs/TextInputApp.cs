@@ -274,11 +274,6 @@ public class TextInputAffixes : ViewBase
                | Text.Monospaced("Nullable with prefix/suffix")
                | nullableState.ToTextInput().Prefix("$").Placeholder("Amount")
                | nullableState.ToTextInput().Suffix("%").Placeholder("Percentage")
-               | nullableState.ToTextInput().Prefix("https://").Suffix(".com").Placeholder("domain")
-
-               | Text.Monospaced("Nullable + Invalid + ShortcutKey")
-               | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+P")
-               | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
-               | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+B");
+               | nullableState.ToTextInput().Prefix("https://").Suffix(".com").Placeholder("domain");
     }
 }

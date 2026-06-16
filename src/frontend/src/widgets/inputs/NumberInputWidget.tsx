@@ -8,7 +8,19 @@ import { inputStyles, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedInputClasses,
+  textInputFieldShellClasses,
+  textInputSizeVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+} from "@/components/ui/input/text-input-variant";
 import { formatBytes } from "@/lib/formatters";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
@@ -214,19 +226,18 @@ const SliderVariant = memo(
 
     return (
       <div
-        className={cn(
-          "flex items-stretch w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
+        className={textInputFieldShellClasses({
+          disabled,
+        })}
       >
         {hasPrefix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
             {prefixContent}
           </div>
         )}
-        <div className="flex-1 px-3">{sliderContent}</div>
+        <div className="flex min-w-0 flex-1 px-3">{sliderContent}</div>
         {hasSuffix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          <div className={textInputAffixSuffixCellClasses(density, suffixContent)}>
             {suffixContent}
           </div>
         )}
@@ -326,31 +337,26 @@ const NumberVariant = memo(
     const suffixContent = slots?.Suffix;
     const hasPrefix = (prefixContent?.length ?? 0) > 0;
     const hasSuffix = (suffixContent?.length ?? 0) > 0;
+    const hasAffixes = hasPrefix || hasSuffix;
+    const showClear = nullable && value !== null && !disabled;
+    const trailingBesideSuffix = hasSuffix;
+    const showTrailing = showClear || Boolean(invalid);
 
     return (
       <div
-        className={cn(
-          "relative flex items-stretch w-full flex-1 rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-          isFocused
-            ? "border-ring outline-none dark:border-ring"
-            : "border-input dark:border-white/10",
-          invalid && "border-destructive",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
+        className={textInputFieldShellClasses({
+          focused: isFocused,
+          invalid,
+          disabled,
+        })}
       >
-        {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-              !isFocused && "border-r border-input",
-            )}
-          >
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
             {prefixContent}
           </div>
         )}
 
-        <div className="relative flex-1">
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           <NumberInput
             min={min}
             max={max}
@@ -366,45 +372,72 @@ const NumberVariant = memo(
             onBlur={handleBlur}
             onFocus={handleFocus}
             className={cn(
-              "border-0 shadow-none",
+              textInputSizeVariant({ density }),
+              textInputEmbeddedInputClasses(hasAffixes, density),
               invalid && inputStyles.invalidInput,
-              (invalid || (nullable && value !== null && !disabled)) && "pr-8",
-              nullable && value !== null && !disabled && invalid && "pr-16",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showClear && invalid && "pr-16",
             )}
             data-testid={dataTestId}
           />
-          {/* Icon container - flex row aligned to right */}
-          {((nullable && value !== null && !disabled) || invalid) && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
-              {/* Clear (X) button - leftmost */}
-              {nullable && value !== null && !disabled && (
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textInputTrailingOverlayClasses(density)}>
+              {showClear && (
                 <button
                   type="button"
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={() => onValueChange(null)}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  className={textInputTrailingIconButtonClasses(true, density)}
                 >
-                  <X className={xIconVariant({ density })} />
+                  <X className={textInputTrailingIconSizeVariant({ density })} />
                 </button>
               )}
-              {/* Invalid icon - rightmost */}
-              {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
+              {invalid && (
+                <InvalidIcon
+                  message={invalid}
+                  className={textInputTrailingInvalidSlotClasses(true, density)}
+                  iconClassName={textInputTrailingIconSizeVariant({ density })}
+                />
+              )}
             </div>
           )}
         </div>
 
-        {/* Suffix with background and separator */}
         {hasSuffix && (
           <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-              !isFocused && "border-l border-input",
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
-            {suffixContent}
+            {trailingBesideSuffix && showTrailing && (
+              <>
+                {showClear && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={() => onValueChange(null)}
+                    className={textInputTrailingIconButtonClasses(false, density)}
+                  >
+                    <X className={textInputTrailingIconSizeVariant({ density })} />
+                  </button>
+                )}
+                {invalid && (
+                  <InvalidIcon
+                    message={invalid}
+                    className={textInputTrailingInvalidSlotClasses(false, density)}
+                    iconClassName={textInputTrailingIconSizeVariant({ density })}
+                  />
+                )}
+              </>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
           </div>
         )}
       </div>

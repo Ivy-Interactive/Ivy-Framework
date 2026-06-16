@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, X } from "lucide-react";
 import {
   addMonths,
   format,
@@ -16,19 +15,21 @@ import {
   isValid,
 } from "date-fns";
 import { useEventHandler } from "@/components/event-handler";
-import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
   dateRangeInputVariant,
-  dateRangeInputIconVariant,
   dateRangeInputTextVariant,
 } from "@/components/ui/input/date-range-input-variant";
-import {
-  affixEmbeddedButtonClasses,
-  affixIconOnlyCellPaddingClasses,
-} from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { DateRangePresets } from "./DateRangePresets";
+import {
+  DateInputAffixShell,
+  dateInputControlInvalid,
+  dateInputEmbeddedControlClasses,
+  dateInputFieldShellClasses,
+  dateInputTriggerTrailingPadding,
+} from "./DateTimeInputWidget/affix";
+import { ClearAndInvalidIcons } from "./DateTimeInputWidget/shared";
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -119,9 +120,9 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   );
 
   const handleClear = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
       if (!events.includes("OnChange")) return;
       if (disabled) return;
       const cleared = { item1: null, item2: null };
@@ -204,13 +205,27 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   const displayFormat = formatProp || "LLL dd, y";
 
   // Show clear button if nullable, not disabled, and has a value
-  const showClear = nullable && !disabled && (date?.from || date?.to);
+  const showClear = nullable && !disabled && Boolean(date?.from ?? date?.to);
 
   const prefixContent = slots?.Prefix;
   const suffixContent = slots?.Suffix;
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showTrailing = showClear || Boolean(invalid);
+  const controlInvalid = dateInputControlInvalid(
+    hasAffixes,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    hasAffixes,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const triggerContent = (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
@@ -223,13 +238,13 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           data-slot="calendar"
           className={cn(
             dateRangeInputVariant({ density }),
-            "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
+            "inline-flex items-center",
             !date && "text-muted-foreground",
-            invalid && "border-destructive focus-visible:ring-destructive",
-            showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
-            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-            hasPrefix && "rounded-l-none",
-            hasSuffix && "rounded-r-none",
+            controlInvalid && "border-destructive focus-visible:ring-destructive",
+            trailingPadding,
+            "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
+            hasAffixes && "rounded-l-none",
+            (hasSuffix || (showTrailing && !trailingBesideSuffix)) && "rounded-r-none",
           )}
           onBlur={() => {
             if (disabled) return;
@@ -240,7 +255,6 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             if (events.includes("OnFocus") && !isOpen) eventHandler("OnFocus", id, []);
           }}
         >
-          <CalendarIcon className={cn("mr-2 shrink-0", dateRangeInputIconVariant({ density }))} />
           {date?.from ? (
             date.to ? (
               <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
@@ -328,68 +342,50 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     </Popover>
   );
 
+  if (!hasAffixes) {
+    return (
+      <div className="relative w-full select-none">
+        <div
+          className={dateInputFieldShellClasses({
+            focused: isOpen,
+            invalid,
+            disabled,
+          })}
+        >
+          <div className={cn("relative min-w-0 flex-1", dateInputEmbeddedControlClasses)}>
+            {triggerContent}
+          </div>
+        </div>
+        {showTrailing && (
+          <ClearAndInvalidIcons
+            showClear={showClear}
+            invalid={invalid}
+            density={density}
+            onClear={handleClear}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full select-none">
-      {hasAffixes ? (
-        <div
-          className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-            isOpen && "ring-1 ring-ring",
-            invalid && "border-destructive",
-            disabled && "cursor-not-allowed opacity-50",
-          )}
-        >
-          {hasPrefix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-                affixEmbeddedButtonClasses,
-                affixIconOnlyCellPaddingClasses,
-                !isOpen && "border-r border-input",
-              )}
-            >
-              {prefixContent}
-            </div>
-          )}
-          <div className="flex-1 relative w-full">{triggerContent}</div>
-          {hasSuffix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-                affixEmbeddedButtonClasses,
-                affixIconOnlyCellPaddingClasses,
-                !isOpen && "border-l border-input",
-              )}
-            >
-              {suffixContent}
-            </div>
-          )}
+      <DateInputAffixShell
+        density={density}
+        invalid={invalid}
+        disabled={disabled}
+        focused={isOpen}
+        hasPrefix={hasPrefix}
+        hasSuffix={hasSuffix}
+        prefixContent={prefixContent}
+        suffixContent={suffixContent}
+        showClear={showClear}
+        onClear={handleClear}
+      >
+        <div className={cn("w-full min-w-0", dateInputEmbeddedControlClasses)}>
+          {triggerContent}
         </div>
-      ) : (
-        triggerContent
-      )}
-      {/* Icons absolutely positioned */}
-      {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={handleClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <X
-                className={cn(
-                  dateRangeInputIconVariant({ density }),
-                  "text-muted-foreground hover:text-foreground",
-                )}
-              />
-            </button>
-          )}
-          {invalid && <InvalidIcon message={invalid} />}
-        </div>
-      )}
+      </DateInputAffixShell>
     </div>
   );
 };

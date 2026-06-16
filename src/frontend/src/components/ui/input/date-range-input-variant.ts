@@ -1,13 +1,13 @@
 import { cva } from "class-variance-authority";
 
 export const dateRangeInputVariant = cva(
-  "w-full justify-start text-left font-normal pr-20 cursor-pointer bg-transparent",
+  "w-full justify-start text-left font-normal cursor-pointer bg-transparent",
   {
     variants: {
       density: {
-        Small: "h-8 px-3",
-        Medium: "h-9 px-4 py-2",
-        Large: "h-10 px-5 py-2",
+        Small: "h-7 min-h-7 max-h-7 px-2 py-0 text-xs [&_svg]:!size-3",
+        Medium: "h-9 min-h-9 max-h-9 px-3 py-0 text-sm [&_svg]:!size-4",
+        Large: "h-11 min-h-11 max-h-11 px-4 py-0 text-base [&_svg]:!size-5",
       },
     },
     defaultVariants: {
@@ -16,12 +16,12 @@ export const dateRangeInputVariant = cva(
   },
 );
 
-export const dateRangeInputIconVariant = cva("", {
+export const dateRangeInputIconVariant = cva("shrink-0", {
   variants: {
     density: {
-      Small: "size-3",
-      Medium: "size-4",
-      Large: "size-5",
+      Small: "!size-3",
+      Medium: "!size-4",
+      Large: "!size-5",
     },
   },
   defaultVariants: {

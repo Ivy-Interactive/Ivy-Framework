@@ -40,6 +40,9 @@ export interface BaseVariantProps {
   autoFocus?: boolean;
   "data-testid"?: string;
   onFocusChange?: (open: boolean) => void;
+  /** When true, clear/invalid render in the parent affix shell instead of an overlay. */
+  inAffixShell?: boolean;
+  trailingBesideSuffix?: boolean;
 }
 
 export interface DateChangeProp {
