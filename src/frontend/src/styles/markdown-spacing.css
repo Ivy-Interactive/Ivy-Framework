@@ -8,7 +8,8 @@
    headings. */
 
 :where(.markdown-widget > *:not(:is(h1, h2, h3, h4, h5, h6)) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
-  margin-top: 0.5rem; /* Default spacing between non-heading elements */
+  margin-top: 0.5rem;
+  /* Default spacing between non-heading elements */
 }
 
 /* Tighter spacing between consecutive details blocks */
@@ -36,6 +37,11 @@
    two :is() type matches), so it wins. */
 .markdown-widget > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
   margin-top: 1rem;
+}
+
+/* h2 headers get top spacing if they follow a non-heading element */
+.markdown-widget > *:not(:is(h1, h2, h3, h4, h5, h6)) + h2 {
+  margin-top: 1.25rem !important;
 }
 
 /* On mobile, let wide markdown tables scroll horizontally instead of clipping off the right edge. */
