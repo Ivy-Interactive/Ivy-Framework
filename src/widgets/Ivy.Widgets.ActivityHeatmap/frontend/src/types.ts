@@ -22,6 +22,7 @@ export interface ActivityHeatmapProps {
   showTooltip?: boolean;
   showMonthLabels?: boolean;
   showDayLabels?: boolean;
+  localize?: boolean;
   interval?: ActivityInterval;
   startDate?: string; // "YYYY-MM-DD"
   endDate?: string;   // "YYYY-MM-DD"

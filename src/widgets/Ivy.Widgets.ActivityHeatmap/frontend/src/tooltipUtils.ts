@@ -1,10 +1,20 @@
 import { Activity } from "./types";
 
-const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
+export type LocaleArg = string | readonly string[];
 
-export function formatTooltipHeader(day: Activity): string {
+export const browserLocale: LocaleArg =
+  navigator.languages.length ? navigator.languages : navigator.language;
+
+// When localization is disabled we render everything in English.
+export const ENGLISH_LOCALE = "en-US";
+
+export function resolveLocale(localize?: boolean): LocaleArg {
+  return localize ? browserLocale : ENGLISH_LOCALE;
+}
+
+export function formatTooltipHeader(day: Activity, locale: LocaleArg = browserLocale): string {
   const dateString = new Date(day.date + "T00:00:00")
-    .toLocaleDateString(preferredLanguage, { month: "short", day: "numeric", year: "numeric" });
+    .toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 
   if (day.hour != null) {
     return `${dateString}, ${String(day.hour).padStart(2, "0")}:00`;
@@ -25,9 +35,9 @@ export function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCo
   return `translate(${xOffset}px, ${yOffset}px)`;
 }
 
-export function formatDimensionLabel(date: Date, isHourly?: boolean): string {
+export function formatDimensionLabel(date: Date, isHourly?: boolean, locale: LocaleArg = browserLocale): string {
   if (isHourly) {
-    return date.toLocaleDateString(preferredLanguage, { month: "short", day: "numeric" });
+    return date.toLocaleDateString(locale, { month: "short", day: "numeric" });
   }
-  return date.toLocaleDateString(preferredLanguage, { month: "short" });
+  return date.toLocaleDateString(locale, { month: "short" });
 }
