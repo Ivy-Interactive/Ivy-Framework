@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
 import { computeMaxCount, getLevel } from "./levelUtils";
-import { formatDimensionLabel, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
+import { formatDimensionLabel, formatTooltipHeader, getTooltipTransform, resolveLocale } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -13,15 +13,6 @@ function buildColorScheme(baseColor: string): string[] {
     baseColor,
   ];
 }
-
-const weekdayFormatter = new Intl.DateTimeFormat(
-  navigator.languages.length ? navigator.languages : navigator.language,
-  { weekday: "short" }
-);
-
-const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
-const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
-const FRIDAY = weekdayFormatter.format(new Date('2025-01-10'));
 
 function formatLocalDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -162,11 +153,23 @@ export function ActivityHeatmap({
   showTooltip = true,
   showMonthLabels = true,
   showDayLabels = true,
+  localize = false,
   interval = "Daily",
   valueLabel,
   startDate,
   endDate,
 }: ActivityHeatmapProps) {
+  const locale = useMemo(() => resolveLocale(localize), [localize]);
+
+  const weekdayLabels = useMemo(() => {
+    const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    return {
+      monday: weekdayFormatter.format(new Date("2025-01-06")),
+      wednesday: weekdayFormatter.format(new Date("2025-01-08")),
+      friday: weekdayFormatter.format(new Date("2025-01-10")),
+    };
+  }, [locale]);
+
   const isHourly = interval === "Hourly";
   const rowCount = isHourly ? 24 : 7;
   const cellSize = 16; // 50% larger than original 11px (11 * 1.5 ≈ 16)
@@ -189,7 +192,7 @@ export function ActivityHeatmap({
   // Row (y-axis) labels: weekdays for daily, hours for hourly.
   const rowLabels: string[] = isHourly
     ? Array.from({ length: 24 }, (_, h) => (h % 6 === 0 ? `${String(h).padStart(2, "0")}:00` : ""))
-    : ["", MONDAY, "", WEDNESDAY, "", FRIDAY, ""];
+    : ["", weekdayLabels.monday, "", weekdayLabels.wednesday, "", weekdayLabels.friday, ""];
 
   // Column (x-axis) labels: month name on month boundaries (daily) or a short date
   // on the first column / month boundaries (hourly).
@@ -201,17 +204,17 @@ export function ActivityHeatmap({
     if (isHourly) {
       // First column or first day of the month
       return ci === 0 || date.getDate() === 1
-        ? formatDimensionLabel(date, isHourly)
+        ? formatDimensionLabel(date, isHourly, locale)
         : "";
     }
 
     if (date.getDate() <= 7) {
       // First week of the month
       const prevColumnFirst = ci > 0 ? columns[ci - 1]?.[0] : null;
-      if (!prevColumnFirst) return formatDimensionLabel(date, isHourly);
+      if (!prevColumnFirst) return formatDimensionLabel(date, isHourly, locale);
       const prevDate = new Date(prevColumnFirst.date + "T00:00:00");
       if (prevDate.getMonth() !== date.getMonth()) {
-        return formatDimensionLabel(date, isHourly);
+        return formatDimensionLabel(date, isHourly, locale);
       }
     }
     return "";
@@ -235,7 +238,7 @@ export function ActivityHeatmap({
         ref={scrollXContainer}>
         <div className={`inline-flex flex-col gap-[${cellGapSize}px] font-sans h-100`}>
           {showMonthLabels && (
-            <div className="sticky top-0 flex gap-1 text-[#57606a] w-full bg-card">
+            <div className="sticky top-0 flex gap-1 pb-2 text-[#57606a] w-full bg-card">
               {showDayLabels && <div style={{ width: `${labelWidth}px` }} />}
               {columns.map((_, ci) => (
                 <div
@@ -352,7 +355,7 @@ export function ActivityHeatmap({
       >
         {tooltip &&
           <>
-            <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
+            <div className="font-bold">{formatTooltipHeader(tooltip.day, locale)}</div>
             <p>
               <span
                 className="relative inline-flex"
