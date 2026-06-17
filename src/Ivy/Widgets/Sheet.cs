@@ -91,30 +91,53 @@ public static class SheetExtensions
 
         if (isHorizontal)
         {
-            var width = sheet.Width?.Default ?? Sheet.DefaultWidth;
-            if (width.Min == null)
-            {
-                width = width.Min(Size.Px(200));
-            }
-            if (width.Max == null)
-            {
-                width = width.Max(Size.Px(1200));
-            }
+            var width = ApplyConstraints(sheet.Width, Sheet.DefaultWidth, Size.Px(200), Size.Px(1200));
             return (sheet with { Resizable = true }).Width(width);
         }
         else
         {
-            var height = sheet.Height?.Default ?? Sheet.DefaultHeight;
-            if (height.Min == null)
-            {
-                height = height.Min(Size.Px(100));
-            }
-            if (height.Max == null)
-            {
-                height = height.Max(Size.Px(900));
-            }
+            var height = ApplyConstraints(sheet.Height, Sheet.DefaultHeight, Size.Px(100), Size.Px(900));
             return (sheet with { Resizable = true }).Height(height);
         }
+    }
+
+    /// <summary>
+    /// Ensures resize min/max constraints are present on every populated breakpoint of a responsive size,
+    /// so a responsive Width/Height keeps its per-breakpoint ramp when the sheet is made resizable.
+    /// Previously only <c>.Default</c> was read, which collapsed multi-breakpoint sizes (e.g. one that
+    /// only sets Mobile/Tablet/Desktop/Wide) down to the fallback default, pinning the sheet to a single width.
+    /// </summary>
+    private static Responsive<Size> ApplyConstraints(Responsive<Size>? size, Size fallback, Size defaultMin, Size defaultMax)
+    {
+        if (size is null ||
+            (size.Default is null && size.Mobile is null && size.Tablet is null &&
+             size.Desktop is null && size.Wide is null))
+        {
+            // No size set at any breakpoint: fall back to a single constrained default.
+            return WithConstraints(fallback, defaultMin, defaultMax);
+        }
+
+        return size with
+        {
+            Default = size.Default is null ? null : WithConstraints(size.Default, defaultMin, defaultMax),
+            Mobile = size.Mobile is null ? null : WithConstraints(size.Mobile, defaultMin, defaultMax),
+            Tablet = size.Tablet is null ? null : WithConstraints(size.Tablet, defaultMin, defaultMax),
+            Desktop = size.Desktop is null ? null : WithConstraints(size.Desktop, defaultMin, defaultMax),
+            Wide = size.Wide is null ? null : WithConstraints(size.Wide, defaultMin, defaultMax),
+        };
+    }
+
+    private static Size WithConstraints(Size size, Size defaultMin, Size defaultMax)
+    {
+        if (size.Min == null)
+        {
+            size = size.Min(defaultMin);
+        }
+        if (size.Max == null)
+        {
+            size = size.Max(defaultMax);
+        }
+        return size;
     }
 
     public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right, bool resizable = false)
