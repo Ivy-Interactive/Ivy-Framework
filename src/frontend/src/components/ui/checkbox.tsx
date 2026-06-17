@@ -45,8 +45,14 @@ const Checkbox = React.forwardRef<
     },
     ref,
   ) => {
-    // Map undefined to null when nullable, then null to 'indeterminate' for Radix
-    const normalizedChecked = nullable && checked === undefined ? null : checked;
+    // Map checked value helper for safe boolean/null states
+    const normalizedChecked = React.useMemo(() => {
+      if (checked === undefined || checked === null) return nullable ? null : false;
+      if (checked === true || (checked as any) === 1) return true;
+      if (checked === false || (checked as any) === 0) return false;
+      return !!checked;
+    }, [checked, nullable]);
+
     const uiChecked =
       nullable && normalizedChecked === null ? "indeterminate" : !!normalizedChecked;
 
