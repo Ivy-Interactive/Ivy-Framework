@@ -48,3 +48,25 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Align checkbox lists (task lists) with the left edge of headers/paragraphs */
+.markdown-widget ul:has(> .task-list-item) {
+  padding-left: 0 !important;
+}
+
+/* Maintain indent for nested task lists */
+.markdown-widget li.task-list-item ul:has(> .task-list-item) {
+  padding-left: 1.25rem !important;
+}
+
+.markdown-widget .task-list-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+}
+
+.markdown-widget .task-list-item > input[type="checkbox"] {
+  margin: 0 !important;
+  margin-top: 0.25rem !important;
+  flex-shrink: 0 !important;
+}
