@@ -168,7 +168,7 @@ const VariantComponents = {
             nullable={nullable}
             autoFocus={autoFocus}
             density={density}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
           {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
@@ -237,7 +237,7 @@ const VariantComponents = {
             icon={icon}
             density={density}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
           {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
@@ -306,7 +306,7 @@ const VariantComponents = {
             density={density}
             aria-label={label}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           >
             {icon && <Icon name={icon} />}
