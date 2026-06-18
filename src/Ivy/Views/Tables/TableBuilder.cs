@@ -386,11 +386,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         {
             var tableWidth = _width ?? Size.Full();
             var table = new Table(tableRows).Width(tableWidth).Density(_density);
-            
+
             bool hasContentSizedColumn = _columns.Values
                 .Where(e => !e.Removed)
                 .Any(c => c.Width == null || c.Width.IsContentSized);
-                
+
             table = table.Layout(hasContentSizedColumn ? "Auto" : "Fixed");
             return table;
         }
