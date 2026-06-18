@@ -4,7 +4,7 @@ using Ivy.Plugins;
 
 namespace Ivy.Plugin.HelloWorld;
 
-public class HelloWorldPlugin : IIvyPlugin
+public class HelloWorldPlugin : IIvyPlugin<IIvyPluginContext>
 {
     public PluginManifest Manifest { get; } = new()
     {

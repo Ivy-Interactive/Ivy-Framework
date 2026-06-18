@@ -275,7 +275,7 @@ public class PluginLoaderTests
             var failedPlugin = unloadedPlugins.FirstOrDefault(p => p.FailureReason is not null);
             Assert.NotNull(failedPlugin);
             Assert.Equal(emptyPluginDir, failedPlugin.Directory);
-            Assert.Contains("No valid plugin found", failedPlugin.FailureReason);
+            Assert.Contains("No DLL files found", failedPlugin.FailureReason);
             Assert.True((DateTime.UtcNow - failedPlugin.FailedAt!.Value).TotalSeconds < 5);
         }
         finally
@@ -312,8 +312,12 @@ public class PluginLoaderTests
             var failedPlugins = unloadedPlugins.Where(p => p.FailureReason is not null).ToList();
             Assert.Equal(2, failedPlugins.Count);
 
-            // Both should have the generic failure reason since they both return null from LoadPluginFromDirectory
-            Assert.All(failedPlugins, f => Assert.Contains("No valid plugin found", f.FailureReason));
+            // Each directory gets a specific failure reason
+            var noDllsFailure = failedPlugins.First(f => f.Directory == noDllsDir);
+            Assert.Contains("No DLL files found", noDllsFailure.FailureReason);
+
+            var noAttrFailure = failedPlugins.First(f => f.Directory == noAttributeDir);
+            Assert.NotNull(noAttrFailure.FailureReason);
         }
         finally
         {
@@ -638,5 +642,56 @@ public class PluginLoaderTests
     {
         public IServiceCollection Services => new ServiceCollection();
         public IIvyPluginConfig Config => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void GenericPlugin_ReceivesTypedContext()
+    {
+        var context = new TestPluginContext();
+        var received = false;
+
+        var plugin = new TypedTestPlugin(ctx =>
+        {
+            // Verify we get the actual extended context type
+            Assert.NotNull(ctx);
+            received = true;
+        });
+
+        // Call via the non-generic interface (simulates how PluginLoader calls it)
+        ((Ivy.Plugins.IIvyPlugin)plugin).Configure(context);
+
+        Assert.True(received);
+    }
+
+    [Fact]
+    public void GenericPlugin_ThrowsOnIncompatibleContext()
+    {
+        var mockContext = new MockNonIvyPluginContext();
+
+        var plugin = new TypedTestPlugin(_ => { });
+
+        // MockNonIvyPluginContext does not implement IIvyExtendedPluginContext,
+        // so the DIM should throw
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            ((Ivy.Plugins.IIvyPlugin)plugin).Configure(mockContext));
+
+        Assert.Contains("requires context type", ex.Message);
+        Assert.Contains(nameof(Ivy.Plugins.IIvyExtendedPluginContext), ex.Message);
+    }
+
+    private class TypedTestPlugin(Action<Ivy.Plugins.IIvyExtendedPluginContext> onConfigure)
+        : Ivy.Plugins.IIvyPlugin<Ivy.Plugins.IIvyExtendedPluginContext>
+    {
+        public Ivy.Plugins.PluginManifest Manifest { get; } = new()
+        {
+            Id = "Ivy.Plugin.TypedTest",
+            Title = "Typed Test",
+            ConfigSectionName = "TypedTest",
+            Version = new Version(1, 0)
+        };
+
+        public Ivy.Plugins.PluginConfigurationSchema? ConfigurationSchema => null;
+
+        public void Configure(Ivy.Plugins.IIvyExtendedPluginContext context) => onConfigure(context);
     }
 }

@@ -11,7 +11,7 @@ namespace Ivy.Plugin.Example.AppProvider;
 /// This plugin uses the AsExtendedContext() extension method to cast IIvyPluginContext to IIvyExtendedPluginContext,
 /// enabling access to extended features like app registration.
 /// </summary>
-public class ExampleAppProviderPlugin : IIvyPlugin
+public class ExampleAppProviderPlugin : IIvyPlugin<IIvyExtendedPluginContext>
 {
     public PluginManifest Manifest { get; } = new()
     {
@@ -34,17 +34,13 @@ public class ExampleAppProviderPlugin : IIvyPlugin
     public object? BuildConfigurationView(IIvyPluginConfig config) =>
         new ExampleAppProviderConfigView(config);
 
-    public void Configure(IIvyPluginContext context)
+    public void Configure(IIvyExtendedPluginContext context)
     {
         var appTitle = context.Config.GetValue("AppTitle") ?? "Example App";
         var appIconName = context.Config.GetValue("AppIcon") ?? "Star";
         var appIcon = Enum.TryParse<Icons>(appIconName, ignoreCase: true, out var parsed) ? parsed : Icons.Star;
 
-        // Use the AsExtendedContext() extension method to access Ivy-specific features
-        var ivyContext = context.AsExtendedContext();
-
-        // Add an app to the host application
-        ivyContext.AddApp(new AppDescriptor
+        context.AddApp(new AppDescriptor
         {
             Id = "example-app",
             Title = appTitle,
