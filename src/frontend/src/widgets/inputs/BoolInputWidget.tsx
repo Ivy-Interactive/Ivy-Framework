@@ -14,9 +14,21 @@ import { Densities } from "@/types/density";
 import {
   labelSizeVariant,
   descriptionSizeVariant,
+  boolInputControlGapVariant,
   boolInputRowMinHeightVariant,
 } from "@/components/ui/input/bool-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import {
+  normalizeInputDensity,
+  textInputAffixControlColumnClasses,
+  textInputAffixInvalidIconClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputFieldShellClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconSizeVariant,
+} from "@/components/ui/input/text-input-variant";
 
 type VariantType = "Checkbox" | "Switch" | "Toggle";
 
@@ -48,6 +60,7 @@ interface BaseVariantProps {
   disabled: boolean;
   loading: boolean;
   density?: Densities;
+  inAffixShell?: boolean;
   autoFocus?: boolean;
   "data-testid"?: string;
 }
@@ -73,17 +86,26 @@ const InputLabel: React.FC<{
   label?: string;
   description?: string;
   density?: Densities;
-}> = React.memo(({ id, label, description, density = Densities.Medium }) => {
+  onClick?: () => void;
+  disabled?: boolean;
+}> = React.memo(({ id, label, description, density = Densities.Medium, onClick, disabled }) => {
   if (!label && !description) return null;
+  const d = normalizeInputDensity(density);
+
+  const cursorClass = onClick ? (disabled ? "cursor-not-allowed" : "cursor-pointer") : undefined;
 
   return (
-    <div>
+    <div onClick={onClick} className={cn("min-w-0 flex-1", cursorClass)}>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariant({ density })}>
+        <Label htmlFor={id} className={cn("block truncate", labelSizeVariant({ density: d }))}>
           {label}
         </Label>
       )}
-      {description && <p className={descriptionSizeVariant({ density })}>{description}</p>}
+      {description && (
+        <p className={cn("block truncate", descriptionSizeVariant({ density: d }))}>
+          {description}
+        </p>
+      )}
     </div>
   );
 });
@@ -122,10 +144,26 @@ const VariantComponents = {
       nullable,
       invalid,
       density = Densities.Medium,
+      inAffixShell = false,
       autoFocus,
       onCheckedChange,
       "data-testid": dataTestId,
     }: CheckboxVariantProps) => {
+      const d = normalizeInputDensity(density);
+      // Toggle cycle for label clicks: null → true → false → null (if nullable)
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        if (nullable) {
+          const isTrue = value === true || (value as any) === 1;
+          const isNull = value === null || value === undefined;
+          if (isNull) onCheckedChange(true);
+          else if (isTrue) onCheckedChange(false);
+          else onCheckedChange(null);
+        } else {
+          onCheckedChange(!value);
+        }
+      };
+
       const checkboxElement = (
         <div className="relative flex shrink-0">
           <Checkbox
@@ -135,18 +173,20 @@ const VariantComponents = {
             disabled={disabled || loading}
             nullable={nullable}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            density={density}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
-          {loading && <LoadingOverlay data-testid={dataTestId} />}
+          {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
         </div>
       );
 
-      const content = (
+      return (
         <div
           className={cn(
-            "flex gap-2 items-center",
-            boolInputRowMinHeightVariant({ density }),
+            "flex items-center",
+            boolInputControlGapVariant({ density: d }),
+            !inAffixShell && boolInputRowMinHeightVariant({ density: d }),
             description && "items-start",
           )}
           onClick={(e) => e.stopPropagation()}
@@ -158,11 +198,16 @@ const VariantComponents = {
           >
             {checkboxElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
-
-      return content;
     },
   ),
 
@@ -176,11 +221,18 @@ const VariantComponents = {
       loading,
       invalid,
       density = Densities.Medium,
+      inAffixShell = false,
       autoFocus,
       icon,
       onCheckedChange,
       "data-testid": dataTestId,
     }: SwitchVariantProps) => {
+      const d = normalizeInputDensity(density);
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        onCheckedChange(!value);
+      };
+
       const switchElement = (
         <div className="relative flex shrink-0">
           <Switch
@@ -189,19 +241,21 @@ const VariantComponents = {
             onCheckedChange={onCheckedChange}
             disabled={disabled || loading}
             icon={icon}
+            density={density}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
-          {loading && <LoadingOverlay data-testid={dataTestId} />}
+          {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
         </div>
       );
 
-      const content = (
+      return (
         <div
           className={cn(
-            "flex gap-2 items-center",
-            boolInputRowMinHeightVariant({ density }),
+            "flex items-center",
+            boolInputControlGapVariant({ density: d }),
+            !inAffixShell && boolInputRowMinHeightVariant({ density: d }),
             description && "items-start",
           )}
           onClick={(e) => e.stopPropagation()}
@@ -213,11 +267,16 @@ const VariantComponents = {
           >
             {switchElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
-
-      return content;
     },
   ),
 
@@ -232,10 +291,17 @@ const VariantComponents = {
       icon,
       invalid,
       density = Densities.Medium,
+      inAffixShell = false,
       autoFocus,
       onPressedChange,
       "data-testid": dataTestId,
     }: ToggleVariantProps) => {
+      const d = normalizeInputDensity(density);
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        onPressedChange(!value);
+      };
+
       const toggleElement = (
         <div className="relative flex shrink-0">
           <Toggle
@@ -243,22 +309,24 @@ const VariantComponents = {
             pressed={!!value}
             onPressedChange={onPressedChange}
             disabled={disabled || loading}
+            density={density}
             aria-label={label}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           >
             {icon && <Icon name={icon} />}
           </Toggle>
-          {loading && <LoadingOverlay data-testid={dataTestId} />}
+          {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
         </div>
       );
 
-      const content = (
+      return (
         <div
           className={cn(
-            "flex gap-x-2 items-center",
-            boolInputRowMinHeightVariant({ density }),
+            "flex items-center",
+            boolInputControlGapVariant({ density: d }),
+            !inAffixShell && boolInputRowMinHeightVariant({ density: d }),
             description && "items-start",
           )}
           onClick={(e) => e.stopPropagation()}
@@ -270,11 +338,16 @@ const VariantComponents = {
           >
             {toggleElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
-
-      return content;
     },
   ),
 };
@@ -298,8 +371,12 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  // Normalize undefined to null when nullable
-  const normalizedValue = nullable && value === undefined ? null : value;
+  const normalizedValue = useMemo(() => {
+    if (value === undefined || value === null) return nullable ? null : false;
+    if (value === true || (value as any) === 1) return true;
+    if (value === false || (value as any) === 0) return false;
+    return !!value;
+  }, [value, nullable]);
 
   const [localValue, setLocalValue] = useOptimisticValue(normalizedValue, false);
 
@@ -313,12 +390,16 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
+  const densityKey = normalizeInputDensity(density);
 
   const prefixContent = slots?.Prefix;
   const suffixContent = slots?.Suffix;
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showTrailing = Boolean(invalid);
+  const controlInvalid = trailingBesideSuffix && showTrailing ? undefined : invalid;
 
   const variantContent = (
     <VariantComponent
@@ -330,8 +411,9 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       loading={loading}
       nullable={nullable}
       icon={icon}
-      invalid={invalid}
+      invalid={controlInvalid}
       density={density}
+      inAffixShell={hasAffixes}
       autoFocus={autoFocus}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
@@ -354,21 +436,39 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
     >
       {hasAffixes ? (
         <div
-          className={cn(
-            "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-            invalid && "border-destructive",
-            disabled && "cursor-not-allowed opacity-50",
-          )}
+          className={textInputFieldShellClasses({
+            invalid,
+            disabled,
+          })}
         >
           {hasPrefix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
               {prefixContent}
             </div>
           )}
-          <div className="flex-1 px-3 py-2">{variantContent}</div>
+          <div className={textInputAffixControlColumnClasses(density)}>{variantContent}</div>
           {hasSuffix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-              {suffixContent}
+            <div
+              className={textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              })}
+            >
+              {trailingBesideSuffix && showTrailing && (
+                <>
+                  {invalid && (
+                    <InvalidIcon
+                      message={invalid}
+                      className={textInputAffixInvalidIconClasses()}
+                      iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+                    />
+                  )}
+                </>
+              )}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+              ) : (
+                suffixContent
+              )}
             </div>
           )}
         </div>

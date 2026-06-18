@@ -8,10 +8,18 @@ import { useFocusable } from "@/hooks/use-focus-management";
 import { sidebarMenuRef } from "@/widgets/layouts/sidebar";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedInputClasses,
   textInputSizeVariant,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingShortcutWrapperClasses,
   searchIconVariant,
-  xIconVariant,
+  searchInputPaddingVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
@@ -89,8 +97,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
-  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
-  const ghostSuffixLayout = Boolean(props.ghost && hasSuffix);
+  /** Trailing controls sit beside the suffix affix, not inside padded input text. */
+  const trailingBesideSuffix = hasSuffix;
+  const showBuiltinSearchIcon = !hasPrefix;
   const showClear = !props.disabled && hasValue;
   const showShortcut =
     Boolean(props.shortcutKey) && !isFocused && !hasValue && !showClear && !props.invalid;
@@ -120,23 +129,27 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear search"
           onClick={onClear}
-          className={cn(
-            "flex h-6 shrink-0 items-center rounded hover:bg-accent focus:outline-none cursor-pointer",
-            overlay ? "p-1 pointer-events-auto" : "p-0.5",
-          )}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
         >
-          <X className={xIconVariant({ density })} />
+          <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
       )}
       {showShortcut && (
-        <div className={cn("flex h-4 shrink-0 items-center", overlay && "pointer-events-auto")}>
+        <div
+          className={cn(
+            textInputTrailingShortcutWrapperClasses(density),
+            overlay && "pointer-events-auto",
+          )}
+        >
           {kbd}
         </div>
       )}
       {props.invalid && (
-        <div className={cn("flex h-6 shrink-0 items-center", overlay && "pointer-events-auto")}>
-          <InvalidIcon message={props.invalid} />
-        </div>
+        <InvalidIcon
+          message={props.invalid}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
+          iconClassName={textInputTrailingIconSizeVariant({ density })}
+        />
       )}
     </>
   );
@@ -156,13 +169,13 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
             {prefixContent}
           </div>
         )}
 
-        <div className={cn("relative flex-1", ghostSuffixLayout && "min-w-0")}>
-          <Search className={searchIconVariant({ density })} />
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
+          {showBuiltinSearchIcon && <Search className={searchIconVariant({ density })} />}
           <Input
             ref={mergedRef}
             id={props.id}
@@ -182,42 +195,38 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             autoComplete="off"
             className={cn(
               textInputSizeVariant({ density }),
-              "pl-8 cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              "cursor-pointer",
+              textInputEmbeddedInputClasses(hasAffixes, density),
+              showBuiltinSearchIcon && searchInputPaddingVariant({ density }),
               props.invalid && inputStyles.invalidInput,
-              ghostSuffixLayout && showTrailing && "pr-2",
-              !ghostSuffixLayout && (props.invalid || showClear) && "pr-8",
-              !ghostSuffixLayout &&
-                props.shortcutKey &&
-                !isFocused &&
-                !hasValue &&
-                !showClear &&
-                !props.invalid &&
-                "pr-16",
-              !ghostSuffixLayout && showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
             )}
             data-testid={props["data-testid"]}
           />
-          {!ghostSuffixLayout && showTrailing && (
+          {!trailingBesideSuffix && showTrailing && (
             <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-end gap-2 pr-2.5">
               {trailingCluster(true)}
             </div>
           )}
         </div>
 
-        {ghostSuffixLayout && showTrailing && (
-          <div className="relative z-10 flex shrink-0 items-center gap-0 self-stretch bg-transparent px-0 text-muted-foreground">
-            {trailingCluster(false)}
-          </div>
-        )}
-
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
-            {suffixContent}
+          <div
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
+          >
+            {trailingBesideSuffix && showTrailing && trailingCluster(false)}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
           </div>
         )}
       </div>

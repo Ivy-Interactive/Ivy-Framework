@@ -141,7 +141,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
       >
         <TableLayout>
           <DataTableHeader className={spacing.mb}>
-            <div className={`flex items-center w-full ${spacing.gapOuter}`}>
+            <div className={`flex flex-wrap items-center w-full ${spacing.gapOuter}`}>
               <div className={`flex items-center ${spacing.gapInner}`}>
                 {finalConfig.allowFiltering && (
                   <DataTableOption

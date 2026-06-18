@@ -372,6 +372,7 @@ export const useBackend = (
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
   const [stableAppShell, setStableAppShell] = useState(appShell);
+  const [stableAppArgs, setStableAppArgs] = useState(appArgs);
 
   // Refs to always have latest values in callbacks, without needing to add them to dependency arrays
   const latestAppIdRef = useRef(appId);
@@ -397,6 +398,7 @@ export const useBackend = (
     if (!isRootConnection) {
       setStableAppId(appId);
       setStableAppShell(appShell);
+      setStableAppArgs(appArgs);
       return;
     }
 
@@ -407,8 +409,9 @@ export const useBackend = (
     if (shouldReconnect) {
       setStableAppId(appId);
       setStableAppShell(appShell);
+      setStableAppArgs(appArgs);
     }
-  }, [appId, appShell, isRootConnection]);
+  }, [appId, appArgs, appShell, isRootConnection]);
 
   useEffect(() => {
     syncStableAppValues();
@@ -742,7 +745,7 @@ export const useBackend = (
     const connectedAccountLogin = pageParams.get("connectedAccountLogin");
 
     // Build SignalR connection URL
-    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${appArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&shell=${latestAppShellRef.current}`;
+    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${stableAppArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&shell=${latestAppShellRef.current}`;
     if (oauthLogin) {
       signalRUrl += `&oauthLogin=${oauthLogin}`;
     }
@@ -803,7 +806,7 @@ export const useBackend = (
         rootAppIdRef.current = undefined;
       }
     };
-  }, [appArgs, stableAppId, machineId, parentId, stableAppShell, isRootConnection]);
+  }, [stableAppArgs, stableAppId, machineId, parentId, stableAppShell, isRootConnection]);
 
   useEffect(() => {
     return setupConnection();

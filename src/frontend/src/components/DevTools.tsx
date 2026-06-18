@@ -16,6 +16,10 @@ interface WidgetInfo {
 const TEXT_EDITABLE_TYPES = ["Ivy.TextBlock", "Ivy.Markdown"];
 
 function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
+  if (wrapperElement.tagName !== "IVY-WIDGET") {
+    return wrapperElement.getBoundingClientRect();
+  }
+
   const children = wrapperElement.children;
   if (children.length === 0) return new DOMRect(0, 0, 0, 0);
 
@@ -106,8 +110,9 @@ export function DevTools() {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
-    const widgetId = element.getAttribute("id")!;
-    const widgetType = element.getAttribute("type")!;
+    const widgetId = element.getAttribute("data-ivy-widget-id") || element.getAttribute("id")!;
+    const widgetType =
+      element.getAttribute("data-ivy-widget-type") || element.getAttribute("type")!;
     const bounds = getWidgetBounds(element);
     const callSite = widgetCallSiteRegistry.get(widgetId);
     return { id: widgetId, type: widgetType, element, bounds, callSite };
@@ -170,7 +175,9 @@ export function DevTools() {
 
       e.stopPropagation();
 
-      const widgetWrapper = target.closest("ivy-widget") as HTMLElement | null;
+      const widgetWrapper = target.closest(
+        "ivy-widget, [data-ivy-widget-id]",
+      ) as HTMLElement | null;
       if (!widgetWrapper) {
         dispatchDev({ highlightedWidget: null, widgetStack: [] });
         return;
@@ -180,7 +187,9 @@ export function DevTools() {
       let current: HTMLElement | null = widgetWrapper;
       while (current) {
         stack.push(current);
-        current = current.parentElement?.closest("ivy-widget") as HTMLElement | null;
+        current = current.parentElement?.closest(
+          "ivy-widget, [data-ivy-widget-id]",
+        ) as HTMLElement | null;
       }
       dispatchDev({
         widgetStack: stack,

@@ -4,17 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import {
   dateTimeInputVariant,
-  dateTimeInputIconVariant,
   dateTimeInputTextVariant,
 } from "@/components/ui/input/date-time-input-variant";
 import { DateVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 
 export const DateVariant: React.FC<DateVariantProps> = ({
   value,
@@ -31,21 +30,45 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = useState(autoFocus);
 
   const hasAutoFocusedRef = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       buttonRef.current?.focus();
-      setOpen(true);
     }
   }, [autoFocus, disabled]);
 
   const date = value ? new Date(value) : undefined;
   const showClear = nullable && !disabled && value != null && value !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const disabledDays = useMemo(() => {
     const matchers: Array<{ before: Date } | { after: Date }> = [];
@@ -87,11 +110,11 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              trailingPadding,
+              "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
             )}
             data-testid={dataTestId}
             onFocus={() => {
@@ -101,7 +124,6 @@ export const DateVariant: React.FC<DateVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",
@@ -125,12 +147,14 @@ export const DateVariant: React.FC<DateVariantProps> = ({
           />
         </PopoverContent>
       </Popover>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

@@ -153,7 +153,7 @@ function truncateCellDisplayData(
     const displayData = cell.displayData;
     const truncated = truncateTextWithEllipsis(displayData, maxWidth, cellFont);
     if (truncated === displayData) return cell;
-    return { ...cell, displayData: truncated };
+    return { ...cell, displayData: truncated, copyData: displayData };
   }
 
   return cell;

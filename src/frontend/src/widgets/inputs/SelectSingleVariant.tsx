@@ -15,7 +15,16 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, X } from "lucide-react";
 import Icon from "@/components/Icon";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedContentPaddingClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  xIconVariant,
+} from "@/components/ui/input/text-input-variant";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { SelectInputWidgetProps } from "./select-types";
 import { useSelectValueHandler } from "./select-utils";
@@ -42,12 +51,25 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   autoFocus,
   slots,
 }) => {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = useState(autoFocus);
   const hasAutoFocusedRef = useRef(false);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setIsOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       triggerRef.current?.focus();
-      setIsOpen(true);
     }
   }, [autoFocus, disabled]);
   const validOptions = options.filter(
@@ -73,13 +95,10 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   }, [stringValue, validOptions]);
 
   const selectedLabel = selectedOption?.label;
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   /** True after the user edits the panel search field; reset when the dropdown closes. */
   const userFilteringRef = useRef(false);
   const [isEllipsed, setIsEllipsed] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -172,6 +191,15 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showClear = nullable && hasValue && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
+
+  const handleClear = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+  };
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
@@ -205,9 +233,8 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         !hasValue && "text-muted-foreground",
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
-        hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-        !hasAffixes &&
-          "border-0 shadow-none rounded-field focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 dark:bg-transparent",
+        "border-0 bg-transparent shadow-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+        hasAffixes && textInputEmbeddedContentPaddingClasses(density),
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}
@@ -225,36 +252,30 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       </span>
       <SelectTriggerEndActions>
         {loading && (
-          <div className="flex items-center h-6 pointer-events-auto">
-            <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
+          <div className="pointer-events-auto flex h-6 items-center">
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground text-opacity-50" />
           </div>
         )}
-        {nullable && hasValue && !disabled && (
+        {!trailingBesideSuffix && showClear && (
           <div
             role="button"
             tabIndex={-1}
             aria-label="Clear"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-            }}
+            onClick={handleClear}
             onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+                handleClear(e);
               }
             }}
-            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
+            className="pointer-events-auto flex h-6 cursor-pointer items-center rounded p-1 hover:bg-accent focus:outline-none"
           >
             <X className={xIconVariant({ density })} />
           </div>
         )}
-        {invalid && (
+        {!trailingBesideSuffix && invalid && (
           <div
-            className="flex items-center h-6 cursor-default pointer-events-auto"
+            className="pointer-events-auto flex h-6 cursor-default items-center"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <InvalidIcon message={invalid} />
@@ -391,8 +412,10 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-            isOpen && "ring-1 ring-ring",
+            "relative flex flex-1 items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            isOpen
+              ? "border-ring outline-none dark:border-ring"
+              : "border-input dark:border-white/10",
             invalid && "border-destructive",
             disabled && "cursor-not-allowed opacity-50",
             ghost &&
@@ -400,24 +423,45 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-                !isOpen && "border-r border-input",
-              )}
-            >
+            <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
               {prefixContent}
             </div>
           )}
-          <div className="flex-1 relative w-full">{selectContent}</div>
+          <div className="relative w-full min-w-0 flex-1">{selectContent}</div>
           {hasSuffix && (
             <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-                !isOpen && "border-l border-input",
-              )}
+              className={textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              })}
             >
-              {suffixContent}
+              {trailingBesideSuffix && showTrailing && (
+                <>
+                  {showClear && (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Clear"
+                      onClick={handleClear}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className={textInputTrailingIconButtonClasses(false, density)}
+                    >
+                      <X className={textInputTrailingIconSizeVariant({ density })} />
+                    </button>
+                  )}
+                  {invalid && (
+                    <InvalidIcon
+                      message={invalid}
+                      className={textInputTrailingInvalidSlotClasses(false, density)}
+                      iconClassName={textInputTrailingIconSizeVariant({ density })}
+                    />
+                  )}
+                </>
+              )}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+              ) : (
+                suffixContent
+              )}
             </div>
           )}
         </div>

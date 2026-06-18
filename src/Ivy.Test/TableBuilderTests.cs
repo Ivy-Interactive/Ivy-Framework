@@ -481,5 +481,15 @@ public class TableBuilderTests
         Assert.Equal("avatar", result.Alt);
         Assert.Equal(ImageFit.Cover, result.ObjectFit);
     }
+
+    [Fact]
+    public void Table_Width_SerializesCorrectly()
+    {
+        var table = new Table().Width(Size.Units(120)) with { Id = "test" };
+        var node = Ivy.Core.WidgetSerializer.Serialize(table);
+        Assert.Equal("Units:120", node["props"]?["width"]?.ToString());
+    }
+
 }
+
 

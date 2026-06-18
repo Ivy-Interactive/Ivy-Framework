@@ -1,13 +1,15 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 
 export function useRovingTabIndex(itemCount: number) {
   const [focusedIndex, setFocusedIndex] = useState(0);
   const itemsRef = useRef<(HTMLElement | null)[]>([]);
 
-  useEffect(() => {
+  const [prevItemCount, setPrevItemCount] = useState(itemCount);
+  if (itemCount !== prevItemCount) {
+    setPrevItemCount(itemCount);
     setFocusedIndex(0);
     itemsRef.current = itemsRef.current.slice(0, itemCount);
-  }, [itemCount]);
+  }
 
   const setItemRef = useCallback(
     (index: number) => (el: HTMLElement | null) => {

@@ -3,17 +3,17 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import {
   dateTimeInputVariant,
-  dateTimeInputIconVariant,
   dateTimeInputTextVariant,
 } from "@/components/ui/input/date-time-input-variant";
 import { MonthVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -31,16 +31,28 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = useState(autoFocus);
 
   const hasAutoFocusedRef = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       buttonRef.current?.focus();
-      setOpen(true);
     }
   }, [autoFocus, disabled]);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
@@ -69,6 +81,18 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   }
 
   const showClear = nullable && !disabled && value != null && value !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const isMonthDisabled = (monthIndex: number) => {
     if (minDate && new Date(viewYear, monthIndex + 1, 0) < minDate) return true;
@@ -109,11 +133,11 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              trailingPadding,
+              "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
             )}
             data-testid={dataTestId}
             onFocus={() => {
@@ -123,7 +147,6 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",
@@ -184,12 +207,14 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

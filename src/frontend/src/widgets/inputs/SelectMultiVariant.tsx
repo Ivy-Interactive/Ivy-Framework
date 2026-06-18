@@ -4,7 +4,16 @@ import { MultipleSelector, Option as MultiSelectOption } from "@/components/ui/m
 import { Loader2, X } from "lucide-react";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { logger } from "@/lib/logger";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedContentPaddingClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  xIconVariant,
+} from "@/components/ui/input/text-input-variant";
 import { SelectInputWidgetProps, Option } from "./select-types";
 import { convertValuesToOriginalType } from "./select-utils";
 import { getWidth } from "@/lib/styles";
@@ -132,45 +141,47 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showClear = selectedMultiSelectOptions.length > 0 && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
+
+  const handleClearAll = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    logger.debug("Select input clear button clicked (MultiSelect)", { id });
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+  };
 
   const rightSlot =
-    loading || (selectedMultiSelectOptions.length > 0 && !disabled) || invalid ? (
+    loading || (!trailingBesideSuffix && showTrailing) ? (
       <>
         {loading && (
-          <div className="pointer-events-auto flex items-center h-6 p-1">
-            <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
+          <div className="pointer-events-auto flex h-6 items-center p-1">
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground text-opacity-50" />
           </div>
         )}
-        {selectedMultiSelectOptions.length > 0 && !disabled && (
+        {!trailingBesideSuffix && showClear && (
           <button
             type="button"
             tabIndex={-1}
             aria-label="Clear All"
             onMouseDown={(e) => {
-              // Keep focus on the input so blur/outside-close still works after clearing.
               e.preventDefault();
               e.stopPropagation();
             }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              logger.debug("Select input clear button clicked (MultiSelect)", { id });
-              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-            }}
+            onClick={handleClearAll}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+                handleClearAll(e);
               }
             }}
-            className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+            className="pointer-events-auto flex h-6 cursor-pointer items-center rounded p-1 hover:bg-accent focus:outline-none"
           >
             <X className={xIconVariant({ density })} />
           </button>
         )}
-        {invalid && (
-          <div className="pointer-events-auto flex items-center h-6 p-1">
+        {!trailingBesideSuffix && invalid && (
+          <div className="pointer-events-auto flex h-6 items-center p-1">
             <InvalidIcon message={invalid} />
           </div>
         )}
@@ -187,7 +198,8 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         "w-full",
         ghost && "ghost",
-        hasAffixes && "border-0 shadow-none",
+        "border-0 bg-transparent shadow-none dark:bg-transparent",
+        hasAffixes && textInputEmbeddedContentPaddingClasses(density),
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}
@@ -218,7 +230,8 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            "relative flex flex-1 items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            "border-input dark:border-white/10 focus-within:border-ring dark:focus-within:border-ring",
             invalid && "border-destructive",
             (disabled || loading) && "cursor-not-allowed opacity-50",
             ghost &&
@@ -226,19 +239,64 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
               {prefixContent}
             </div>
           )}
-          <div className="flex-1 relative w-full">{multiSelectorContent}</div>
+          <div className="relative w-full min-w-0 flex-1">{multiSelectorContent}</div>
           {hasSuffix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-              {suffixContent}
+            <div
+              className={textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              })}
+            >
+              {trailingBesideSuffix && showTrailing && (
+                <>
+                  {showClear && (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Clear All"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={handleClearAll}
+                      className={textInputTrailingIconButtonClasses(false, density)}
+                    >
+                      <X className={textInputTrailingIconSizeVariant({ density })} />
+                    </button>
+                  )}
+                  {invalid && (
+                    <InvalidIcon
+                      message={invalid}
+                      className={textInputTrailingInvalidSlotClasses(false, density)}
+                      iconClassName={textInputTrailingIconSizeVariant({ density })}
+                    />
+                  )}
+                </>
+              )}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+              ) : (
+                suffixContent
+              )}
             </div>
           )}
         </div>
       ) : (
-        <div className="flex-1 relative w-full">{multiSelectorContent}</div>
+        <div
+          className={cn(
+            "relative flex w-full min-w-0 flex-1 select-none items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            "border-input outline-none dark:border-white/10 focus-within:border-ring dark:focus-within:border-ring",
+            invalid && "border-destructive",
+            (disabled || loading) && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          )}
+        >
+          <div className="relative min-w-0 flex-1">{multiSelectorContent}</div>
+        </div>
       )}
     </div>
   );

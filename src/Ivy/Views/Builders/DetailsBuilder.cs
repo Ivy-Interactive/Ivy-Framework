@@ -146,6 +146,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     {
         var column = GetField(field);
         column.Builder = builder(_builderFactory);
+        column.IsRemoved = false;
         return this;
     }
 
@@ -154,6 +155,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         foreach (var column in _items.Values.Where(e => e.Type == typeof(TU)))
         {
             column.Builder = builder(_builderFactory);
+            column.IsRemoved = false;
         }
         return this;
     }
@@ -163,6 +165,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         foreach (var column in _items.Values.Where(e => e.Type == typeof(TU)))
         {
             column.Builder = Outer(_builderFactory);
+            column.IsRemoved = false;
         }
         return this;
 
@@ -174,6 +177,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         foreach (var column in _items.Values)
         {
             column.Builder = Outer(_builderFactory);
+            column.IsRemoved = false;
         }
         return this;
 

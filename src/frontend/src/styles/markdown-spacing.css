@@ -8,7 +8,8 @@
    headings. */
 
 :where(.markdown-widget > *:not(:is(h1, h2, h3, h4, h5, h6)) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
-  margin-top: 0.5rem; /* Default spacing between non-heading elements */
+  margin-top: 0.5rem;
+  /* Default spacing between non-heading elements */
 }
 
 /* Tighter spacing between consecutive details blocks */
@@ -18,12 +19,13 @@
 
 /* Larger spacing for a non-heading element that follows a heading */
 :where(.markdown-widget > :is(h1, h2, h3) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
-/* Tighter spacing around code blocks */
-:where(.markdown-widget > pre + p, .markdown-widget > p + pre) {
-  margin-top: 0.375rem;
+/* Spacing around code blocks */
+:where(.markdown-widget > .markdown-code-block) {
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
 /* When a heading immediately follows another heading (e.g. an h2 directly
@@ -35,4 +37,46 @@
    two :is() type matches), so it wins. */
 .markdown-widget > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
   margin-top: 1rem;
+}
+
+/* h2 headers get top spacing if they follow a non-heading element */
+.markdown-widget > *:not(:is(h1, h2, h3, h4, h5, h6)) + h2 {
+  margin-top: 1.25rem !important;
+}
+
+/* On mobile, let wide markdown tables scroll horizontally instead of clipping off the right edge. */
+@media (max-width: 639.98px) {
+  .markdown-widget table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Align checkbox lists (task lists) with other list types */
+.markdown-widget ul:has(> .task-list-item) {
+  padding-left: 1.25rem !important;
+}
+
+/* Maintain indent for nested task lists */
+.markdown-widget li.task-list-item ul:has(> .task-list-item) {
+  padding-left: 1.25rem !important;
+}
+
+.markdown-widget .task-list-item {
+  position: relative !important;
+  list-style-type: none !important;
+  padding-left: 0.25rem !important;
+}
+
+.markdown-widget .task-list-item > input[type="checkbox"] {
+  position: absolute !important;
+  left: -1rem !important;
+  top: 0.35rem !important;
+  margin: 0 !important;
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+  flex-shrink: 0 !important;
 }

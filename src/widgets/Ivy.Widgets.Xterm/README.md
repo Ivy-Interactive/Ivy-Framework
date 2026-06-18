@@ -37,6 +37,12 @@ new Terminal()
 new Terminal()
     .InitialContent("Welcome!\r\n$ ")
 
+// Terminal with a loading overlay shown until the attached
+// process writes its first output to the stream
+new Terminal()
+    .Stream(pty.Stream)
+    .Loading("Starting Claude Code...")
+
 // Terminal with event handlers
 new Terminal()
     .HandleData(data => Console.WriteLine($"User typed: {data}"))
@@ -57,6 +63,8 @@ new Terminal()
 | `Scrollback` | `int` | `1000` | Lines to keep in scrollback buffer |
 | `Theme` | `TerminalTheme?` | Dark theme | Terminal color theme |
 | `InitialContent` | `string?` | `null` | Initial content to display |
+| `Loading` | `bool` | `false` | Show a loading overlay (spinner + text) until the first stream data arrives |
+| `LoadingText` | `string?` | `"Loading..."` | Text shown in the loading overlay |
 
 #### Events
 
@@ -122,8 +130,14 @@ All color properties accept CSS color strings (hex, rgb, rgba):
 
 ```bash
 cd .samples
-dotnet run Terminal.cs
+dotnet run
 ```
+
+The sample server uses an app shell with multiple demo apps (in `.samples/Apps/`):
+
+- **Shell** — an interactive system shell (`cmd` on Windows, `bash` otherwise)
+- **Hello Console** — runs the Spectre.Console demo app from `.console/HelloApp`
+- **Claude Code** — runs the `claude` CLI in the terminal (requires Claude Code to be installed and on `PATH`)
 
 ## Creating New Widgets
 

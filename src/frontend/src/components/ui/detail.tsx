@@ -55,7 +55,7 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
         )}
         {...props}
       >
-        <div className={cn(detailLabelSizeVariant({ density }))}>{label}</div>
+        <div className={cn(detailLabelSizeVariant({ density }), multiline && "pb-0")}>{label}</div>
         <div
           className={cn(
             detailValueSizeVariant({ density }),

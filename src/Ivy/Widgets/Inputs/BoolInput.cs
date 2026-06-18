@@ -101,13 +101,14 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
         Label = label;
         Disabled = disabled;
         Variant = variant;
+        Nullable = typeof(TBool) == typeof(bool?);
     }
 
-    internal BoolInput() { }
+    internal BoolInput()
+    {
+    }
 
     [Prop(AlwaysSerialize = true)] public TBool Value { get; init; } = default!;
-
-    [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
     [Event] public EventHandler<Event<IInput<TBool>, TBool>>? OnChange { get; }
 }
@@ -154,8 +155,7 @@ public static class BoolInputExtensions
         Type genericType = typeof(BoolInput<>).MakeGenericType(stateType);
 
         BoolInputBase input = (BoolInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, label, disabled, variant }, null)!;
-        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        nullableProperty?.SetValue(input, isNullable);
+        input.Nullable = isNullable;
 
         input.ScaffoldDefaults(null!, stateType);
         return input;

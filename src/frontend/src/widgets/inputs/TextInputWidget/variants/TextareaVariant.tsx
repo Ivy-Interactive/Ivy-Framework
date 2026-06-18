@@ -4,7 +4,18 @@ import { cn } from "@/lib/utils";
 import { getWidth, getHeight, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
-import { textareaSizeVariant, xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textareaSizeVariant,
+  textareaTrailingOverlayClasses,
+  textareaTrailingStackClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedInputClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+} from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
 import { Mic, X } from "lucide-react";
@@ -26,6 +37,14 @@ interface TextareaVariantProps {
   nullable?: boolean;
   density?: Densities;
 }
+
+const textareaAffixAlignClasses = (density: Densities) =>
+  cn(
+    "self-start",
+    density === Densities.Small && "pt-2",
+    density === Densities.Medium && "pt-2",
+    density === Densities.Large && "pt-3",
+  );
 
 export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   props,
@@ -71,86 +90,145 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
+  const prefixContent = props.slots?.Prefix;
+  const suffixContent = props.slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showShortcut = Boolean(
+    props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid,
+  );
+  const showTrailing =
+    showShortcut || showClear || Boolean(props.invalid) || Boolean(props.dictation);
+
+  const trailingCluster = (overlay: boolean) => (
+    <>
+      {props.dictation && !props.disabled && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label={props.isRecording ? "Stop dictation" : "Start dictation"}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            props.onDictationToggle?.();
+          }}
+          className={cn(
+            textInputTrailingIconButtonClasses(overlay, density),
+            props.isRecording && "bg-destructive/10 text-destructive",
+          )}
+        >
+          <Mic className={cn("size-4", props.isRecording && "animate-pulse text-destructive")} />
+        </button>
+      )}
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear text"
+          onClick={onClear}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
+        >
+          <X className={textInputTrailingIconSizeVariant({ density })} />
+        </button>
+      )}
+      {showShortcut && (
+        <div className={cn("flex shrink-0 items-center", overlay && "pointer-events-auto")}>
+          <kbd className="rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
+            {shortcutDisplay}
+          </kbd>
+        </div>
+      )}
+      {props.invalid && (
+        <InvalidIcon
+          message={props.invalid}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
+          iconClassName={textInputTrailingIconSizeVariant({ density })}
+        />
+      )}
+    </>
+  );
 
   return (
-    <div className="relative w-full select-none">
+    <div className="relative w-full select-none" style={wrapperStyles}>
       <div
         className={cn(
-          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+          isFocused
+            ? "border-ring outline-none dark:border-ring"
+            : "border-input dark:border-white/10",
+          props.invalid && "border-destructive",
+          props.disabled && "cursor-not-allowed opacity-50",
           props.ghost &&
-            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+            "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
+          hasAffixes && "ivy-textarea-affixed-shell",
         )}
-        style={wrapperStyles}
       >
-        <Textarea
-          ref={elementRef as React.RefObject<HTMLTextAreaElement>}
-          id={props.id}
-          placeholder={props.placeholder}
-          value={props.value}
-          disabled={props.disabled}
-          maxLength={props.maxLength}
-          minLength={props.minLength}
-          rows={props.rows}
-          onChange={handleChange}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          style={textareaStyles}
-          className={cn(
-            textareaSizeVariant({ density }),
-            "border-0 shadow-none dark:bg-transparent",
-            !props.height && "h-full",
-            props.invalid && inputStyles.invalidInput,
-            (props.invalid || showClear) && "pr-8",
-            props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && "pr-16",
-            showClear && props.invalid && "pr-16",
-            !hasValue && props.nullable && "placeholder:text-muted-foreground",
-          )}
-          data-testid={props["data-testid"]}
-        />
-      </div>
-      <div className="absolute right-2.5 top-2 flex items-start gap-2 pointer-events-none z-10">
-        {props.dictation && !props.disabled && (
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label={props.isRecording ? "Stop dictation" : "Start dictation"}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              props.onDictationToggle?.();
-            }}
+        {hasPrefix && (
+          <div
             className={cn(
-              "p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center transition-colors",
-              props.isRecording && "bg-destructive/10 text-destructive",
+              textInputAffixPrefixCellClasses(density, prefixContent),
+              textareaAffixAlignClasses(density),
             )}
           >
-            <Mic className={cn("size-4", props.isRecording && "animate-pulse text-destructive")} />
-          </button>
-        )}
-        {showClear && (
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label="Clear text"
-            onClick={onClear}
-            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center"
-            style={{ pointerEvents: "auto" }}
-          >
-            <X className={xIconVariant({ density })} />
-          </button>
-        )}
-        {props.shortcutKey && !isFocused && !hasValue && (
-          <div className="pointer-events-auto flex items-center">
-            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-field">
-              {shortcutDisplay}
-            </kbd>
+            {prefixContent}
           </div>
         )}
-        {props.invalid && (
-          <div className="flex items-center">
-            <InvalidIcon message={props.invalid} />
+
+        <div className={cn("relative min-w-0 flex-1", hasAffixes && "flex flex-col")}>
+          <Textarea
+            ref={elementRef as React.RefObject<HTMLTextAreaElement>}
+            id={props.id}
+            placeholder={props.placeholder}
+            value={props.value}
+            disabled={props.disabled}
+            maxLength={props.maxLength}
+            minLength={props.minLength}
+            rows={props.rows}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            style={textareaStyles}
+            className={cn(
+              textareaSizeVariant({ density }),
+              textInputEmbeddedInputClasses(hasAffixes, density),
+              !props.height && "h-full min-h-0",
+              hasAffixes && "resize-y",
+              props.invalid && inputStyles.invalidInput,
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !hasValue && props.nullable && "placeholder:text-muted-foreground",
+            )}
+            data-testid={props["data-testid"]}
+          />
+
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
+          )}
+        </div>
+
+        {hasSuffix && (
+          <div
+            className={cn(
+              textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              }),
+              textareaAffixAlignClasses(density),
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && (
+              <div className={textareaTrailingStackClasses(density)}>{trailingCluster(false)}</div>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
           </div>
         )}
       </div>

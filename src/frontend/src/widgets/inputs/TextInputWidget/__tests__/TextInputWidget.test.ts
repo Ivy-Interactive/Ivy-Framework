@@ -36,12 +36,27 @@ vi.mock("@/components/ui/input", () => {
   };
 });
 
-vi.mock("@/components/ui/input/text-input-variant", () => ({
-  textInputSizeVariant: () => "",
-  textInputAffixCellClasses: () => "",
-  searchIconVariant: () => "",
-  xIconVariant: () => "",
+const { mockTextInputAffixCellClasses } = vi.hoisted(() => ({
+  mockTextInputAffixCellClasses: vi.fn<(side: "prefix" | "suffix", density?: string) => string>(
+    () => "",
+  ),
 }));
+
+vi.mock("@/components/ui/input/text-input-variant", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/ui/input/text-input-variant")>();
+  return {
+    ...actual,
+    textInputAffixCellClasses: mockTextInputAffixCellClasses,
+    textInputAffixPrefixCellClasses: vi.fn((density, content) => {
+      mockTextInputAffixCellClasses("prefix", density);
+      return actual.textInputAffixPrefixCellClasses(density, content);
+    }),
+    textInputAffixSuffixCellClasses: vi.fn((density, content, options) => {
+      mockTextInputAffixCellClasses("suffix", density);
+      return actual.textInputAffixSuffixCellClasses(density, content, options);
+    }),
+  };
+});
 
 vi.mock("@/lib/styles", () => ({
   getWidth: () => ({}),
@@ -387,9 +402,11 @@ describe("SearchVariant keyboard handling", () => {
 describe("useCursorPosition", () => {
   function CursorWrapper({
     value,
+    type = "text",
     onRef,
   }: {
     value?: string;
+    type?: string;
     onRef?: (ref: {
       savePosition: () => void;
       elementRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
@@ -404,6 +421,7 @@ describe("useCursorPosition", () => {
     return React.createElement("input", {
       ref: elementRef as React.RefObject<HTMLInputElement>,
       "data-testid": "cursor-input",
+      type,
       value: value ?? "",
       onChange: () => {},
     });
@@ -485,6 +503,51 @@ describe("useCursorPosition", () => {
 
     expect(input.selectionStart).toBe(2);
   });
+
+  it("does not throw when restoring cursor on email inputs", () => {
+    let hookRef: {
+      savePosition: () => void;
+      elementRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+    } | null = null;
+
+    mount(
+      React.createElement(CursorWrapper, {
+        type: "email",
+        value: "hello@",
+        onRef: (ref) => {
+          hookRef = ref;
+        },
+      }),
+    );
+
+    const input = container.querySelector('[data-testid="cursor-input"]') as HTMLInputElement;
+    input.focus();
+    if (typeof input.setSelectionRange === "function") {
+      try {
+        input.setSelectionRange(6, 6);
+      } catch {
+        // Some environments reject selection on email inputs — still exercise restore path.
+      }
+    }
+
+    act(() => {
+      hookRef!.savePosition();
+    });
+
+    expect(() => {
+      act(() => {
+        root.render(
+          React.createElement(CursorWrapper, {
+            type: "email",
+            value: "hello@ivy.app",
+            onRef: (ref) => {
+              hookRef = ref;
+            },
+          }),
+        );
+      });
+    }).not.toThrow();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -541,5 +604,28 @@ describe("SearchVariant disabled/invalid container styles", () => {
     expect(borderedContainer.className).not.toContain("cursor-not-allowed");
     expect(borderedContainer.className).not.toContain("opacity-50");
     expect(borderedContainer.className).not.toContain("border-destructive");
+  });
+
+  it("uses shared affix cell classes with field density for prefix and suffix slots", () => {
+    mockTextInputAffixCellClasses.mockClear();
+    renderSearchVariant({
+      slots: {
+        Prefix: [React.createElement("span", { key: "prefix" }, "in:")],
+        Suffix: [React.createElement("span", { key: "suffix" }, "v")],
+      },
+    });
+
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("prefix", "Medium");
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("suffix", "Medium");
+  });
+
+  it("omits the built-in search icon when a prefix slot is present", () => {
+    renderSearchVariant({
+      slots: {
+        Prefix: [React.createElement("span", { key: "prefix" }, "in:")],
+      },
+    });
+
+    expect(container.querySelectorAll("svg")).toHaveLength(0);
   });
 });

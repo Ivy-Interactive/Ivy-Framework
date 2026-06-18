@@ -60,7 +60,12 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 
 const MemoizedCopyButton = memo(
   ({ textToCopy, density }: { textToCopy: string; density: Densities }) => (
-    <div className={codeCopyButtonVariant({ density })}>
+    <div
+      className={cn(
+        codeCopyButtonVariant({ density }),
+        "opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200",
+      )}
+    >
       <CopyToClipboardButton textToCopy={textToCopy} density={density} />
     </div>
   ),
@@ -173,7 +178,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     );
 
     return (
-      <div className="relative" style={containerStyles}>
+      <div className="group relative" style={containerStyles}>
         {showCopyButton && <MemoizedCopyButton textToCopy={content} density={density} />}
         <ScrollArea
           className={cn(

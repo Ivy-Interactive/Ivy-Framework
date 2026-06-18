@@ -403,7 +403,7 @@ FodyWeavers.xsd
 **/.idea/*
 
 
-*\bin\Debug\
+**/bin/Debug/
 
 # Possible Playwright test results in root folder
 test-results/

@@ -14,6 +14,16 @@ ivy-widget {
   display: contents;
 }
 
+/* Radix ScrollArea's internal display:table viewport wrapper sizes to its widest descendant
+   and overflows the viewport on mobile; force it to a capped block so content doesn't clip. */
+@media (max-width: 639.98px) {
+  [data-radix-scroll-area-viewport] > div[style*="display: table"] {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+}
+
 /* Additional theme customization variables */
 @layer base {
   :root {

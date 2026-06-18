@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { ClipboardAddon } from "@xterm/addon-clipboard";
 import { Unicode11Addon } from "@xterm/addon-unicode11";
+import { CanvasAddon } from "@xterm/addon-canvas";
 import xtermStyles from "@xterm/xterm/css/xterm.css?inline";
 import { EventHandler, StreamSubscriber } from "./types";
 import { getWidth, getHeight } from "./styles";
@@ -53,6 +54,8 @@ interface TerminalProps {
   stream?: { id: string };
   closed?: boolean;
   allowClipboard?: boolean;
+  loading?: boolean;
+  loadingText?: string;
   background?: string;
   foreground?: string;
 }
@@ -112,6 +115,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   stream,
   closed = false,
   allowClipboard = true,
+  loading = false,
+  loadingText = "Loading...",
   background,
   foreground,
 }) => {
@@ -122,6 +127,28 @@ export const Terminal: React.FC<TerminalProps> = ({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const initialContentWrittenRef = useRef(false);
   const terminalReadyRef = useRef(false);
+
+  // Loading overlay: visible while `loading` is set, auto-hidden once visible
+  // output arrives on the stream. ConPTY and shells emit escape-sequence
+  // preambles (window title, cursor homing, mode sets) within milliseconds of
+  // spawn — long before the process prints anything — so control sequences
+  // and whitespace must not count as output.
+  const streamDataReceivedRef = useRef(false);
+  const [streamDataReceived, setStreamDataReceived] = useState(false);
+
+  const markStreamDataIfVisible = useCallback((text: string) => {
+    if (streamDataReceivedRef.current) return;
+    const visible = text
+      .replace(/\x1b\][\s\S]*?(\x07|\x1b\\|$)/g, "") // OSC (e.g. title set)
+      .replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, "") // CSI
+      .replace(/\x1b[\s\S]/g, "") // other ESC sequences
+      .replace(/[\x00-\x1f\x7f]/g, "") // remaining control chars
+      .trim();
+    if (visible.length > 0) {
+      streamDataReceivedRef.current = true;
+      setStreamDataReceived(true);
+    }
+  }, []);
 
   const isReadOnly = closed || !events.includes("OnInput");
 
@@ -231,6 +258,8 @@ export const Terminal: React.FC<TerminalProps> = ({
     container.innerHTML = "";
     initialContentWrittenRef.current = false;
     terminalReadyRef.current = false;
+    streamDataReceivedRef.current = false;
+    setStreamDataReceived(false);
 
     const mergedTheme = { ...defaultTheme, ...theme };
 
@@ -343,11 +372,60 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     let disposed = false;
 
+    // Container padding (see .terminal-container CSS: "10px 0px 10px 10px").
+    const PAD_TOP = 10;
+    const PAD_BOTTOM = 10;
+
+    // FitAddon computes rows from the fractional cell height, but the canvas
+    // renderer rounds each row up to whole pixels. Over many rows that excess
+    // can exceed the bottom padding, pushing the last row past the container
+    // and clipping it. After fitting, if the rendered terminal overflows the
+    // available height, drop one row so the final line stays fully visible.
+    const doFit = () => {
+      const fa = fitAddonRef.current;
+      const t = terminalRef.current;
+      if (!fa || !t) return;
+      fa.fit();
+      const rendered = t.element?.offsetHeight ?? 0;
+      const available = container.clientHeight - PAD_TOP - PAD_BOTTOM;
+      if (rendered > available + 1 && t.rows > 1) {
+        t.resize(t.cols, t.rows - 1);
+      }
+    };
+
     // Defer opening until container has dimensions
     requestAnimationFrame(() => {
       if (disposed) return;
 
       term.open(container);
+
+      // Canvas renderer draws box-drawing and block-element glyphs procedurally
+      // (customGlyphs, on by default), so the Claude logo and other block art
+      // tile seamlessly like Windows Terminal instead of relying on font metrics.
+      // Must be loaded after open(); the canvas renderer works reliably inside
+      // the Shadow DOM (unlike WebGL). Fall back to the DOM renderer on failure.
+      try {
+        const canvasAddon = new CanvasAddon();
+        term.loadAddon(canvasAddon);
+
+        // The canvas renderer caches glyphs in a texture atlas on first paint.
+        // If a webfont (e.g. Geist Mono) hasn't finished loading yet, missing
+        // glyphs get cached as tofu until the cell is invalidated. Once fonts
+        // are ready, drop the atlas and repaint so those glyphs render correctly.
+        if (document.fonts?.ready) {
+          document.fonts.ready.then(() => {
+            if (disposed) return;
+            try {
+              canvasAddon.clearTextureAtlas();
+              term.refresh(0, term.rows - 1);
+            } catch {
+              // Addon disposed or refresh failed — ignore.
+            }
+          });
+        }
+      } catch {
+        // Canvas unsupported — DOM renderer remains in place.
+      }
 
       terminalRef.current = term;
       fitAddonRef.current = fitAddon;
@@ -357,7 +435,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       term.onResize(handleResize);
 
       if (!cols && !rows) {
-        fitAddon.fit();
+        doFit();
         // Fire initial size since fit() may not trigger onResize if size matches default
         handleResize({ cols: term.cols, rows: term.rows });
       }
@@ -373,7 +451,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     const handleWindowResize = () => {
       if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
-        fitAddonRef.current.fit();
+        doFit();
       }
     };
 
@@ -381,7 +459,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     const resizeObserver = new ResizeObserver(() => {
       if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
-        fitAddonRef.current.fit();
+        doFit();
       }
     });
 
@@ -440,12 +518,14 @@ export const Terminal: React.FC<TerminalProps> = ({
               text: text.slice(0, 50),
             });
           }
+          markStreamDataIfVisible(text);
           terminalRef.current.write(text);
         } catch (e) {
           // Fallback for non-base64 data
           console.warn("[Terminal] base64 decode failed, using raw data:", e, {
             data: data.slice(0, 50),
           });
+          markStreamDataIfVisible(data);
           terminalRef.current.write(data);
         }
       } else {
@@ -454,13 +534,59 @@ export const Terminal: React.FC<TerminalProps> = ({
     });
 
     return unsubscribe;
-  }, [stream?.id, subscribeToStream]);
+  }, [stream?.id, subscribeToStream, markStreamDataIfVisible]);
 
   const style: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
     overflow: "hidden",
+    position: "relative",
   };
 
-  return <div ref={hostRef} style={style} />;
+  const showLoading = loading && !streamDataReceived && !closed;
+
+  const overlayForeground = foreground
+    ? `var(--${foreground.toLowerCase()})`
+    : defaultTheme.foreground;
+
+  return (
+    <div style={style}>
+      <div ref={hostRef} style={{ width: "100%", height: "100%" }} />
+      {showLoading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "12px",
+            pointerEvents: "none",
+          }}
+        >
+          <style>{`@keyframes ivy-xterm-loading-spin { to { transform: rotate(360deg); } }`}</style>
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              border: "3px solid rgba(128, 128, 128, 0.3)",
+              borderTopColor: overlayForeground,
+              animation: "ivy-xterm-loading-spin 0.8s linear infinite",
+            }}
+          />
+          <span
+            style={{
+              color: overlayForeground,
+              fontFamily,
+              fontSize: "13px",
+            }}
+          >
+            {loadingText}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 };

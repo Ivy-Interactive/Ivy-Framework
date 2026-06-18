@@ -80,6 +80,9 @@ const FrontmatterDisplay: React.FC<{ data: FrontmatterData }> = memo(({ data }) 
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return "null";
     if (typeof value === "boolean") return value ? "true" : "false";
+    if (value instanceof Date) {
+      return value.toLocaleString();
+    }
     if (typeof value === "string") {
       // Format ISO dates nicely
       if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
@@ -362,7 +365,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
         const isTaskItem = className?.includes("task-list-item");
         if (isTaskItem) {
-          return <li className={cn(typography.li, "list-none")}>{children}</li>;
+          return <li className={cn(typography.li, "list-none", className)}>{children}</li>;
         }
 
         const hasBlock = React.Children.toArray(children).some((child) => {
@@ -410,7 +413,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         });
 
         return (
-          <li className={typography.li}>
+          <li className={cn(typography.li, className)}>
             {hasBlock ? <div className={typography.liContent}>{children}</div> : children}
           </li>
         );

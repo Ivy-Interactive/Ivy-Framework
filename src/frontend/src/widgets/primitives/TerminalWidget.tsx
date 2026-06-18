@@ -34,10 +34,7 @@ const TerminalWidget = ({
   const hasCommands = commandsText.length > 0;
 
   return (
-    <div
-      role="terminal"
-      className={cn("rounded-lg overflow-hidden border border-border shadow-md")}
-    >
+    <div className={cn("rounded-lg overflow-hidden border border-border shadow-md")}>
       {showHeader && (
         <div className="bg-zinc-800 px-4 py-2 flex items-center">
           <div className="flex gap-1">
@@ -48,9 +45,9 @@ const TerminalWidget = ({
           <div className="text-zinc-400 text-body font-medium flex-1 text-center">{title}</div>
         </div>
       )}
-      <div className="relative">
+      <div className="group relative">
         {showCopyButton && hasCommands && (
-          <div className="absolute top-2 right-2 z-50">
+          <div className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
             <CopyToClipboardButton
               textToCopy={commandsText}
               className="bg-zinc-800 text-white hover:bg-zinc-700"
@@ -79,10 +76,7 @@ const TerminalWidget = ({
                       </span>
                     )}
                   </div>
-                  <span
-                    role="terminal-text"
-                    className={cn("text-sm", line.isCommand ? commandColor : outputColor)}
-                  >
+                  <span className={cn("text-sm", line.isCommand ? commandColor : outputColor)}>
                     {line.content}
                   </span>
                 </div>

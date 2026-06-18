@@ -5,9 +5,18 @@ import { getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedInputClasses,
+  textInputFieldShellClasses,
   textInputSizeVariant,
-  xIconVariant,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingOverlayClasses,
+  textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -73,32 +82,30 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
-  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
   const showClear = props.nullable && !props.disabled && hasValue;
-  const ghostTrailingTight = Boolean(props.ghost && hasSuffix);
+  const trailingBesideSuffix = hasSuffix;
+  const showShortcut = Boolean(
+    props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid,
+  );
+  const showTrailing = showShortcut || showClear || Boolean(props.invalid);
 
   return (
     <div className="relative w-full select-none" style={styles}>
       <div
-        className={cn(
-          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-          isFocused
-            ? "border-ring outline-none dark:border-ring"
-            : "border-input dark:border-white/10",
-          props.invalid && "border-destructive",
-          props.disabled && "cursor-not-allowed opacity-50",
-          props.ghost &&
-            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-        )}
+        className={textInputFieldShellClasses({
+          focused: isFocused,
+          invalid: props.invalid,
+          disabled: props.disabled,
+          ghost: props.ghost,
+        })}
       >
-        {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
             {prefixContent}
           </div>
         )}
 
-        <div className="relative flex-1">
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           <Input
             ref={elementRef as React.RefObject<HTMLInputElement>}
             id={props.id}
@@ -118,34 +125,26 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             className={cn(
               textInputSizeVariant({ density }),
               props.invalid && inputStyles.invalidInput,
-              (props.invalid || showClear) && "pr-8",
-              props.shortcutKey &&
-                !isFocused &&
-                !hasValue &&
-                !showClear &&
-                !props.invalid &&
-                "pr-16",
-              showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
+              textInputEmbeddedInputClasses(hasAffixes, density),
             )}
             data-testid={props["data-testid"]}
           />
 
-          {/* Right side container: shortcut (if any), clear (if nullable), then invalid (if any) */}
-          {(props.shortcutKey || showClear || props.invalid) && (
-            <div
-              className={cn(
-                "pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-row items-center",
-                ghostTrailingTight ? "right-0 gap-0 pr-0" : "right-2 gap-1",
-              )}
-            >
-              {props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && (
-                <div className="pointer-events-auto flex items-center h-6">
-                  <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-selector">
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textInputTrailingOverlayClasses(density)}>
+              {showShortcut && (
+                <div
+                  className={cn(
+                    "pointer-events-auto",
+                    textInputTrailingShortcutWrapperClasses(density),
+                  )}
+                >
+                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
                     {shortcutDisplay}
                   </kbd>
                 </div>
@@ -156,16 +155,17 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={onClear}
-                  className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  className={textInputTrailingIconButtonClasses(true, density)}
                 >
-                  <X className={xIconVariant({ density })} />
+                  <X className={textInputTrailingIconSizeVariant({ density })} />
                 </button>
               )}
-              {/* Invalid icon - rightmost */}
               {props.invalid && (
-                <div className="flex items-center h-6">
-                  <InvalidIcon message={props.invalid} />
-                </div>
+                <InvalidIcon
+                  message={props.invalid}
+                  className={textInputTrailingInvalidSlotClasses(true, density)}
+                  iconClassName={textInputTrailingIconSizeVariant({ density })}
+                />
               )}
             </div>
           )}
@@ -192,10 +192,44 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           </button>
         )}
 
-        {/* Suffix with background and separator */}
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
-            {suffixContent}
+          <div
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
+          >
+            {trailingBesideSuffix && showTrailing && (
+              <>
+                {showShortcut && (
+                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
+                    {shortcutDisplay}
+                  </kbd>
+                )}
+                {showClear && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={onClear}
+                    className={textInputTrailingIconButtonClasses(false, density)}
+                  >
+                    <X className={textInputTrailingIconSizeVariant({ density })} />
+                  </button>
+                )}
+                {props.invalid && (
+                  <InvalidIcon
+                    message={props.invalid}
+                    className={textInputTrailingInvalidSlotClasses(false, density)}
+                    iconClassName={textInputTrailingIconSizeVariant({ density })}
+                  />
+                )}
+              </>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
           </div>
         )}
       </div>

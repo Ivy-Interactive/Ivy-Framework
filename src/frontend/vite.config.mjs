@@ -192,7 +192,9 @@ export default defineConfig({
     "../**/*.cs": "dotnet format ../Ivy-Framework.slnx --include",
   },
 
-  plugins: [react(), tailwindcss(), mkcert(), injectMeta(mode)],
+  plugins: [react(), tailwindcss(), !process.env.VITEST && mkcert(), injectMeta(mode)].filter(
+    Boolean,
+  ),
   server: {
     proxy: {
       "^/(.*\\.md|llms\\.txt)$": {

@@ -14,6 +14,7 @@ public class ActivityHeatmapBuilder<TSource>(
     private bool _showTooltip = true;
     private bool _showMonthLabels = true;
     private bool _showDayLabels = true;
+    private bool _localize;
     private DateOnly? _startDate;
     private DateOnly? _endDate;
     private EventHandler<Event<ActivityHeatmap, Activity>>? _onDayClick;
@@ -86,6 +87,7 @@ public class ActivityHeatmapBuilder<TSource>(
             .ShowTooltip(_showTooltip)
             .ShowMonthLabels(_showMonthLabels)
             .ShowDayLabels(_showDayLabels)
+            .Localize(_localize)
             .Interval(resolvedInterval.Value)
             .ValueLabel(_measure.Name)
             .StartDate(_startDate)
@@ -107,6 +109,7 @@ public class ActivityHeatmapBuilder<TSource>(
     public ActivityHeatmapBuilder<TSource> ShowTooltip(bool show = true) { _showTooltip = show; return this; }
     public ActivityHeatmapBuilder<TSource> ShowMonthLabels(bool show = true) { _showMonthLabels = show; return this; }
     public ActivityHeatmapBuilder<TSource> ShowDayLabels(bool show = true) { _showDayLabels = show; return this; }
+    public ActivityHeatmapBuilder<TSource> Localize(bool localize = true) { _localize = localize; return this; }
     public ActivityHeatmapBuilder<TSource> StartDate(DateOnly? date) { _startDate = date; return this; }
     public ActivityHeatmapBuilder<TSource> EndDate(DateOnly? date) { _endDate = date; return this; }
 
