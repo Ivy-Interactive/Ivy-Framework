@@ -48,6 +48,11 @@ public record Size
     private SizeType Type { get; set; }
     private float? Value { get; set; }
 
+    public bool IsContentSized => Type == SizeType.Fit ||
+                                  Type == SizeType.Auto ||
+                                  Type == SizeType.MinContent ||
+                                  Type == SizeType.MaxContent;
+
     public Size? Min { get; init; }
 
     public Size? Max { get; init; }

@@ -9,27 +9,28 @@ interface TableWidgetProps {
   children?: React.ReactNode;
   width?: string;
   density?: Densities;
+  layout?: string;
 }
 
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
   width,
   density = Densities.Medium,
+  layout = "Auto",
 }) => {
   const widthStyles = getWidth(width || "Full");
 
   return (
-    <Table
-      density={density}
-      className={cn("w-full caption-bottom border-collapse border border-border")}
-      style={{
-        ...widthStyles,
-        ...(widthStyles.width === "100%"
-          ? { maxWidth: "100%", tableLayout: "fixed" as const }
-          : { tableLayout: "auto" as const }),
-      }}
-    >
-      <TableBody>{children}</TableBody>
-    </Table>
+    <div style={widthStyles} className="w-full">
+      <Table
+        density={density}
+        className={cn("w-full caption-bottom border-collapse border border-border")}
+        style={{
+          tableLayout: layout.toLowerCase() === "fixed" ? "fixed" : "auto",
+        }}
+      >
+        <TableBody>{children}</TableBody>
+      </Table>
+    </div>
   );
 };
