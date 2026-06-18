@@ -95,13 +95,17 @@ const InputLabel: React.FC<{
   const cursorClass = onClick ? (disabled ? "cursor-not-allowed" : "cursor-pointer") : undefined;
 
   return (
-    <div onClick={onClick} className={cursorClass}>
+    <div onClick={onClick} className={cn("min-w-0 flex-1", cursorClass)}>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariant({ density: d })}>
+        <Label htmlFor={id} className={cn("block truncate", labelSizeVariant({ density: d }))}>
           {label}
         </Label>
       )}
-      {description && <p className={descriptionSizeVariant({ density: d })}>{description}</p>}
+      {description && (
+        <p className={cn("block truncate", descriptionSizeVariant({ density: d }))}>
+          {description}
+        </p>
+      )}
     </div>
   );
 });
@@ -150,8 +154,10 @@ const VariantComponents = {
       const handleLabelClick = () => {
         if (disabled || loading) return;
         if (nullable) {
-          if (value === null) onCheckedChange(true);
-          else if (value === true) onCheckedChange(false);
+          const isTrue = value === true || (value as any) === 1;
+          const isNull = value === null || value === undefined;
+          if (isNull) onCheckedChange(true);
+          else if (isTrue) onCheckedChange(false);
           else onCheckedChange(null);
         } else {
           onCheckedChange(!value);
@@ -168,7 +174,7 @@ const VariantComponents = {
             nullable={nullable}
             autoFocus={autoFocus}
             density={density}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
           {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
@@ -237,7 +243,7 @@ const VariantComponents = {
             icon={icon}
             density={density}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           />
           {loading && <LoadingOverlay density={density} data-testid={dataTestId} />}
@@ -306,7 +312,7 @@ const VariantComponents = {
             density={density}
             aria-label={label}
             autoFocus={autoFocus}
-            className={cn(invalid && inputStyles.invalid)}
+            className={cn(invalid && inputStyles.invalidInput)}
             data-testid={dataTestId}
           >
             {icon && <Icon name={icon} />}
@@ -365,7 +371,12 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  const normalizedValue = nullable && value === undefined ? null : value;
+  const normalizedValue = useMemo(() => {
+    if (value === undefined || value === null) return nullable ? null : false;
+    if (value === true || (value as any) === 1) return true;
+    if (value === false || (value as any) === 0) return false;
+    return !!value;
+  }, [value, nullable]);
 
   const [localValue, setLocalValue] = useOptimisticValue(normalizedValue, false);
 

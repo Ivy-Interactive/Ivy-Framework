@@ -45,8 +45,14 @@ const Checkbox = React.forwardRef<
     },
     ref,
   ) => {
-    // Map undefined to null when nullable, then null to 'indeterminate' for Radix
-    const normalizedChecked = nullable && checked === undefined ? null : checked;
+    // Map checked value helper for safe boolean/null states
+    const normalizedChecked = React.useMemo(() => {
+      if (checked === undefined || checked === null) return nullable ? null : false;
+      if (checked === true || (checked as any) === 1) return true;
+      if (checked === false || (checked as any) === 0) return false;
+      return !!checked;
+    }, [checked, nullable]);
+
     const uiChecked =
       nullable && normalizedChecked === null ? "indeterminate" : !!normalizedChecked;
 
@@ -62,9 +68,23 @@ const Checkbox = React.forwardRef<
       }
     };
 
+    const isInvalid = className?.includes("border-destructive") || className?.includes("bg-red-50");
     const baseClass = `peer ${getSizeClasses(density)} shrink-0 rounded-checkbox border border-border shadow transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary data-[state=checked]:hover:bg-primary/90 dark:border-white/10`;
-    const finalClass = className?.includes("bg-red-50")
-      ? baseClass.replace("data-[state=checked]:bg-primary", "")
+    const finalClass = isInvalid
+      ? baseClass
+          .replace("data-[state=checked]:bg-primary", "data-[state=checked]:bg-destructive")
+          .replace("data-[state=checked]:border-primary", "data-[state=checked]:border-destructive")
+          .replace(
+            "data-[state=checked]:text-primary-foreground",
+            "data-[state=checked]:text-destructive-foreground",
+          )
+          .replace(
+            "data-[state=checked]:hover:bg-primary/90",
+            "data-[state=checked]:hover:bg-destructive/90",
+          )
+          .replace("focus-visible:ring-ring", "focus-visible:ring-destructive")
+          .replace("border-border", "border-destructive")
+          .replace("dark:border-white/10", "dark:border-destructive")
       : baseClass;
 
     return (

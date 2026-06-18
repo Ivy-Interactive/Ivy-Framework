@@ -13,9 +13,16 @@ const Switch = React.forwardRef<
       icon?: string;
     }
 >(({ className, density, icon, ...props }, ref) => {
+  const isInvalid = className?.includes("border-destructive") || className?.includes("bg-red-50");
   const baseClass = switchVariant({ density });
-  const finalClass = className?.includes("bg-red-50")
-    ? baseClass.replace("data-[state=checked]:bg-primary", "")
+  const finalClass = isInvalid
+    ? baseClass
+        .replace("data-[state=checked]:bg-primary", "data-[state=checked]:bg-destructive")
+        .replace(
+          "hover:data-[state=checked]:bg-primary/90",
+          "hover:data-[state=checked]:bg-destructive/90",
+        )
+        .replace("focus-visible:ring-ring", "focus-visible:ring-destructive")
     : baseClass;
   return (
     <SwitchPrimitives.Root className={cn(finalClass, className)} {...props} ref={ref}>

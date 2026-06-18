@@ -56,23 +56,23 @@
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.76.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.9" />
     <!-- Lifts the transitive MessagePack 2.5.187 from SignalR.Protocols.MessagePack past GHSA-hv8m-jj95-wg3x (NU1903) -->
     <PackageReference Include="MessagePack" Version="2.5.302" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
     <PackageReference Include="DeepCloner" Version="0.10.4" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.5" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.9" />
     <PackageReference Include="Ivy.SystemTextJson.JsonDiffPatch" Version="2.0.4" />
     <PackageReference Include="Ivy.NativeJsonDiff" Version="2.0.0" />
     <PackageReference Include="Ivy.DesignSystem" Version="1.1.31" />

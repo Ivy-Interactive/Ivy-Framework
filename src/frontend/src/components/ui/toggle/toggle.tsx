@@ -13,8 +13,21 @@ const Toggle = React.forwardRef<
     }
 >(({ className, variant, density = Densities.Medium, dataTestId, ...props }, ref) => {
   let toggleClass = toggleVariant({ variant, density, className });
-  if (className?.includes("bg-red-50")) {
-    toggleClass = toggleClass.replace("data-[state=on]:bg-accent", "");
+  const isInvalid = className?.includes("border-destructive") || className?.includes("bg-red-50");
+  if (isInvalid) {
+    toggleClass = toggleClass
+      .replace("data-[state=on]:bg-primary", "data-[state=on]:bg-destructive")
+      .replace(
+        "data-[state=on]:text-primary-foreground",
+        "data-[state=on]:text-destructive-foreground",
+      )
+      .replace("focus-visible:ring-ring", "focus-visible:ring-destructive");
+
+    if (toggleClass.includes("border-input")) {
+      toggleClass = toggleClass.replace("border-input", "border-destructive");
+    } else {
+      toggleClass = cn(toggleClass, "border border-destructive");
+    }
   }
   return (
     <TogglePrimitive.Root

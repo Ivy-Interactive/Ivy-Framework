@@ -365,7 +365,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
         const isTaskItem = className?.includes("task-list-item");
         if (isTaskItem) {
-          return <li className={cn(typography.li, "list-none")}>{children}</li>;
+          return <li className={cn(typography.li, "list-none", className)}>{children}</li>;
         }
 
         const hasBlock = React.Children.toArray(children).some((child) => {
@@ -413,7 +413,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         });
 
         return (
-          <li className={typography.li}>
+          <li className={cn(typography.li, className)}>
             {hasBlock ? <div className={typography.liContent}>{children}</div> : children}
           </li>
         );

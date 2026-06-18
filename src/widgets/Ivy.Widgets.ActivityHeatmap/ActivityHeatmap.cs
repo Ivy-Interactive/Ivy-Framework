@@ -19,6 +19,9 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
 
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
+    /// <summary>When false (default), dates and labels are rendered in English. When true, they follow the user's browser locale.</summary>
+    [Prop] public bool Localize { get; init; } = false;
+
     [Prop] public ActivityInterval Interval { get; init; } = ActivityInterval.Daily;
 
     [Prop] public string? ValueLabel { get; init; }
@@ -49,6 +52,9 @@ public static class ActivityHeatmapExtensions
 
     public static ActivityHeatmap ShowDayLabels(this ActivityHeatmap w, bool show = true) =>
         w with { ShowDayLabels = show };
+
+    public static ActivityHeatmap Localize(this ActivityHeatmap w, bool localize = true) =>
+        w with { Localize = localize };
 
     public static ActivityHeatmap Interval(this ActivityHeatmap w, ActivityInterval interval) =>
         w with { Interval = interval };

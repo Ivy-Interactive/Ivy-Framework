@@ -42,7 +42,10 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({ appId, appArgs, pa
   return (
     <div ref={containerRef} className="w-full h-full p-4 overflow-y-auto">
       <ErrorBoundary>
-        <BreakpointProvider>
+        {/* Derive the breakpoint from the app content container (sidebar-aware) rather
+            than the viewport, so progressive-collapse layouts react to the width
+            actually available to the app. */}
+        <BreakpointProvider containerRef={containerRef}>
           <EventHandlerProvider eventHandler={eventHandler}>
             <StreamHandlerProvider subscribeToStream={subscribeToStream}>
               <>{renderWidgetTree(widgetTree || loadingState())}</>

@@ -485,7 +485,7 @@ const CollapsibleMenuItem: React.FC<{
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <ul className="mt-1 gap-y-1 px-3">
+            <ul className="flex flex-col mt-1 gap-y-0.5 px-3">
               {item.children &&
                 renderMenuItems(
                   item.children!,
@@ -606,11 +606,11 @@ const renderMenuItems = (
     if ("children" in item) {
       if (level === 0) {
         return (
-          <div key={itemPathKey} className="gap-y-1 mt-6 first:mt-0">
+          <div key={itemPathKey} className="flex flex-col gap-y-1 mt-6 first:mt-0">
             <h4 className="sticky top-0 z-10 bg-card p-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
-            <ul className="gap-y-1">
+            <ul className="flex flex-col gap-y-0.5">
               {item.children &&
                 renderMenuItems(
                   item.children!,
@@ -921,11 +921,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         });
 
         return (
-          <div key={item.label} className="gap-y-1 mt-6 first:mt-0">
+          <div key={item.label} className="flex flex-col gap-y-1 mt-6 first:mt-0">
             <h4 className="sticky top-0 z-10 bg-card p-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
-            <ul className="gap-y-1">
+            <ul className="flex flex-col gap-y-0.5">
               {groupsOrdered.map(([path, pathItems], index) => (
                 <React.Fragment key={path || "__none__"}>
                   {index > 0 && (
@@ -939,7 +939,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                         {path}
                       </div>
                     )}
-                    <ul className="gap-y-1">
+                    <ul className="flex flex-col gap-y-0.5">
                       {pathItems.map((child) => renderResultItem(child, false))}
                     </ul>
                   </li>
