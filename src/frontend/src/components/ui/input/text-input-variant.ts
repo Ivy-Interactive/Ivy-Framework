@@ -560,6 +560,20 @@ export const searchIconVariant = cva("absolute text-muted-foreground", {
   },
 });
 
+// Left padding variants for search input when icon is shown
+export const searchInputPaddingVariant = cva("", {
+  variants: {
+    density: {
+      Small: "!pl-7",
+      Medium: "!pl-8",
+      Large: "!pl-9",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
 // Size variants for X icon
 export const xIconVariant = cva("text-muted-foreground hover:text-foreground", {
   variants: {
