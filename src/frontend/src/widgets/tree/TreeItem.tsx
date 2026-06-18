@@ -14,17 +14,13 @@ const TreeItemLabel: React.FC<{ label: string; tooltip?: string }> = ({ label, t
   const [isTruncated, setIsTruncated] = React.useState(false);
   const [showTooltip, setShowTooltip] = React.useState(false);
 
-  React.useEffect(() => {
-    const checkTruncation = () => {
-      const el = spanRef.current;
-      if (el) {
-        setIsTruncated(el.scrollWidth > el.clientWidth);
-      }
-    };
-    checkTruncation();
-    window.addEventListener("resize", checkTruncation);
-    return () => window.removeEventListener("resize", checkTruncation);
-  }, []);
+  const handleMouseEnter = () => {
+    const el = spanRef.current;
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+    setShowTooltip(true);
+  };
 
   return (
     <TooltipProvider>
@@ -33,7 +29,7 @@ const TreeItemLabel: React.FC<{ label: string; tooltip?: string }> = ({ label, t
           <span
             ref={spanRef}
             className="truncate flex-1"
-            onMouseEnter={() => setShowTooltip(true)}
+            onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setShowTooltip(false)}
           >
             {label}

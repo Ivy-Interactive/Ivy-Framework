@@ -67,7 +67,7 @@ export const MemoizedWidget = React.memo(
 
     const Component = widgetMap[node.type as keyof typeof widgetMap] as React.ComponentType<
       Record<string, unknown>
-    >;
+    > & { skipWidgetWrapper?: boolean };
 
     if (!Component) {
       return <div>{`Unknown component type: ${node.type}`}</div>;
@@ -121,7 +121,13 @@ export const MemoizedWidget = React.memo(
       ? (node.props.content as string) || (node.props.text as string) || ""
       : undefined;
 
-    const content = (
+    const skipWrapper = Component.skipWidgetWrapper === true;
+
+    const content = skipWrapper ? (
+      <Component {...props} slots={slots}>
+        {slots.default}
+      </Component>
+    ) : (
       <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
         <Component {...props} slots={slots}>
           {slots.default}

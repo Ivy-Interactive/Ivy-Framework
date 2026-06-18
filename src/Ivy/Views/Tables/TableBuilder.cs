@@ -156,7 +156,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
             var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed, cellBuilder, removed, cellAlignment);
-            column.Width = CalculateSmartDefaultWidth(column);
             _columns[field.Name] = column;
         }
     }
@@ -174,7 +173,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             foreach (var key in dictObj.Keys)
             {
                 var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
-                column.Width = CalculateSmartDefaultWidth(column);
                 _columns[key] = column;
             }
         }
@@ -183,7 +181,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             foreach (var key in dictStr.Keys)
             {
                 var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
-                column.Width = CalculateSmartDefaultWidth(column);
                 _columns[key] = column;
             }
         }
@@ -192,30 +189,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             foreach (var key in dict.Keys.Cast<object>().Select(k => k.ToString()!))
             {
                 var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
-                column.Width = CalculateSmartDefaultWidth(column);
                 _columns[key] = column;
             }
         }
     }
-
-    private int CalculateColumnWidth(TableBuilderColumn column)
-    {
-        var baseWidth = Math.Max(15, column.Header.Length + 2);
-
-        baseWidth = column.Type switch
-        {
-            var t when t?.IsNumeric() == true => Math.Max(baseWidth, 25),
-            var t when t == typeof(DateTime) || t == typeof(DateOnly) => Math.Max(baseWidth, 25),
-            var t when t == typeof(bool) => Math.Max(baseWidth, 10),
-            var t when t == typeof(string) => Math.Max(baseWidth, 25),
-            _ => baseWidth
-        };
-
-        return Math.Min(baseWidth, 50);
-    }
-
-    private Size CalculateSmartDefaultWidth(TableBuilderColumn column) =>
-        Size.Units(CalculateColumnWidth(column));
 
     public TableBuilder<TModel> Width(Size width)
     {
@@ -263,7 +240,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var builder = _builderFactory.Default();
             column = new TableBuilderColumn(name, order, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
             column.ExpressionAccessor = field.Compile();
-            column.Width = CalculateSmartDefaultWidth(column);
             _columns[name] = column;
         }
         return column;
@@ -410,6 +386,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         {
             var tableWidth = _width ?? Size.Full();
             var table = new Table(tableRows).Width(tableWidth).Density(_density);
+
+            bool hasContentSizedColumn = _columns.Values
+                .Where(e => !e.Removed)
+                .Any(c => c.Width == null || c.Width.IsContentSized);
+
+            table = table.Layout(hasContentSizedColumn ? "Auto" : "Fixed");
             return table;
         }
 
@@ -427,7 +409,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             if (isHeader)
             {
-                cell = cell.Width(column.Width);
+                cell = cell.Width(column.Width ?? Size.Fit());
             }
 
             if (!isHeader && isEmptyColumn[index])

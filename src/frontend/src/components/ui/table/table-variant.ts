@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 import { densityHeight, densityText } from "../density-scale";
 
 // Size variants for TableHead padding
-export const tableHeadSizeVariant = cva("w-full caption-bottom", {
+export const tableHeadSizeVariant = cva("", {
   variants: {
     density: {
       Small: `${densityHeight.Small} px-1 ${densityText.Small}`,
