@@ -20,41 +20,38 @@ If the file `.ivy/learnings/ivy-create-release-notes.md` exists in the project d
 
 ### 1. Plan and Determine Range
 - Check git tags in the repository using `git tag --sort=-v:refname`.
-- Identify the latest tag (e.g. `v1.2.56`).
-- Ask the user to confirm the tag/commit range. By default, analyze changes from the latest release tag to the current `HEAD` (or the last 7 days).
-- If the user specified a start commit or tag in their prompt, use that.
+- Identify the latest tag (e.g. `v1.2.67`) and the previous tag (e.g. `v1.2.66`).
+- Ask the user to confirm the tag/commit range. By default, analyze changes from the previous release tag to the latest release tag.
 
-### 2. Download and Extract Commits
-- Run the PowerShell script `src/.releases/CreateNotes.ps1` to download and extract commits for the selected period into the `src/.releases/Commits/` directory.
-- This creates individual markdown files containing commit messages and code diffs for all commits.
+### 2. Extract and Filter Commits
+- Run the PowerShell script `src/.releases/GeneratePatchNotes.ps1` to extract non-frontend commits for the selected range into a JSON file:
+  ```bash
+  pwsh src/.releases/GeneratePatchNotes.ps1 -FromRef <FromRef> -ToRef <ToRef> -Output src/.releases/Commits.json
+  ```
 
-### 3. Generate Release Notes
-Depending on the local environment, choose one of the following paths:
-
-#### Path A: Script Execution (If `claude` CLI is installed and configured)
-- Allow the `CreateNotes.ps1` script to run the automated pipeline.
-- It will invoke `LlmEach.ps1` which uses the local `claude` command-line utility to incrementally write changes to `src/.releases/weekly-notes-YYYY-MM-DD.md`.
-
-#### Path B: Agent-Guided Fallback (Recommended if `claude` CLI is missing or errors)
-If `claude` is not available, process the files using your own agent context:
-1. Initialize the release notes file `src/.releases/weekly-notes-YYYY-MM-DD.md` (if it does not exist) with the header:
+### 3. Generate Release Notes File
+1. Parse the generated `src/.releases/Commits.json` file.
+2. Filter and categorize the commits (ignoring internal refactors, merge commits, or test-only changes that do not affect users of the framework/CLI).
+3. Group changes into sections (e.g., `New Features`, `Bug Fixes and Improvements`, etc.).
+4. Write clear, user-facing descriptions for each change.
+5. Provide concise C# usage code blocks for new features or major API additions.
+6. Initialize/write the release notes file `src/.releases/weekly-notes-YYYY-MM-DD.md` (e.g., `weekly-notes-2026-06-18.md`) with the header:
    ```markdown
    # Ivy Framework Weekly Notes - Week of YYYY-MM-DD
 
    > [!NOTE]
    > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
    ```
-2. Read the commit files from `src/.releases/Commits/` sorted sequentially.
-3. For each commit:
-   - Analyze the commit message and file diffs.
-   - Ignore internal refactorings, merge commits, or test-only changes that do not affect users of the framework/CLI.
-   - Categorize the change (e.g., New Features, Component Updates, Breaking Changes, Bug Fixes).
-   - Write clear, user-facing descriptions.
-   - For new APIs or major updates, write a concise C# code block showing how to use the feature. Refer to `references/AGENTS.md` to ensure correct Ivy conventions.
-   - Edit `src/.releases/weekly-notes-YYYY-MM-DD.md` to add/merge the changes cleanly.
-4. Clean up any temporary files or the `Commits/` folder if requested.
+7. Commit and push the generated `weekly-notes-YYYY-MM-DD.md` file to the `development` branch, and remove the temporary `Commits.json` file.
 
-### 4. Review and Finalize
-- Read the generated `weekly-notes-YYYY-MM-DD.md` file.
-- Verify that the layout, headers, and C# examples conform to the standard style (e.g. look at `weekly-notes-2026-04-07.md` for reference).
-- Present the location and key highlights of the generated release notes to the user.
+### 4. Update GitHub Release Notes
+1. Retrieve the existing body of the GitHub release:
+   ```bash
+   gh release view <tag> --json body -q .body
+   ```
+2. Combine the new weekly release notes text and the existing body, placing the new weekly notes at the top, before the "What's Changed" section.
+3. Update the GitHub release description using `gh`:
+   ```bash
+   gh release edit <tag> --notes-file <path_to_combined_notes_file>
+   ```
+
