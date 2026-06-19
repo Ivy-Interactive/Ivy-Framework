@@ -103,6 +103,17 @@ public class ExternalWidgetRegistry
     }
 
     /// <summary>
+    /// Removes all widgets that were registered from the given assembly.
+    /// Called when a plugin is unloaded.
+    /// </summary>
+    public void UnregisterAssembly(Assembly assembly)
+    {
+        var toRemove = _widgets.Where(kv => kv.Value.Assembly == assembly).Select(kv => kv.Key).ToList();
+        foreach (var key in toRemove)
+            _widgets.TryRemove(key, out _);
+    }
+
+    /// <summary>
     /// Gets all registered external widgets.
     /// </summary>
     public IReadOnlyDictionary<string, ExternalWidgetInfo> GetAll() => _widgets;

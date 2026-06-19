@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
+using Ivy.Core.ExternalWidgets;
 using Ivy.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -103,7 +104,10 @@ public class PluginLoader : IPluginManager
         }
 
         foreach (var plugin in _plugins)
+        {
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", plugin.Instance.Manifest.Id, plugin.Instance.Manifest.Version);
+            ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
+        }
     }
 
     private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)? LoadPluginFromDirectory(
@@ -313,6 +317,9 @@ public class PluginLoader : IPluginManager
             if (plugin.Status == PluginStatus.Active)
                 _pluginContext?.RemovePluginContributions(pluginId);
 
+            // Unregister external widgets before unloading the assembly
+            ExternalWidgetRegistry.Instance.UnregisterAssembly(plugin.Assembly);
+
             // Unload the assembly context
             plugin.LoadContext.Unload();
             DeleteShadowDirectory(plugin.ShadowDirectory);
@@ -421,6 +428,7 @@ public class PluginLoader : IPluginManager
             // Clear from failed plugins if it was there
             _failedPlugins.Remove(pluginPath);
 
+            ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
 
             loadedPluginId = manifest.Id;
@@ -549,6 +557,7 @@ public class PluginLoader : IPluginManager
             {
                 if (oldPlugin.Status == PluginStatus.Active)
                     _pluginContext?.RemovePluginContributions(pluginId);
+                ExternalWidgetRegistry.Instance.UnregisterAssembly(oldPlugin.Assembly);
                 oldPlugin.LoadContext.Unload();
                 DeleteShadowDirectory(oldPlugin.ShadowDirectory);
                 _plugins.Remove(oldPlugin);
@@ -596,6 +605,7 @@ public class PluginLoader : IPluginManager
             _plugins.Add(newPlugin);
             _failedPlugins.Remove(directory);
 
+            ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
             _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
         }
         finally
