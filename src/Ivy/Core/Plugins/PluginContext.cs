@@ -202,12 +202,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         }
     }
 
-    internal IServiceProvider? GetPluginServiceProvider(string pluginId)
-    {
-        // The aggregate provider manages individual providers, just return it
-        return null; // individual providers are managed by the aggregate
-    }
-
     public T? GetService<T>() where T : class
     {
         return _aggregateProvider.GetService<T>();
@@ -355,5 +349,3 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 }
 
 internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase(server, builder);
-
-

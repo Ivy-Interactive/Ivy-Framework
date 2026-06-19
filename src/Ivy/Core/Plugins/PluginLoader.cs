@@ -313,9 +313,6 @@ public class PluginLoader : IPluginManager
             if (plugin.Status == PluginStatus.Active)
                 _pluginContext?.RemovePluginContributions(pluginId);
 
-            // Dispose the plugin's service provider
-            (plugin.ServiceProvider as IDisposable)?.Dispose();
-
             // Unload the assembly context
             plugin.LoadContext.Unload();
             DeleteShadowDirectory(plugin.ShadowDirectory);
@@ -415,7 +412,6 @@ public class PluginLoader : IPluginManager
                 _pluginContext.ClearCurrentPlugin();
                 _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
-                plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
             plugin.Status = PluginStatus.Active;
@@ -553,7 +549,6 @@ public class PluginLoader : IPluginManager
             {
                 if (oldPlugin.Status == PluginStatus.Active)
                     _pluginContext?.RemovePluginContributions(pluginId);
-                (oldPlugin.ServiceProvider as IDisposable)?.Dispose();
                 oldPlugin.LoadContext.Unload();
                 DeleteShadowDirectory(oldPlugin.ShadowDirectory);
                 _plugins.Remove(oldPlugin);
@@ -593,7 +588,6 @@ public class PluginLoader : IPluginManager
                 _pluginContext.ClearCurrentPlugin();
                 _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
-                newPlugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
             newPlugin.Status = PluginStatus.Active;
@@ -678,8 +672,6 @@ public class PluginLoader : IPluginManager
                 try
                 {
                     _pluginContext.RemovePluginContributions(pluginId);
-                    (plugin.ServiceProvider as IDisposable)?.Dispose();
-                    plugin.ServiceProvider = null;
                     plugin.Status = PluginStatus.Unconfigured;
                 }
                 finally
@@ -709,8 +701,6 @@ public class PluginLoader : IPluginManager
             if (oldStatus == PluginStatus.Active)
             {
                 _pluginContext.RemovePluginContributions(pluginId);
-                (plugin.ServiceProvider as IDisposable)?.Dispose();
-                plugin.ServiceProvider = null;
             }
 
             _pluginContext.SetCurrentPlugin(manifest.Id, plugin.Directory);
@@ -719,7 +709,6 @@ public class PluginLoader : IPluginManager
             _pluginContext.ClearCurrentPlugin();
             _pluginContext.ClearPluginConfig();
             _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
-            plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             plugin.Status = PluginStatus.Active;
         }
         finally
@@ -1278,5 +1267,4 @@ public record LoadedPlugin(
 {
     public PluginStatus Status { get; internal set; } = PluginStatus.Active;
     public ServiceCollection Services { get; } = new();
-    public IServiceProvider? ServiceProvider { get; internal set; }
 }
