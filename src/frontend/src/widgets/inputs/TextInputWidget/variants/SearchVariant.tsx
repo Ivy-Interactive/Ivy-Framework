@@ -19,6 +19,7 @@ import {
   textInputSuffixGlyphSlotClasses,
   textInputTrailingShortcutWrapperClasses,
   searchIconVariant,
+  searchInputPaddingVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
@@ -196,7 +197,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
               textInputSizeVariant({ density }),
               "cursor-pointer",
               textInputEmbeddedInputClasses(hasAffixes, density),
-              showBuiltinSearchIcon && "pl-8",
+              showBuiltinSearchIcon && searchInputPaddingVariant({ density }),
               props.invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
               !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",

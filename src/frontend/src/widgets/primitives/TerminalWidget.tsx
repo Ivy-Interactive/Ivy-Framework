@@ -45,9 +45,9 @@ const TerminalWidget = ({
           <div className="text-zinc-400 text-body font-medium flex-1 text-center">{title}</div>
         </div>
       )}
-      <div className="relative">
+      <div className="group relative">
         {showCopyButton && hasCommands && (
-          <div className="absolute top-2 right-2 z-50">
+          <div className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
             <CopyToClipboardButton
               textToCopy={commandsText}
               className="bg-zinc-800 text-white hover:bg-zinc-700"

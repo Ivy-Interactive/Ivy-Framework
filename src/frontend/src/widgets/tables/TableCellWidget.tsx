@@ -38,7 +38,8 @@ const getTextAlign = (align: Align): React.CSSProperties => {
   }
 };
 
-export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
+export const TableCellWidget: React.FC<TableCellWidgetProps> & { skipWidgetWrapper?: boolean } = ({
+  id,
   children,
   isHeader,
   isFooter,
@@ -75,24 +76,49 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     </div>
   );
 
+  // Check if width is a content-based sizing type (Fit, MinContent, MaxContent, Auto)
+  // or undefined. Content-sized columns should size naturally and not be truncated.
+  const isContentSized =
+    !width ||
+    width.toLowerCase().startsWith("fit") ||
+    width.toLowerCase().startsWith("mincontent") ||
+    width.toLowerCase().startsWith("maxcontent") ||
+    width.toLowerCase().startsWith("auto");
+
   // Apply max-w-0 overflow-hidden for truncation when:
-  // 1. We have an explicit width (for column width control), OR
-  // 2. It's a header cell (headers should truncate)
-  // Don't apply to data cells without widths - they need to size naturally
-  const shouldTruncate = width || isHeader;
+  // 1. We have an explicit fixed width (not content-sized), OR
+  // 2. It's a header cell of a non-content-sized column
+  const shouldTruncate = width ? !isContentSized : isHeader && !isContentSized;
 
   // Only show tooltip for string/number children to avoid "[object Object]" issues
   const shouldShowTooltip =
     !multiline && (typeof children === "string" || typeof children === "number");
 
+  const isRightAligned =
+    alignContent === "Right" || alignContent === "TopRight" || alignContent === "BottomRight";
+
+  const isCenterAligned =
+    alignContent === "Center" || alignContent === "TopCenter" || alignContent === "BottomCenter";
+
+  const isLeftAligned =
+    alignContent === "Left" || alignContent === "TopLeft" || alignContent === "BottomLeft";
+
   const cellClasses = cn("border border-border force-text-inherit", {
     "header-cell bg-muted font-bold": isHeader,
     "footer-cell bg-muted font-semibold": isFooter,
     "max-w-0 overflow-hidden": shouldTruncate,
+    "text-right": isRightAligned,
+    "text-center": isCenterAligned,
+    "text-left": isLeftAligned,
   });
 
   return (
-    <TableCell className={cellClasses} style={cellStyles}>
+    <TableCell
+      className={cellClasses}
+      style={cellStyles}
+      data-ivy-widget-id={id}
+      data-ivy-widget-type="Ivy.TableCell"
+    >
       {shouldShowTooltip ? (
         <TooltipProvider>
           <Tooltip>
@@ -108,3 +134,4 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     </TableCell>
   );
 };
+TableCellWidget.skipWidgetWrapper = true;

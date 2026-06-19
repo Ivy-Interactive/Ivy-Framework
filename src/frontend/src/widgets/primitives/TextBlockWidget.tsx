@@ -95,19 +95,15 @@ const variantMap: VariantMap = {
     const spanRef = React.useRef<HTMLSpanElement>(null);
     const [isTruncated, setIsTruncated] = React.useState(false);
     const [showTooltip, setShowTooltip] = React.useState(false);
-    React.useEffect(() => {
-      const checkTruncation = () => {
-        const el = spanRef.current;
-        if (el) {
-          setIsTruncated(el.scrollWidth > el.clientWidth);
-        }
-      };
-      checkTruncation();
-      window.addEventListener("resize", checkTruncation);
-      return () => {
-        window.removeEventListener("resize", checkTruncation);
-      };
-    }, [children, style]);
+
+    const handleMouseEnter = () => {
+      const el = spanRef.current;
+      if (el) {
+        setIsTruncated(el.scrollWidth > el.clientWidth);
+      }
+      setShowTooltip(true);
+    };
+
     return (
       <div className={cn(typography.block, className)} style={style}>
         <TooltipProvider>
@@ -116,7 +112,7 @@ const variantMap: VariantMap = {
               <span
                 ref={spanRef}
                 className="overflow-hidden text-ellipsis"
-                onMouseEnter={() => setShowTooltip(true)}
+                onMouseEnter={handleMouseEnter}
                 onMouseLeave={() => setShowTooltip(false)}
               >
                 {children}
