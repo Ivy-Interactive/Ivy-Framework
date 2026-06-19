@@ -279,8 +279,11 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
                 if (!_pluginStates.TryGetValue(pluginId, out var state))
                     return Results.NotFound();
 
+                if (string.IsNullOrEmpty(filePath) || Path.IsPathRooted(filePath))
+                    return Results.NotFound();
+
                 var pluginDir = Path.GetFullPath(state.Directory);
-                var fullPath = Path.GetFullPath(Path.Combine(pluginDir, filePath));
+                var fullPath = Path.GetFullPath(Path.Join(pluginDir, filePath));
 
                 if (!fullPath.StartsWith(pluginDir + Path.DirectorySeparatorChar))
                     return Results.NotFound();

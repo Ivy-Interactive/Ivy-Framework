@@ -1136,6 +1136,14 @@ public class PluginLoader : IPluginManager
     {
         if (manifest.Icon is { Kind: PluginIconKind.File } icon)
         {
+            if (string.IsNullOrWhiteSpace(icon.Value) || Path.IsPathRooted(icon.Value))
+            {
+                _logger.LogWarning(
+                    "Plugin '{Id}' has an invalid icon path '{Path}' (must be relative).",
+                    manifest.Id, icon.Value);
+                return;
+            }
+
             var fullPath = Path.GetFullPath(Path.Combine(directory, icon.Value));
             if (!File.Exists(fullPath))
             {
@@ -1265,7 +1273,7 @@ public class PluginLoader : IPluginManager
                         {
                             hostAssembly = Assembly.Load(new AssemblyName(packageName));
                         }
-                        catch
+                        catch (Exception) // CodeQL suppress: assembly load has many failure modes beyond IO
                         {
                             // Assembly not available in host — plugin may still work if it's optional
                             continue;
