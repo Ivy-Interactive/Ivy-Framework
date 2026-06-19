@@ -60,8 +60,25 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     internal void SetPluginConfig(IIvyPluginConfig config) => _currentPluginConfig = config;
     internal void ClearPluginConfig() => _currentPluginConfig = null;
 
-    public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
-    public IReadOnlyList<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders => _badgeProviders;
+    public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers
+    {
+        get
+        {
+            _lock.EnterReadLock();
+            try { return _menuTransformers.ToList(); }
+            finally { _lock.ExitReadLock(); }
+        }
+    }
+
+    public IReadOnlyList<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders
+    {
+        get
+        {
+            _lock.EnterReadLock();
+            try { return _badgeProviders.ToList(); }
+            finally { _lock.ExitReadLock(); }
+        }
+    }
 
     internal void SetCurrentPlugin(string pluginId, string directory)
     {
@@ -100,26 +117,47 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
     public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer)
     {
-        _menuTransformers.Add(transformer);
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.MenuTransformers.Add(transformer);
+        _lock.EnterWriteLock();
+        try
+        {
+            _menuTransformers.Add(transformer);
+            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
+                state.MenuTransformers.Add(transformer);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider)
     {
-        _badgeProviders.Add((menuTag, countProvider));
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.BadgeProviders.Add((menuTag, countProvider));
+        _lock.EnterWriteLock();
+        try
+        {
+            _badgeProviders.Add((menuTag, countProvider));
+            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
+                state.BadgeProviders.Add((menuTag, countProvider));
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public void UseWebApplication(Action<WebApplication> configure)
     {
-        _appActions.Add(configure);
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.AppActions.Add(configure);
+        _lock.EnterWriteLock();
+        try
+        {
+            _appActions.Add(configure);
+            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
+                state.AppActions.Add(configure);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure)
@@ -268,7 +306,12 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
     public void Apply(WebApplication app)
     {
-        foreach (var action in _appActions)
+        List<Action<WebApplication>> actions;
+        _lock.EnterReadLock();
+        try { actions = _appActions.ToList(); }
+        finally { _lock.ExitReadLock(); }
+
+        foreach (var action in actions)
             action(app);
 
         app.MapGet("/ivy/plugins/{pluginId}/assets/{**filePath}", (string pluginId, string filePath) =>
