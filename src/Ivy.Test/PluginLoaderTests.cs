@@ -184,11 +184,11 @@ public class PluginLoaderTests
         var context = new TestPluginContext();
 
         context.SetCurrentPlugin("plugin-a", "/plugins/a");
-        context.AddMenuItems(items => items.Append(new MenuItem("A")));
+        context.TransformMenuItems(items => items.Append(new MenuItem("A")));
         context.ClearCurrentPlugin();
 
         context.SetCurrentPlugin("plugin-b", "/plugins/b");
-        context.AddMenuItems(items => items.Append(new MenuItem("B")));
+        context.TransformMenuItems(items => items.Append(new MenuItem("B")));
         context.ClearCurrentPlugin();
 
         Assert.Equal(2, context.MenuTransformers.Count);

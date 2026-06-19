@@ -121,7 +121,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             state.AppFactories.Add(factory);
     }
 
-    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0)
+    public void TransformMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0)
     {
         _lock.EnterWriteLock();
         try
