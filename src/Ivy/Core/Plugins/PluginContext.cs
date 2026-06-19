@@ -12,7 +12,7 @@ namespace Ivy.Core.Plugins;
 /// This is an internal implementation detail of the plugin hosting infrastructure.
 /// Plugins should only depend on the <see cref="IIvyPluginContext"/> (or derived) interfaces.
 /// </summary>
-public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider, IPluginMenuContributions
+public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
     protected AppRepository AppRepository { get; }
     protected IReadOnlySet<string> ReservedPaths { get; }
@@ -31,7 +31,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-    private readonly List<(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> Transformer, int Priority)> _menuTransformers = [];
     private readonly List<Action<WebApplication>> _appActions = [];
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
@@ -58,23 +57,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
     internal void SetPluginConfig(IIvyPluginConfig config) => _currentPluginConfig = config;
     internal void ClearPluginConfig() => _currentPluginConfig = null;
-
-    public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers
-    {
-        get
-        {
-            _lock.EnterReadLock();
-            try
-            {
-                return _menuTransformers
-                    .OrderBy(t => t.Priority)
-                    .Select(t => t.Transformer)
-                    .ToList();
-            }
-            finally { _lock.ExitReadLock(); }
-        }
-    }
-
 
     internal void SetCurrentPlugin(string pluginId, string directory)
     {
@@ -111,20 +93,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             state.AppFactories.Add(factory);
     }
 
-    public void TransformMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0)
-    {
-        _lock.EnterWriteLock();
-        try
-        {
-            _menuTransformers.Add((transformer, priority));
-            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-                state.MenuTransformers.Add((transformer, priority));
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
 
 
     public void UseWebApplication(Action<WebApplication> configure)
@@ -205,9 +173,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
             // Collect app IDs before removing factories so we can reload affected sessions
             affectedAppIds = GetAppIdsFromFactories(state.AppFactories);
-
-            foreach (var t in state.MenuTransformers)
-                _menuTransformers.Remove(t);
 
             foreach (var a in state.AppActions)
                 _appActions.Remove(a);

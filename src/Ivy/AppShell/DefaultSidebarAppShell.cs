@@ -1,7 +1,6 @@
 using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.AppShell;
-using Ivy.Core.Plugins;
 using System.Collections.Immutable;
 
 // ReSharper disable once CheckNamespace
@@ -24,11 +23,10 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         Context.TryUseService<IAuthService>(out var auth);
-        Context.TryUseService<IPluginMenuContributions>(out var pluginContributions);
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
-        var menuItems = UseState(() => ApplyMenuTransformers(appRepository.GetMenuItems(), pluginContributions));
+        var menuItems = UseState(() => appRepository.GetMenuItems());
 
         // Auto-default: if there's exactly one visible app, select it and close sidebar
         var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
@@ -70,11 +68,11 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
         {
             if (string.IsNullOrWhiteSpace(search.Value))
             {
-                menuItems.Set(ApplyMenuTransformers(appRepository.GetMenuItems(), pluginContributions));
+                menuItems.Set(appRepository.GetMenuItems());
             }
             else
             {
-                var result = ApplyMenuTransformers(appRepository.GetMenuItems(), pluginContributions)
+                var result = appRepository.GetMenuItems()
                     .FlattenWithPath()
                     .Select(x => new { x.Item, x.Path, Score = AppShellUtils.ItemMatchScore(x.Item, search.Value) })
                     .Where(x => x.Score > 0)
@@ -560,17 +558,5 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             ),
             settings.Width
         ).Open(sidebarOpen.Value).MainAppSidebar(true);
-    }
-
-    private static MenuItem[] ApplyMenuTransformers(MenuItem[] items, IPluginMenuContributions? contributions)
-    {
-        if (contributions is null) return items;
-        var transformers = contributions.MenuTransformers;
-        if (transformers.Count == 0) return items;
-
-        IEnumerable<MenuItem> result = items;
-        foreach (var transformer in transformers)
-            result = transformer(result);
-        return result.ToArray();
     }
 }

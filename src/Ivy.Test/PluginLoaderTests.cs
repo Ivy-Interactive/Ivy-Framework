@@ -178,26 +178,6 @@ public class PluginLoaderTests
         }
     }
 
-    [Fact]
-    public void MenuTransformersAreTrackedPerPlugin()
-    {
-        var context = new TestPluginContext();
-
-        context.SetCurrentPlugin("plugin-a", "/plugins/a");
-        context.TransformMenuItems(items => items.Append(new MenuItem("A")));
-        context.ClearCurrentPlugin();
-
-        context.SetCurrentPlugin("plugin-b", "/plugins/b");
-        context.TransformMenuItems(items => items.Append(new MenuItem("B")));
-        context.ClearCurrentPlugin();
-
-        Assert.Equal(2, context.MenuTransformers.Count);
-
-        // Unload plugin A
-        context.RemovePluginContributions("plugin-a");
-
-        Assert.Single(context.MenuTransformers);
-    }
 
 
     [Fact]
