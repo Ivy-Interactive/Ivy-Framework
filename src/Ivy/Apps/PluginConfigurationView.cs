@@ -26,7 +26,7 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
             | (Horizontal().Gap(2)
                 | new Button("Save", onClick: _ =>
                 {
-                    for (var i = 0; i < fields.Length; i++)
+                    for (var i = 0; i < fields.Count; i++)
                     {
                         var value = states[i].Value;
                         if (!string.IsNullOrEmpty(value))
