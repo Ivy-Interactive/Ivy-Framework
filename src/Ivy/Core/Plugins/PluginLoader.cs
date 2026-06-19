@@ -47,6 +47,8 @@ public class PluginLoader : IPluginManager
             "Microsoft.Extensions.DependencyInjection.Abstractions",
             "Microsoft.Extensions.Logging.Abstractions",
         };
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => CleanupAllShadowDirectories();
     }
 
     public IReadOnlyList<LoadedPlugin> Plugins
@@ -69,7 +71,7 @@ public class PluginLoader : IPluginManager
             return;
         }
 
-        var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)>();
+        var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)>();
 
         // Load plugins from subdirectories of the plugins directory
         foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
@@ -93,7 +95,7 @@ public class PluginLoader : IPluginManager
         _lock.EnterWriteLock();
         try
         {
-            _plugins.AddRange(candidates.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory)));
+            _plugins.AddRange(candidates.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory, c.ShadowDirectory)));
         }
         finally
         {
@@ -104,7 +106,7 @@ public class PluginLoader : IPluginManager
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", plugin.Instance.Manifest.Id, plugin.Instance.Manifest.Version);
     }
 
-    private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)? LoadPluginFromDirectory(
+    private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)? LoadPluginFromDirectory(
         string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
         failureReason = null;
@@ -154,6 +156,7 @@ public class PluginLoader : IPluginManager
         {
             _logger.LogError("Plugin in '{Directory}' is incompatible: {Error}", directory, compatError);
             failureReason = compatError;
+            DeleteShadowDirectory(shadowDir);
             return null;
         }
 
@@ -195,6 +198,7 @@ public class PluginLoader : IPluginManager
                     "Assembly {Dll} has [IvyPlugin({Type})] but that type does not implement IIvyPlugin. Skipping directory.",
                     dllPath, attr.PluginType.FullName);
                 failureReason = $"[IvyPlugin({attr.PluginType.FullName})] does not implement IIvyPlugin";
+                DeleteShadowDirectory(shadowDir);
                 return null;
             }
 
@@ -205,6 +209,7 @@ public class PluginLoader : IPluginManager
         {
             _logger.LogDebug("No [assembly: IvyPlugin] attribute found in {Directory}. Skipping.", directory);
             failureReason = "No [IvyPlugin] attribute found";
+            DeleteShadowDirectory(shadowDir);
             return null;
         }
 
@@ -214,12 +219,13 @@ public class PluginLoader : IPluginManager
                 "Multiple [assembly: IvyPlugin] attributes found in {Directory} ({Assemblies}). Skipping.",
                 directory, string.Join(", ", found.Select(f => Path.GetFileName(f.Assembly.Location))));
             failureReason = "Multiple [IvyPlugin] attributes found";
+            DeleteShadowDirectory(shadowDir);
             return null;
         }
 
         var (pluginType, pluginAssembly) = found[0];
         var instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
-        return (instance, pluginAssembly, loadContext, directory);
+        return (instance, pluginAssembly, loadContext, directory, shadowDir);
     }
 
     internal void SetPluginConfigFactory(IIvyPluginConfigFactory factory)
@@ -312,6 +318,7 @@ public class PluginLoader : IPluginManager
 
             // Unload the assembly context
             plugin.LoadContext.Unload();
+            DeleteShadowDirectory(plugin.ShadowDirectory);
 
             _plugins.Remove(plugin);
             _logger.LogInformation("Unloaded plugin: {Id}", pluginId);
@@ -370,7 +377,7 @@ public class PluginLoader : IPluginManager
                 return false;
             }
 
-            var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
+            var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
             if (plugin.Instance.ConfigurationSchema is { } schema)
@@ -548,10 +555,11 @@ public class PluginLoader : IPluginManager
                     _pluginContext?.RemovePluginContributions(pluginId);
                 (oldPlugin.ServiceProvider as IDisposable)?.Dispose();
                 oldPlugin.LoadContext.Unload();
+                DeleteShadowDirectory(oldPlugin.ShadowDirectory);
                 _plugins.Remove(oldPlugin);
             }
 
-            var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
+            var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
             if (newPlugin.Instance.ConfigurationSchema is { } schema)
@@ -883,7 +891,7 @@ public class PluginLoader : IPluginManager
 
         try
         {
-            pluginInstance.ShutdownAsync(shutdownContext).Wait(cts.Token);
+            Task.Run(() => pluginInstance.ShutdownAsync(shutdownContext)).Wait(cts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -983,7 +991,7 @@ public class PluginLoader : IPluginManager
         string directory,
         IServiceProvider serviceProvider,
         Version hostVersion,
-        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> candidates)
+        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)> candidates)
     {
         try
         {
@@ -1146,6 +1154,34 @@ public class PluginLoader : IPluginManager
         public void Save() => inner.Save();
     }
 
+    private void DeleteShadowDirectory(string? shadowDirectory)
+    {
+        if (shadowDirectory is null) return;
+        try
+        {
+            if (Directory.Exists(shadowDirectory))
+                Directory.Delete(shadowDirectory, recursive: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to delete shadow directory: {Directory}", shadowDirectory);
+        }
+    }
+
+    private void CleanupAllShadowDirectories()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            foreach (var plugin in _plugins)
+                DeleteShadowDirectory(plugin.ShadowDirectory);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     /// <summary>
     /// Checks that the plugin's deps.json does not require newer versions of shared assemblies
     /// than what the host currently provides. Returns an error message if incompatible, null if OK.
@@ -1237,7 +1273,8 @@ public record LoadedPlugin(
     IIvyPlugin Instance,
     Assembly Assembly,
     AssemblyLoadContext LoadContext,
-    string Directory)
+    string Directory,
+    string? ShadowDirectory = null)
 {
     public PluginStatus Status { get; internal set; } = PluginStatus.Active;
     public ServiceCollection Services { get; } = new();
