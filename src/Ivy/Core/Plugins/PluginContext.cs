@@ -32,7 +32,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         Builder = builder;
     }
     private readonly List<(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> Transformer, int Priority)> _menuTransformers = [];
-    private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
     private readonly List<Action<WebApplication>> _appActions = [];
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
@@ -76,15 +75,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         }
     }
 
-    public IReadOnlyList<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders
-    {
-        get
-        {
-            _lock.EnterReadLock();
-            try { return _badgeProviders.ToList(); }
-            finally { _lock.ExitReadLock(); }
-        }
-    }
 
     internal void SetCurrentPlugin(string pluginId, string directory)
     {
@@ -136,20 +126,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         }
     }
 
-    public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider)
-    {
-        _lock.EnterWriteLock();
-        try
-        {
-            _badgeProviders.Add((menuTag, countProvider));
-            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-                state.BadgeProviders.Add((menuTag, countProvider));
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
 
     public void UseWebApplication(Action<WebApplication> configure)
     {
@@ -232,9 +208,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
             foreach (var t in state.MenuTransformers)
                 _menuTransformers.Remove(t);
-
-            foreach (var b in state.BadgeProviders)
-                _badgeProviders.Remove(b);
 
             foreach (var a in state.AppActions)
                 _appActions.Remove(a);

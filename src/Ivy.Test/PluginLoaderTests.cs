@@ -199,26 +199,6 @@ public class PluginLoaderTests
         Assert.Single(context.MenuTransformers);
     }
 
-    [Fact]
-    public void BadgeProvidersAreTrackedPerPlugin()
-    {
-        var context = new TestPluginContext();
-
-        context.SetCurrentPlugin("plugin-a", "/plugins/a");
-        context.AddBadgeProvider("tag-a", _ => 5);
-        context.ClearCurrentPlugin();
-
-        context.SetCurrentPlugin("plugin-b", "/plugins/b");
-        context.AddBadgeProvider("tag-b", _ => 10);
-        context.ClearCurrentPlugin();
-
-        Assert.Equal(2, context.BadgeProviders.Count);
-
-        context.RemovePluginContributions("plugin-a");
-
-        Assert.Single(context.BadgeProviders);
-        Assert.Equal("tag-b", context.BadgeProviders[0].Tag);
-    }
 
     [Fact]
     public async Task AggregateProviderThreadSafety()

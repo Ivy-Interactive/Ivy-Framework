@@ -12,9 +12,6 @@ public interface IIvyExtendedPluginContext : IIvyPluginContext
     // Menu hooks
     void TransformMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0);
 
-    // Sidebar badge providers
-    void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider);
-
     // ASP.NET pipeline
     void UseWebApplication(Action<WebApplication> configure);
     void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure);
