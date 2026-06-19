@@ -16,6 +16,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Plugin API compatibility: compares public API against baseline to catch breaking changes -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion>1.2.67</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <PropertyGroup>
