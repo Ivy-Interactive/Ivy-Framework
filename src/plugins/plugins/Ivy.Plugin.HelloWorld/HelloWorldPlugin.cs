@@ -26,7 +26,7 @@ public class HelloWorldPlugin : IIvyPlugin<IIvyPluginContext>
     public void Configure(IIvyPluginContext context)
     {
         var greeting = context.Config.GetValue("Greeting") ?? "Hello";
-        var enthusiastic = context.Config.GetValue("Enthusiastic") == "true";
+        var enthusiastic = context.Config.GetBool("Enthusiastic") ?? false;
         context.RegisterGreeter(new HelloWorldGreeter(greeting, enthusiastic));
     }
 }
