@@ -73,80 +73,7 @@ public class PluginLoader : IPluginManager
 
         // Load plugins from subdirectories of the plugins directory
         foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
-        {
-            try
-            {
-                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                {
-                    if (!SourcePluginBuilder.BuildSync(directory, _logger))
-                    {
-                        _lock.EnterWriteLock();
-                        try
-                        {
-                            _failedPlugins[directory] = ("Source plugin build failed", DateTime.UtcNow);
-                        }
-                        finally
-                        {
-                            _lock.ExitWriteLock();
-                        }
-                        continue;
-                    }
-                }
-
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
-                if (loaded is null)
-                {
-                    // Track that this directory failed to load
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _failedPlugins[directory] = (
-                            reason ?? "No valid plugin found",
-                            DateTime.UtcNow);
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
-                    continue;
-                }
-
-                var manifest = loaded.Value.Instance.Manifest;
-
-                if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
-                {
-                    _logger.LogError(
-                        "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
-                        manifest.Id, minVersion, hostVersion);
-                    continue;
-                }
-
-                ValidatePluginIcon(manifest, directory);
-
-                _knownPlugins[manifest.Id] = directory;
-                candidates.Add(loaded.Value);
-            }
-            catch (IOException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (BadImageFormatException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-        }
+            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
 
         // Load plugins from the references file
         var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
@@ -156,91 +83,11 @@ public class PluginLoader : IPluginManager
             if (!Directory.Exists(directory))
             {
                 _logger.LogWarning("Referenced plugin directory does not exist: {Directory}", directory);
-                _lock.EnterWriteLock();
-                try
-                {
-                    _failedPlugins[directory] = (
-                        $"Directory does not exist: {directory}",
-                        DateTime.UtcNow);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
+                RecordFailure(directory, $"Directory does not exist: {directory}");
                 continue;
             }
 
-            try
-            {
-                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                {
-                    if (!SourcePluginBuilder.BuildSync(directory, _logger))
-                    {
-                        _lock.EnterWriteLock();
-                        try
-                        {
-                            _failedPlugins[directory] = ("Source plugin build failed", DateTime.UtcNow);
-                        }
-                        finally
-                        {
-                            _lock.ExitWriteLock();
-                        }
-                        continue;
-                    }
-                }
-
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
-                if (loaded is null)
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _failedPlugins[directory] = (
-                            reason ?? "No valid plugin found",
-                            DateTime.UtcNow);
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
-                    continue;
-                }
-
-                var manifest = loaded.Value.Instance.Manifest;
-
-                if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
-                {
-                    _logger.LogError(
-                        "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
-                        manifest.Id, minVersion, hostVersion);
-                    continue;
-                }
-
-                ValidatePluginIcon(manifest, directory);
-
-                _knownPlugins[manifest.Id] = directory;
-                candidates.Add(loaded.Value);
-            }
-            catch (IOException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (BadImageFormatException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
+            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
         }
 
         _lock.EnterWriteLock();
@@ -1116,6 +963,80 @@ public class PluginLoader : IPluginManager
         finally
         {
             _lock.ExitWriteLock();
+        }
+    }
+
+    private void RecordFailure(string directory, string reason)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _failedPlugins[directory] = (reason, DateTime.UtcNow);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    private void TryLoadCandidate(
+        string directory,
+        IServiceProvider serviceProvider,
+        Version hostVersion,
+        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> candidates)
+    {
+        try
+        {
+            if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
+            {
+                if (!SourcePluginBuilder.BuildSync(directory, _logger))
+                {
+                    RecordFailure(directory, "Source plugin build failed");
+                    return;
+                }
+            }
+
+            var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
+            if (loaded is null)
+            {
+                RecordFailure(directory, reason ?? "No valid plugin found");
+                return;
+            }
+
+            var manifest = loaded.Value.Instance.Manifest;
+
+            if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
+            {
+                _logger.LogError(
+                    "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
+                    manifest.Id, minVersion, hostVersion);
+                return;
+            }
+
+            ValidatePluginIcon(manifest, directory);
+
+            _knownPlugins[manifest.Id] = directory;
+            candidates.Add(loaded.Value);
+        }
+        catch (IOException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (BadImageFormatException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (InvalidOperationException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
         }
     }
 
