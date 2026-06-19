@@ -544,7 +544,6 @@ public class PluginLoaderTests
         {
             Id = Id,
             Title = "Test Plugin",
-            ConfigSectionName = "TestPlugin",
             Version = new Version(1, 0)
         };
 
@@ -686,7 +685,6 @@ public class PluginLoaderTests
         {
             Id = "Ivy.Plugin.TypedTest",
             Title = "Typed Test",
-            ConfigSectionName = "TypedTest",
             Version = new Version(1, 0)
         };
 

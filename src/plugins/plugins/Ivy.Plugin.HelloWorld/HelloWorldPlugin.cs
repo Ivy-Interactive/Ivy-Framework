@@ -10,7 +10,6 @@ public class HelloWorldPlugin : IIvyPlugin<IIvyPluginContext>
     {
         Id = "Ivy.Plugin.HelloWorld",
         Title = "Hello World Plugin",
-        ConfigSectionName = "HelloWorld",
         Version = new Version(1, 0, 0),
     };
 

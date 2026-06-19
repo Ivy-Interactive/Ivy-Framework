@@ -286,7 +286,6 @@ public class PluginConfigurationValidationTests
         {
             Id = "Ivy.Plugin.Fake",
             Title = "Fake",
-            ConfigSectionName = "Fake",
             Version = new Version(1, 0, 0),
         };
 

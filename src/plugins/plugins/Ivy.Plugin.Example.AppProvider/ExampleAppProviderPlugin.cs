@@ -17,7 +17,6 @@ public class ExampleAppProviderPlugin : IIvyPlugin<IIvyExtendedPluginContext>
     {
         Id = "Ivy.Plugin.Example.AppProvider",
         Title = "Example App Provider",
-        ConfigSectionName = "ExampleAppProvider",
         Version = new Version(1, 0, 0),
     };
 
