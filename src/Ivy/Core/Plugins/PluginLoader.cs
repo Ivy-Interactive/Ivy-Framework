@@ -77,7 +77,21 @@ public class PluginLoader : IPluginManager
             try
             {
                 if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                    SourcePluginBuilder.BuildSync(directory, _logger);
+                {
+                    if (!SourcePluginBuilder.BuildSync(directory, _logger))
+                    {
+                        _lock.EnterWriteLock();
+                        try
+                        {
+                            _failedPlugins[directory] = ("Source plugin build failed", DateTime.UtcNow);
+                        }
+                        finally
+                        {
+                            _lock.ExitWriteLock();
+                        }
+                        continue;
+                    }
+                }
 
                 var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
                 if (loaded is null)
@@ -159,7 +173,21 @@ public class PluginLoader : IPluginManager
             try
             {
                 if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                    SourcePluginBuilder.BuildSync(directory, _logger);
+                {
+                    if (!SourcePluginBuilder.BuildSync(directory, _logger))
+                    {
+                        _lock.EnterWriteLock();
+                        try
+                        {
+                            _failedPlugins[directory] = ("Source plugin build failed", DateTime.UtcNow);
+                        }
+                        finally
+                        {
+                            _lock.ExitWriteLock();
+                        }
+                        continue;
+                    }
+                }
 
                 var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
                 if (loaded is null)
@@ -462,7 +490,10 @@ public class PluginLoader : IPluginManager
         }
 
         if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(pluginPath))
-            SourcePluginBuilder.BuildSync(pluginPath, _logger);
+        {
+            if (!SourcePluginBuilder.BuildSync(pluginPath, _logger))
+                return false;
+        }
 
         string? loadedPluginId = null;
         PluginStatus loadedStatus = PluginStatus.Active;
@@ -619,7 +650,13 @@ public class PluginLoader : IPluginManager
 
         // Build source plugins before attempting reload
         if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-            SourcePluginBuilder.BuildSync(directory, _logger);
+        {
+            if (!SourcePluginBuilder.BuildSync(directory, _logger))
+            {
+                _logger.LogError("Failed to reload plugin '{Id}': source build failed", pluginId);
+                return false;
+            }
+        }
 
         // Load the new plugin assembly first, before unloading the old one
         var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!(), out var reloadFailReason);
