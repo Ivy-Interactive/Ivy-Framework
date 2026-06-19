@@ -10,7 +10,7 @@ public interface IIvyExtendedPluginContext : IIvyPluginContext
     void AddAppsFromAssembly(Assembly assembly);
 
     // Menu hooks
-    void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer);
+    void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0);
 
     // Sidebar badge providers
     void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider);

@@ -12,7 +12,7 @@ namespace Ivy.Core.Plugins;
 /// This is an internal implementation detail of the plugin hosting infrastructure.
 /// Plugins should only depend on the <see cref="IIvyPluginContext"/> (or derived) interfaces.
 /// </summary>
-public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
+public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider, IPluginMenuContributions
 {
     protected AppRepository AppRepository { get; }
     protected IReadOnlySet<string> ReservedPaths { get; }
@@ -31,7 +31,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-    private readonly List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> _menuTransformers = [];
+    private readonly List<(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> Transformer, int Priority)> _menuTransformers = [];
     private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
     private readonly List<Action<WebApplication>> _appActions = [];
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
@@ -65,7 +65,13 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         get
         {
             _lock.EnterReadLock();
-            try { return _menuTransformers.ToList(); }
+            try
+            {
+                return _menuTransformers
+                    .OrderBy(t => t.Priority)
+                    .Select(t => t.Transformer)
+                    .ToList();
+            }
             finally { _lock.ExitReadLock(); }
         }
     }
@@ -115,14 +121,14 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             state.AppFactories.Add(factory);
     }
 
-    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer)
+    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer, int priority = 0)
     {
         _lock.EnterWriteLock();
         try
         {
-            _menuTransformers.Add(transformer);
+            _menuTransformers.Add((transformer, priority));
             if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-                state.MenuTransformers.Add(transformer);
+                state.MenuTransformers.Add((transformer, priority));
         }
         finally
         {

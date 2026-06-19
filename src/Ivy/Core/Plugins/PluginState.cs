@@ -9,7 +9,7 @@ internal class PluginState
     public string Directory { get; }
     public ServiceCollection PluginServices { get; } = new();
 
-    public List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers { get; } = [];
+    public List<(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> Transformer, int Priority)> MenuTransformers { get; } = [];
     public List<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders { get; } = [];
     public List<Action<WebApplication>> AppActions { get; } = [];
     public List<Func<AppDescriptor[]>> AppFactories { get; } = [];
