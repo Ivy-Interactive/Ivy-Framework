@@ -148,8 +148,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         className={cn(
           // When expanded on compact screens the container spans the full available
           // width so the panel can fill the viewport instead of overflowing it.
+          // min-w-0/max-w-full let the editor inside clamp and scroll horizontally
+          // rather than forcing the row wider than the screen.
           // Collapsed (or on desktop) it shrinks to the button.
-          isCompact && expanded ? "flex w-full items-center" : "inline-flex items-center",
+          isCompact && expanded
+            ? "flex w-full min-w-0 max-w-full items-center"
+            : "inline-flex items-center",
           "rounded-field border border-input bg-transparent shadow-sm",
           "dark:border-white/10 dark:bg-white/5",
           "focus-within:outline-none focus-within:ring-1 focus-within:ring-ring",

@@ -142,7 +142,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
         <TableLayout>
           <DataTableHeader className={spacing.mb}>
             <div className={`flex flex-wrap items-center w-full ${spacing.gapOuter}`}>
-              <div className={`flex items-center ${spacing.gapInner}`}>
+              <div className={`flex min-w-0 flex-1 items-center ${spacing.gapInner}`}>
                 {finalConfig.allowFiltering && (
                   <DataTableOption
                     icon={FilterIcon}
@@ -158,8 +158,9 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
                 )}
                 {slots?.HeaderLeft}
               </div>
-              <div className="flex-1" />
-              <div className={`flex items-center ${spacing.gapInner}`}>{slots?.HeaderRight}</div>
+              <div className={`flex shrink-0 items-center ${spacing.gapInner}`}>
+                {slots?.HeaderRight}
+              </div>
             </div>
           </DataTableHeader>
 
