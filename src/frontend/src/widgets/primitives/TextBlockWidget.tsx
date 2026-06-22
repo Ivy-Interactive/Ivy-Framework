@@ -36,7 +36,7 @@ interface TextBlockWidgetProps {
   variant: TextBlockVariant;
   width?: string;
   strikeThrough?: boolean;
-  color: string;
+  color?: string;
   noWrap?: boolean;
   overflow?: Overflow;
   bold?: boolean;

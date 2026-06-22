@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect } from "vitest";
 import { renderToString } from "react-dom/server";
 import { TextBlockWidget } from "./TextBlockWidget";
