@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 import { controlHeight, controlSize } from "@/components/ui/density-scale";
+import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
 
 /**
  * Display modes for DataTableOption
@@ -70,6 +71,10 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   }
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Use popover mode on mobile to prevent horizontal overflow
+  const breakpoint = useCurrentBreakpoint();
+  const effectiveDisplayMode = breakpoint === "mobile" ? "popover" : displayMode;
+
   const heightClass = controlHeight[density] || controlHeight.Medium;
   const sizeClass = controlSize[density] || controlSize.Medium;
   const pxClass =
@@ -95,7 +100,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   // }, [expanded, displayMode]);
 
   // Popover mode - uses default button styling
-  if (displayMode === "popover") {
+  if (effectiveDisplayMode === "popover") {
     return (
       <Popover>
         <PopoverTrigger asChild>
@@ -163,17 +168,23 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           {buttonContent}
         </button>
 
-        {/* Content container - fixed dimensions when expanded */}
+        {/* Content container - responsive width when expanded */}
         <div
           className={cn(
             `border-l ${heightClass}`,
             "transition-all duration-300 ease-in-out",
-            expanded ? "w-[450px] opacity-100 border-input" : "w-0 opacity-0 border-transparent",
+            expanded
+              ? cn(
+                  "opacity-100 border-input",
+                  breakpoint === "tablet" ? "max-w-[450px] w-[calc(100vw-8rem)]" : "w-[450px]",
+                )
+              : "w-0 opacity-0 border-transparent",
           )}
         >
           <div
             className={cn(
-              "flex h-full min-h-0 min-w-0 w-[450px] max-w-full items-stretch",
+              "flex h-full min-h-0 min-w-0 max-w-full items-stretch",
+              breakpoint === "tablet" ? "w-full" : "w-[450px]",
               "overflow-hidden rounded-l-none rounded-tr-fields rounded-br-fields",
               contentClassName,
             )}
