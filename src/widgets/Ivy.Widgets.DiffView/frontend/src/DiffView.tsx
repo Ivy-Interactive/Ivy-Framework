@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { parseDiff, Diff, Hunk, type ChangeData } from "react-diff-view";
 import "react-diff-view/style/index.css";
 import "./custom-diff.css";
@@ -27,6 +27,27 @@ function getLineNumber(change: ChangeData | null): number {
   return change.lineNumber;
 }
 
+export function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return isMobile;
+}
+
 export const DiffView: React.FC<DiffViewProps> = ({
   id,
   width,
@@ -52,7 +73,10 @@ export const DiffView: React.FC<DiffViewProps> = ({
 
   const [collapsedState, setCollapsedState] = useState<Record<number, boolean>>({});
 
+  const isMobile = useIsMobile();
   const diffViewType = viewType === "Split" ? "split" : "unified";
+  const effectiveViewType = isMobile ? "unified" : diffViewType;
+  const effectiveWordWrap = isMobile || wordWrap;
 
   const style: React.CSSProperties = {
     ...getWidth(width),
@@ -69,7 +93,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   }
 
   return (
-    <div style={style} className={`ivy-diff-view text-xs${wordWrap ? " diff-wrap" : ""}`}>
+    <div style={style} className={`ivy-diff-view text-xs${effectiveWordWrap ? " diff-wrap" : ""}`}>
       {files.map((file, fileIndex) => {
         const rawOld = oldRevision || file.oldPath || "";
         const rawNew = newRevision || file.newPath || "";
@@ -128,7 +152,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
             )}
             {!isCollapsed && (
               <Diff
-                viewType={diffViewType}
+                viewType={effectiveViewType}
                 diffType={file.type}
                 hunks={file.hunks}
                 gutterEvents={{
