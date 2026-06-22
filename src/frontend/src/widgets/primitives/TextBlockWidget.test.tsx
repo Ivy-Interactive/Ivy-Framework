@@ -1,5 +1,6 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { renderToString } from "react-dom/server";
 import { TextBlockWidget } from "./TextBlockWidget";
 
 describe("TextBlockWidget id attribute", () => {
@@ -20,49 +21,47 @@ describe("TextBlockWidget id attribute", () => {
     "Display",
   ] as const;
 
-  test.each(variants)("%s variant renders id attribute", (variant) => {
-    const testId = `test-anchor-${variant.toLowerCase()}`;
-    const { container } = render(
-      <TextBlockWidget
-        id="test-widget"
-        content="Test content"
-        variant={variant}
-        anchor={testId}
-      />
-    );
+  variants.forEach((variant) => {
+    it(`${variant} variant renders id attribute`, () => {
+      const testId = `test-anchor-${variant.toLowerCase()}`;
+      const html = renderToString(
+        <TextBlockWidget
+          id="test-widget"
+          content="Test content"
+          variant={variant}
+          anchor={testId}
+        />,
+      );
 
-    const element = container.querySelector(`#${testId}`);
-    expect(element).not.toBeNull();
-    expect(element?.id).toBe(testId);
+      expect(html).toContain(`id="${testId}"`);
+    });
   });
 
-  test("heading variants also render id attribute", () => {
+  it("heading variants render id attribute", () => {
     const headingVariants = ["H1", "H2", "H3", "H4", "H5", "H6"] as const;
 
     headingVariants.forEach((variant) => {
       const testId = `test-anchor-${variant.toLowerCase()}`;
-      const { container } = render(
+      const html = renderToString(
         <TextBlockWidget
           id="test-widget"
           content="Test heading"
           variant={variant}
           anchor={testId}
-        />
+        />,
       );
 
-      const element = container.querySelector(`#${testId}`);
-      expect(element).not.toBeNull();
-      expect(element?.id).toBe(testId);
+      expect(html).toContain(`id="${testId}"`);
     });
   });
 
-  test("no id attribute when anchor is not provided", () => {
-    const { container } = render(
-      <TextBlockWidget id="test-widget" content="Test content" variant="P" />
+  it("no id attribute when anchor is not provided", () => {
+    const html = renderToString(
+      <TextBlockWidget id="test-widget" content="Test content" variant="P" />,
     );
 
-    const paragraph = container.querySelector("p");
-    expect(paragraph).not.toBeNull();
-    expect(paragraph?.id).toBe("");
+    const paragraph = html.match(/<p[^>]*>/)?.[0];
+    expect(paragraph).toBeDefined();
+    expect(paragraph).not.toContain('id="');
   });
 });
