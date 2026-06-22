@@ -38,4 +38,7 @@ export default defineConfig({
     sourcemap: true,
     cssCodeSplit: false,
   },
+  test: {
+    environment: "happy-dom",
+  },
 });
