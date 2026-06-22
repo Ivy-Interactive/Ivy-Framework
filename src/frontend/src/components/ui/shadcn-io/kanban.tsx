@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
+import { Circle, MoreHorizontal } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -210,9 +211,9 @@ export function KanbanColumn({ id, name, color, width, children, className }: Ka
   return (
     <div
       className={cn(
-        "bg-background rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors",
+        "bg-muted/40 rounded-xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
         hasExplicitWidth ? "flex-none shrink-0" : "flex-none shrink-0 min-w-70",
-        showDragOver && "bg-accent rounded-lg",
+        showDragOver && "bg-accent ring-2 ring-primary/20",
         className,
       )}
       style={{
@@ -223,14 +224,23 @@ export function KanbanColumn({ id, name, color, width, children, className }: Ka
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="px-2">
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          {color && <div className="size-3 rounded-full" style={{ backgroundColor: color }} />}
-          {name || id}
-          {showCounts && (
-            <span className="text-muted-foreground text-sm font-normal">({columnTaskCount})</span>
-          )}
-        </h3>
+      <div className="flex items-center gap-2 px-4 pb-1">
+        {color ? (
+          <span className="size-4 rounded-full border-[1.5px]" style={{ borderColor: color }} />
+        ) : (
+          <Circle className="size-4 text-muted-foreground/60" strokeWidth={1.5} />
+        )}
+        <h3 className="font-medium text-sm text-foreground/80 truncate">{name || id}</h3>
+        {showCounts && (
+          <span className="text-muted-foreground/70 text-sm font-normal">{columnTaskCount}</span>
+        )}
+        <button
+          type="button"
+          className="ml-auto text-muted-foreground/50 hover:text-foreground transition-colors"
+          aria-label="Column options"
+        >
+          <MoreHorizontal className="size-4" />
+        </button>
       </div>
       {children}
     </div>
