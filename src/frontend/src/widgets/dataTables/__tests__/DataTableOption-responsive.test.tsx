@@ -1,31 +1,57 @@
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import React, { act } from "react";
+import { createRoot, Root } from "react-dom/client";
 import { DataTableOption } from "../DataTableOption";
 import { Filter } from "lucide-react";
 import * as BreakpointContext from "@/hooks/use-breakpoint-context";
+
+let container: HTMLDivElement;
+let root: Root;
+
+function mount(element: React.ReactElement) {
+  act(() => {
+    root.render(element);
+  });
+}
+
+beforeEach(() => {
+  container = document.createElement("div");
+  document.body.appendChild(container);
+  root = createRoot(container);
+});
+
+afterEach(() => {
+  act(() => {
+    root.unmount();
+  });
+  container.remove();
+  vi.restoreAllMocks();
+});
 
 describe("DataTableOption responsive behavior", () => {
   it("renders as popover on mobile breakpoint", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("mobile");
 
-    render(
+    mount(
       <DataTableOption icon={Filter} label="Filter" displayMode="inline">
         <div data-testid="filter-content">Filter content</div>
       </DataTableOption>,
     );
 
     // On mobile, should render as popover (button without inline expansion)
-    const button = screen.getByRole("button", { name: /filter/i });
-    expect(button).toBeInTheDocument();
+    const button = container.querySelector("button");
+    expect(button).toBeTruthy();
+    expect(button?.textContent).toContain("Filter");
 
     // The popover content should not be visible initially (Radix Popover behavior)
-    expect(screen.queryByTestId("filter-content")).not.toBeInTheDocument();
+    const filterContent = container.querySelector('[data-testid="filter-content"]');
+    expect(filterContent).toBeFalsy();
   });
 
   it("renders inline with fixed width on desktop breakpoint", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("desktop");
 
-    const { container } = render(
+    mount(
       <DataTableOption
         icon={Filter}
         label="Filter"
@@ -38,21 +64,22 @@ describe("DataTableOption responsive behavior", () => {
     );
 
     // On desktop with expanded state, should render inline expansion
-    const button = screen.getByRole("button", { name: /filter/i });
-    expect(button).toBeInTheDocument();
+    const button = container.querySelector("button");
+    expect(button).toBeTruthy();
 
     // Content should be visible
-    expect(screen.getByTestId("filter-content")).toBeInTheDocument();
+    const filterContent = container.querySelector('[data-testid="filter-content"]');
+    expect(filterContent).toBeTruthy();
 
     // Check that the expansion container uses desktop width (w-[450px])
     const expansionContainer = container.querySelector(".w-\\[450px\\]");
-    expect(expansionContainer).toBeInTheDocument();
+    expect(expansionContainer).toBeTruthy();
   });
 
   it("renders inline with constrained width on tablet breakpoint", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("tablet");
 
-    const { container } = render(
+    mount(
       <DataTableOption
         icon={Filter}
         label="Filter"
@@ -65,35 +92,37 @@ describe("DataTableOption responsive behavior", () => {
     );
 
     // On tablet with expanded state, should render inline expansion
-    const button = screen.getByRole("button", { name: /filter/i });
-    expect(button).toBeInTheDocument();
+    const button = container.querySelector("button");
+    expect(button).toBeTruthy();
 
     // Content should be visible
-    expect(screen.getByTestId("filter-content")).toBeInTheDocument();
+    const filterContent = container.querySelector('[data-testid="filter-content"]');
+    expect(filterContent).toBeTruthy();
 
-    // Check that the expansion container uses responsive width (max-w-[450px] w-[calc(100vw-8rem)])
+    // Check that the expansion container uses responsive width (max-w-[450px])
     const expansionContainer = container.querySelector(".max-w-\\[450px\\]");
-    expect(expansionContainer).toBeInTheDocument();
+    expect(expansionContainer).toBeTruthy();
 
     // Verify the calc width is also present
-    const calcWidthContainer = container.querySelector('[class*="w-\\[calc"]');
-    expect(calcWidthContainer).toBeInTheDocument();
+    const htmlString = container.innerHTML;
+    expect(htmlString).toContain("w-[calc(100vw-8rem)]");
   });
 
   it("respects explicit popover displayMode on desktop", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("desktop");
 
-    render(
+    mount(
       <DataTableOption icon={Filter} label="Filter" displayMode="popover">
         <div data-testid="filter-content">Filter content</div>
       </DataTableOption>,
     );
 
     // Even on desktop, if displayMode is explicitly "popover", it should render as popover
-    const button = screen.getByRole("button", { name: /filter/i });
-    expect(button).toBeInTheDocument();
+    const button = container.querySelector("button");
+    expect(button).toBeTruthy();
 
     // The popover content should not be visible initially
-    expect(screen.queryByTestId("filter-content")).not.toBeInTheDocument();
+    const filterContent = container.querySelector('[data-testid="filter-content"]');
+    expect(filterContent).toBeFalsy();
   });
 });
