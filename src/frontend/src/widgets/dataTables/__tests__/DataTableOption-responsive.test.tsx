@@ -29,23 +29,38 @@ afterEach(() => {
 });
 
 describe("DataTableOption responsive behavior", () => {
-  it("renders as popover on mobile breakpoint", () => {
+  it("renders inline (not popover) and fills available width on mobile breakpoint", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("mobile");
 
     mount(
-      <DataTableOption icon={Filter} label="Filter" displayMode="inline">
+      <DataTableOption
+        icon={Filter}
+        label="Filter"
+        displayMode="inline"
+        inlineDirection="right"
+        defaultExpanded={true}
+      >
         <div data-testid="filter-content">Filter content</div>
       </DataTableOption>,
     );
 
-    // On mobile, should render as popover (button without inline expansion)
     const button = container.querySelector("button");
     expect(button).toBeTruthy();
     expect(button?.textContent).toContain("Filter");
 
-    // The popover content should not be visible initially (Radix Popover behavior)
+    // Behavior stays inline on mobile — the content is rendered inline (not
+    // hidden behind a popover trigger).
     const filterContent = container.querySelector('[data-testid="filter-content"]');
-    expect(filterContent).toBeFalsy();
+    expect(filterContent).toBeTruthy();
+
+    // On compact screens the container goes full-width and the expanded panel
+    // flexes to fill the remaining space rather than using a fixed 450px width.
+    const containerEl = container.querySelector(".w-full");
+    expect(containerEl).toBeTruthy();
+    const flexPanel = container.querySelector(".flex-1");
+    expect(flexPanel).toBeTruthy();
+    // No fixed desktop width on mobile.
+    expect(container.querySelector(".w-\\[450px\\]")).toBeFalsy();
   });
 
   it("renders inline with fixed width on desktop breakpoint", () => {
@@ -76,7 +91,7 @@ describe("DataTableOption responsive behavior", () => {
     expect(expansionContainer).toBeTruthy();
   });
 
-  it("renders inline with constrained width on tablet breakpoint", () => {
+  it("renders inline and fills available width on tablet breakpoint", () => {
     vi.spyOn(BreakpointContext, "useCurrentBreakpoint").mockReturnValue("tablet");
 
     mount(
@@ -99,13 +114,11 @@ describe("DataTableOption responsive behavior", () => {
     const filterContent = container.querySelector('[data-testid="filter-content"]');
     expect(filterContent).toBeTruthy();
 
-    // Check that the expansion container uses responsive width (max-w-[450px])
-    const expansionContainer = container.querySelector(".max-w-\\[450px\\]");
-    expect(expansionContainer).toBeTruthy();
-
-    // Verify the calc width is also present
-    const htmlString = container.innerHTML;
-    expect(htmlString).toContain("w-[calc(100vw-8rem)]");
+    // Tablet is also treated as compact: full-width container + flexing panel,
+    // no fixed desktop width.
+    expect(container.querySelector(".w-full")).toBeTruthy();
+    expect(container.querySelector(".flex-1")).toBeTruthy();
+    expect(container.querySelector(".w-\\[450px\\]")).toBeFalsy();
   });
 
   it("respects explicit popover displayMode on desktop", () => {

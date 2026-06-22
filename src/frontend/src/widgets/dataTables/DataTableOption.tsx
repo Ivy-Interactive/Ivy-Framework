@@ -71,9 +71,11 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   }
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Use popover mode on mobile to prevent horizontal overflow
+  // Constrain the expanded inline width on smaller screens so the filter never
+  // overflows the viewport horizontally. The interaction stays identical to
+  // desktop (inline expansion) — only the expanded width adapts.
   const breakpoint = useCurrentBreakpoint();
-  const effectiveDisplayMode = breakpoint === "mobile" ? "popover" : displayMode;
+  const isCompact = breakpoint === "mobile" || breakpoint === "tablet";
 
   const heightClass = controlHeight[density] || controlHeight.Medium;
   const sizeClass = controlSize[density] || controlSize.Medium;
@@ -100,7 +102,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   // }, [expanded, displayMode]);
 
   // Popover mode - uses default button styling
-  if (effectiveDisplayMode === "popover") {
+  if (displayMode === "popover") {
     return (
       <Popover>
         <PopoverTrigger asChild>
@@ -144,7 +146,10 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center",
+          // When expanded on compact screens the container spans the full available
+          // width so the panel can fill the viewport instead of overflowing it.
+          // Collapsed (or on desktop) it shrinks to the button.
+          isCompact && expanded ? "flex w-full items-center" : "inline-flex items-center",
           "rounded-field border border-input bg-transparent shadow-sm",
           "dark:border-white/10 dark:bg-white/5",
           "focus-within:outline-none focus-within:ring-1 focus-within:ring-ring",
@@ -168,23 +173,20 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           {buttonContent}
         </button>
 
-        {/* Content container - responsive width when expanded */}
+        {/* Content container - fills remaining width on compact screens, fixed on desktop */}
         <div
           className={cn(
             `border-l ${heightClass}`,
             "transition-all duration-300 ease-in-out",
             expanded
-              ? cn(
-                  "opacity-100 border-input",
-                  breakpoint === "tablet" ? "max-w-[450px] w-[calc(100vw-8rem)]" : "w-[450px]",
-                )
+              ? cn("opacity-100 border-input", isCompact ? "flex-1 min-w-0" : "w-[450px]")
               : "w-0 opacity-0 border-transparent",
           )}
         >
           <div
             className={cn(
               "flex h-full min-h-0 min-w-0 max-w-full items-stretch",
-              breakpoint === "tablet" ? "w-full" : "w-[450px]",
+              isCompact ? "w-full" : "w-[450px]",
               "overflow-hidden rounded-l-none rounded-tr-fields rounded-br-fields",
               contentClassName,
             )}
