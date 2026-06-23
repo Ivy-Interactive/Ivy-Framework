@@ -61,7 +61,7 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
             detailValueSizeVariant({ density }),
             multiline
               ? cn(
-                  "whitespace-normal break-words text-left",
+                  "w-full whitespace-normal break-words text-left",
                   detailValueMultiLinePaddingVariant({ density }),
                 )
               : "truncate text-right ml-auto",
