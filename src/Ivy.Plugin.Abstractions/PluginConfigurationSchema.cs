@@ -2,5 +2,6 @@ namespace Ivy.Plugins;
 
 public record PluginConfigurationSchema
 {
-    public IReadOnlyList<ConfigFieldDefinition> Fields { get; init; } = [];
+    internal PluginConfigurationSchema() { }
+    public IReadOnlyList<ConfigFieldDefinition> Fields { get; internal init; } = [];
 }
