@@ -125,10 +125,10 @@
     "lint-staged": "16.4.0",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.24",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
     "vite-plugin-mkcert": "1.17.10",
-    "vite-plus": "0.1.24",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.24"
+    "vite-plus": "0.2.1",
+    "vitest": "4.1.9"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
@@ -153,8 +153,8 @@
       "minimatch": "9.0.7",
       "remark-mermaid-plugin>mermaid": "11.15.0",
       "rollup": ">=4.59.0",
-      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.24",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.24",
+      "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
+      "vitest": "4.1.9",
       "ws": "8.21.0",
       "form-data": "4.0.6"
     }
