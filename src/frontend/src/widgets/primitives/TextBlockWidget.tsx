@@ -36,7 +36,7 @@ interface TextBlockWidgetProps {
   variant: TextBlockVariant;
   width?: string;
   strikeThrough?: boolean;
-  color: string;
+  color?: string;
   noWrap?: boolean;
   overflow?: Overflow;
   bold?: boolean;
@@ -56,8 +56,8 @@ interface VariantMap {
   }>;
 }
 const variantMap: VariantMap = {
-  Literal: ({ children, className, style }) => (
-    <span className={className} style={style}>
+  Literal: ({ children, className, style, id }) => (
+    <span id={id} className={className} style={style}>
       {children}
     </span>
   ),
@@ -91,7 +91,7 @@ const variantMap: VariantMap = {
       {children}
     </h6>
   ),
-  Block: ({ children, className, style }) => {
+  Block: ({ children, className, style, id }) => {
     const spanRef = React.useRef<HTMLSpanElement>(null);
     const [isTruncated, setIsTruncated] = React.useState(false);
     const [showTooltip, setShowTooltip] = React.useState(false);
@@ -105,7 +105,7 @@ const variantMap: VariantMap = {
     };
 
     return (
-      <div className={cn(typography.block, className)} style={style}>
+      <div id={id} className={cn(typography.block, className)} style={style}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -128,63 +128,63 @@ const variantMap: VariantMap = {
       </div>
     );
   },
-  P: ({ children, className, style }) => (
-    <p className={cn(typography.p, className)} style={style}>
+  P: ({ children, className, style, id }) => (
+    <p id={id} className={cn(typography.p, className)} style={style}>
       {children}
     </p>
   ),
-  Inline: ({ children, className, style }) => (
-    <span className={cn(className)} style={style}>
+  Inline: ({ children, className, style, id }) => (
+    <span id={id} className={cn(className)} style={style}>
       {children}
     </span>
   ),
-  Blockquote: ({ children, className, style }) => (
-    <blockquote className={cn(typography.blockquote, className)} style={style}>
+  Blockquote: ({ children, className, style, id }) => (
+    <blockquote id={id} className={cn(typography.blockquote, className)} style={style}>
       {children}
     </blockquote>
   ),
-  Monospaced: ({ children, className, style }) => (
-    <code className={cn(typography.code, className)} style={style}>
+  Monospaced: ({ children, className, style, id }) => (
+    <code id={id} className={cn(typography.code, className)} style={style}>
       {children}
     </code>
   ),
-  Lead: ({ children, className, style }) => (
-    <div className={cn(typography.lead, className)} style={style}>
+  Lead: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.lead, className)} style={style}>
       <MarkdownRenderer content={children} />
     </div>
   ),
-  Muted: ({ children, className, style }) => (
-    <div className={cn(typography.muted, className)} style={style}>
+  Muted: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.muted, className)} style={style}>
       {children}
     </div>
   ),
-  Danger: ({ children, className, style }) => (
-    <div className={cn(typography.danger, className)} style={style}>
+  Danger: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.danger, className)} style={style}>
       {children}
     </div>
   ),
-  Warning: ({ children, className, style }) => (
-    <div className={cn(typography.warning, className)} style={style}>
+  Warning: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.warning, className)} style={style}>
       {children}
     </div>
   ),
-  Success: ({ children, className, style }) => (
-    <div className={cn(typography.success, className)} style={style}>
+  Success: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.success, className)} style={style}>
       {children}
     </div>
   ),
-  Label: ({ children, className, style }) => (
-    <div className={cn(typography.label, className)} style={style}>
+  Label: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.label, className)} style={style}>
       {children}
     </div>
   ),
-  Strong: ({ children, className, style }) => (
-    <strong className={cn(typography.strong, className)} style={style}>
+  Strong: ({ children, className, style, id }) => (
+    <strong id={id} className={cn(typography.strong, className)} style={style}>
       {children}
     </strong>
   ),
-  Display: ({ children, className, style }) => (
-    <div className={cn(typography.display, className)} style={style}>
+  Display: ({ children, className, style, id }) => (
+    <div id={id} className={cn(typography.display, className)} style={style}>
       {children}
     </div>
   ),

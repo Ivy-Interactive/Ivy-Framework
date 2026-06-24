@@ -43,15 +43,15 @@ public record Callout : WidgetBase<Callout>
 
     [Event] public EventHandler<Event<Callout>>? OnClose { get; set; }
 
-    public static Callout Info(string? description = null, string? title = null) => new(description, title);
+    public static Callout Info(object? description = null, string? title = null) => new(description, title);
 
-    public static Callout Warning(string? description = null, string? title = null) => new(description, title, CalloutVariant.Warning);
+    public static Callout Warning(object? description = null, string? title = null) => new(description, title, CalloutVariant.Warning);
 
-    public static Callout Error(string? description = null, string? title = null) => new(description, title, CalloutVariant.Error);
+    public static Callout Error(object? description = null, string? title = null) => new(description, title, CalloutVariant.Error);
 
-    public static Callout Success(string? description = null, string? title = null) => new(description, title, CalloutVariant.Success);
+    public static Callout Success(object? description = null, string? title = null) => new(description, title, CalloutVariant.Success);
 
-    public static Callout Destructive(string? description = null, string? title = null) => new(description, title, CalloutVariant.Destructive);
+    public static Callout Destructive(object? description = null, string? title = null) => new(description, title, CalloutVariant.Destructive);
 }
 
 public static class CalloutExtensions
