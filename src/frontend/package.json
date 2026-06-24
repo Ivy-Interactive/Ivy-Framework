@@ -147,7 +147,7 @@
       "uuid": "14.0.0",
       "@swc/helpers": "0.5.17",
       "axios": "1.16.1",
-      "dompurify": "3.4.9",
+      "dompurify": "3.4.11",
       "follow-redirects": ">=1.16.0",
       "lodash-es": "4.18.1",
       "minimatch": "9.0.7",
