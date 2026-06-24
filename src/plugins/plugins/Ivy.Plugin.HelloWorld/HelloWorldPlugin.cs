@@ -13,14 +13,10 @@ public class HelloWorldPlugin : IIvyPlugin<IIvyPluginContext>
         Version = new Version(1, 0, 0),
     };
 
-    public PluginConfigurationSchema? ConfigurationSchema { get; } = new()
-    {
-        Fields =
-        [
-            new() { Key = "Greeting", Type = ConfigFieldType.String, IsRequired = true, DefaultValue = "Hello", Description = "The greeting prefix" },
-            new() { Key = "Enthusiastic", Type = ConfigFieldType.Boolean, IsRequired = false, DefaultValue = "false", Description = "Add exclamation marks" }
-        ]
-    };
+    public PluginConfigurationSchema? ConfigurationSchema { get; } = new SchemaBuilder()
+        .AddString("Greeting", defaultValue: "Hello", description: "The greeting prefix", isRequired: true)
+        .AddBoolean("Enthusiastic", defaultValue: false, description: "Add exclamation marks")
+        .Build();
 
     public void Configure(IIvyPluginContext context)
     {

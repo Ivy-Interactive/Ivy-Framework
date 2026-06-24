@@ -20,15 +20,11 @@ public class ExampleAppProviderPlugin : IIvyPlugin<IIvyExtendedPluginContext>
         Version = new Version(1, 0, 0),
     };
 
-    public PluginConfigurationSchema? ConfigurationSchema { get; } = new()
-    {
-        Fields =
-        [
-            new() { Key = "AppTitle", Type = ConfigFieldType.String, IsRequired = true, DefaultValue = "Example App", Description = "Title shown in the sidebar" },
-            new() { Key = "AppIcon", Type = ConfigFieldType.String, IsRequired = false, DefaultValue = "Star", Description = "Icon name for the app" },
-            new() { Key = "ApiKey", Type = ConfigFieldType.Secret, IsRequired = true, DefaultValue = "sk-example-key", Description = "API key for the backend service" }
-        ]
-    };
+    public PluginConfigurationSchema? ConfigurationSchema { get; } = new SchemaBuilder()
+        .AddString("AppTitle", defaultValue: "Example App", description: "Title shown in the sidebar", isRequired: true)
+        .AddString("AppIcon", defaultValue: "Star", description: "Icon name for the app")
+        .AddSecret("ApiKey", description: "API key for the backend service", isRequired: true)
+        .Build();
 
     public object? BuildConfigurationView(IIvyPluginConfig config) =>
         new ExampleAppProviderConfigView(config);

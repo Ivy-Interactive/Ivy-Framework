@@ -24,13 +24,9 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_RequiredFieldMissing_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "BotToken", Type = ConfigFieldType.Secret, IsRequired = true }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddSecret("BotToken", isRequired: true)
+            .Build();
         var config = BuildConfig([]);
 
         var errors = loader.ValidatePluginConfiguration(schema, config);
@@ -43,13 +39,9 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_InvalidIntegerType_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddInteger("MaxRetries")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
             ["MaxRetries"] = "not-a-number"
@@ -65,13 +57,9 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_InvalidBooleanType_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "Enabled", Type = ConfigFieldType.Boolean, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddBoolean("Enabled")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
             ["Enabled"] = "not-a-bool"
@@ -87,13 +75,9 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_OptionalFieldMissing_NoError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "DefaultChannel", Type = ConfigFieldType.String, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddString("DefaultChannel")
+            .Build();
         var config = BuildConfig([]);
 
         var errors = loader.ValidatePluginConfiguration(schema, config);
@@ -105,16 +89,12 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_AllFieldsValid_NoError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "BotToken", Type = ConfigFieldType.Secret, IsRequired = true },
-                new() { Key = "DefaultChannel", Type = ConfigFieldType.String, IsRequired = false },
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false },
-                new() { Key = "Enabled", Type = ConfigFieldType.Boolean, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddSecret("BotToken", isRequired: true)
+            .AddString("DefaultChannel")
+            .AddInteger("MaxRetries")
+            .AddBoolean("Enabled")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
             ["BotToken"] = "xoxb-test-token",
@@ -135,10 +115,9 @@ public class PluginConfigurationValidationTests
         var configured = false;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields = [new() { Key = "Required", Type = ConfigFieldType.String, IsRequired = true }]
-            },
+            schema: new SchemaBuilder()
+                .AddString("Required", isRequired: true)
+                .Build(),
             onConfigure: _ => configured = true);
 
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
@@ -161,10 +140,9 @@ public class PluginConfigurationValidationTests
         var configured = false;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields = [new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true }]
-            },
+            schema: new SchemaBuilder()
+                .AddString("ApiKey", isRequired: true)
+                .Build(),
             onConfigure: _ => configured = true);
 
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
@@ -200,13 +178,9 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_RequiredFieldWithDefault_StillValidatesPresence()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true, DefaultValue = "default-key" }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddString("ApiKey", defaultValue: "default-key", isRequired: true)
+            .Build();
         var config = BuildConfig([]);
 
         var errors = loader.ValidatePluginConfiguration(schema, config);
@@ -222,14 +196,10 @@ public class PluginConfigurationValidationTests
         string? receivedMaxRetries = null;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields =
-                [
-                    new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true },
-                    new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false, DefaultValue = "3" }
-                ]
-            },
+            schema: new SchemaBuilder()
+                .AddString("ApiKey", isRequired: true)
+                .AddInteger("MaxRetries", defaultValue: 3)
+                .Build(),
             onConfigure: ctx =>
             {
                 receivedMaxRetries = ctx.Config.GetValue("MaxRetries");
