@@ -12,19 +12,6 @@ interface WidgetNodeChild {
   events: string[];
 }
 
-function getStatusOrder(status: string): number {
-  switch (status) {
-    case "Todo":
-      return 1;
-    case "In Progress":
-      return 2;
-    case "Done":
-      return 3;
-    default:
-      return 0;
-  }
-}
-
 function extractColumnKeysFromCards(cards: CardData[]): string[] {
   const columnSet = new Set<string>();
   cards.forEach((card) => {
@@ -43,12 +30,6 @@ function buildColumnNameMap(cards: CardData[]): Map<string, string> {
     }
   });
   return map;
-}
-
-function sortColumnKeysByBackendOrder(columnKeys: string[]): string[] {
-  return [...columnKeys].sort((a, b) => {
-    return getStatusOrder(a) - getStatusOrder(b);
-  });
 }
 
 export function useKanbanData(
@@ -87,7 +68,7 @@ export function useKanbanData(
         const allColumnKeys = extractColumnKeysFromCards(extractedCards);
         const columnNameMap = buildColumnNameMap(extractedCards);
 
-        const finalColumnKeys = sortColumnKeysByBackendOrder(allColumnKeys);
+        const finalColumnKeys = allColumnKeys;
 
         const extractedColumns: Column[] = finalColumnKeys.map((key, index) => ({
           id: key,
@@ -130,7 +111,7 @@ export function useKanbanData(
       const statusKeys = Array.from(statusMap.keys());
       const columnNameMap = buildColumnNameMap(extractedCards);
 
-      const columnKeys = sortColumnKeysByBackendOrder(statusKeys);
+      const columnKeys = statusKeys;
 
       const extractedColumns: Column[] = columnKeys.map((status, index) => ({
         id: status,
