@@ -102,6 +102,8 @@ public class PluginStateServiceTests
 
         public IReadOnlyList<string> GetActivePluginIds() => ActivePluginIds;
 
+        public PluginManifest? GetPluginManifest(string pluginId) => null;
+
         public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins() => [];
 
         public IReadOnlyList<PluginCandidate> GetUnloadedPlugins() => [];
@@ -113,6 +115,10 @@ public class PluginStateServiceTests
         public bool ReloadPlugin(string pluginId) => throw new NotImplementedException();
 
         public bool ReconfigurePlugin(string pluginId) => throw new NotImplementedException();
+
+        public PluginConfigurationSchema? GetPluginSchema(string pluginId) => null;
+
+        public object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config) => null;
 
         public void RaisePluginLoaded(string pluginId) => PluginLoaded?.Invoke(pluginId);
         public void RaisePluginUnloaded(string pluginId) => PluginUnloaded?.Invoke(pluginId);

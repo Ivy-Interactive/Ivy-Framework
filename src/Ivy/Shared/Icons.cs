@@ -29,6 +29,7 @@ public enum Icons
     Spotify, //<FaSpotify />
     Notion, //<FaNotion />
     XTwitter, //<FaXTwitter />
+    Linear, //<SiLinear />
     IvyCorner,
 
     // AI Coding Agents:

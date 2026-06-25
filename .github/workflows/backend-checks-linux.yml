@@ -51,6 +51,12 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release
 
+      # Plugin API compatibility check (runs EnablePackageValidation against baseline)
+      - name: Check plugin API compatibility
+        run: |
+          dotnet pack Ivy/Ivy.csproj --configuration Release --output ./nupkg /p:Version=99.0.0
+          dotnet pack Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release --output ./nupkg /p:Version=99.0.0
+
       # Run tests
       - name: Run tests
         run: dotnet test --configuration Release --no-build --verbosity normal

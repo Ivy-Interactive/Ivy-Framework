@@ -2,41 +2,41 @@ using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
 
+/// <summary>
+/// Base class for plugin context implementations. NOT intended for use by plugins directly.
+/// This is an internal implementation detail of the plugin hosting infrastructure.
+/// Plugins should only depend on the <see cref="IIvyPluginContext"/> (or derived) interfaces.
+/// </summary>
 public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
-    protected IConfiguration BaseConfiguration { get; }
     protected AppRepository AppRepository { get; }
     protected IReadOnlySet<string> ReservedPaths { get; }
     protected WebApplicationBuilder Builder { get; }
 
     public PluginContextBase(Ivy.Server server, WebApplicationBuilder builder)
     {
-        BaseConfiguration = server.Configuration;
         AppRepository = server.AppRepository;
         ReservedPaths = server.ReservedPaths;
         Builder = builder;
     }
 
-    protected PluginContextBase(IConfiguration configuration, AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
+    protected PluginContextBase(AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
     {
-        BaseConfiguration = configuration;
         AppRepository = appRepository;
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-    private readonly List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> _menuTransformers = [];
-    private readonly List<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> _footerMenuTransformers = [];
-    private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
     private readonly List<Action<WebApplication>> _appActions = [];
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
     private string? _currentPluginId;
+    protected string? CurrentPluginId => _currentPluginId;
 
     public IServiceCollection Services
     {
@@ -51,16 +51,12 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     // Fallback service collection for non-plugin code
     private readonly ServiceCollection _fallbackServices = new();
 
-    private IConfiguration? _configurationOverride;
+    private IIvyPluginConfig? _currentPluginConfig;
 
-    public IConfiguration Configuration => _configurationOverride ?? BaseConfiguration;
+    public IIvyPluginConfig Config => _currentPluginConfig ?? throw new InvalidOperationException("No plugin config is currently active.");
 
-    internal void PushConfiguration(IConfiguration configuration) => _configurationOverride = configuration;
-    internal void PopConfiguration() => _configurationOverride = null;
-
-    public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
-    public IReadOnlyList<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers => _footerMenuTransformers;
-    public IReadOnlyList<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders => _badgeProviders;
+    internal void SetPluginConfig(IIvyPluginConfig config) => _currentPluginConfig = config;
+    internal void ClearPluginConfig() => _currentPluginConfig = null;
 
     internal void SetCurrentPlugin(string pluginId, string directory)
     {
@@ -97,36 +93,21 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             state.AppFactories.Add(factory);
     }
 
-    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer)
-    {
-        _menuTransformers.Add(transformer);
 
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.MenuTransformers.Add(transformer);
-    }
-
-    public void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer)
-    {
-        _footerMenuTransformers.Add(transformer);
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.FooterMenuTransformers.Add(transformer);
-    }
-
-    public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider)
-    {
-        _badgeProviders.Add((menuTag, countProvider));
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.BadgeProviders.Add((menuTag, countProvider));
-    }
 
     public void UseWebApplication(Action<WebApplication> configure)
     {
-        _appActions.Add(configure);
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.AppActions.Add(configure);
+        _lock.EnterWriteLock();
+        try
+        {
+            _appActions.Add(configure);
+            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
+                state.AppActions.Add(configure);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure)
@@ -171,12 +152,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         }
     }
 
-    internal IServiceProvider? GetPluginServiceProvider(string pluginId)
-    {
-        // The aggregate provider manages individual providers, just return it
-        return null; // individual providers are managed by the aggregate
-    }
-
     public T? GetService<T>() where T : class
     {
         return _aggregateProvider.GetService<T>();
@@ -187,7 +162,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         return _aggregateProvider.GetServices<T>();
     }
 
-    internal void RemovePluginContributions(string pluginId)
+    internal virtual void RemovePluginContributions(string pluginId)
     {
         HashSet<string> affectedAppIds;
 
@@ -198,15 +173,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
             // Collect app IDs before removing factories so we can reload affected sessions
             affectedAppIds = GetAppIdsFromFactories(state.AppFactories);
-
-            foreach (var t in state.MenuTransformers)
-                _menuTransformers.Remove(t);
-
-            foreach (var t in state.FooterMenuTransformers)
-                _footerMenuTransformers.Remove(t);
-
-            foreach (var b in state.BadgeProviders)
-                _badgeProviders.Remove(b);
 
             foreach (var a in state.AppActions)
                 _appActions.Remove(a);
@@ -278,11 +244,52 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
     public void Apply(WebApplication app)
     {
-        foreach (var action in _appActions)
+        List<Action<WebApplication>> actions;
+        _lock.EnterReadLock();
+        try { actions = _appActions.ToList(); }
+        finally { _lock.ExitReadLock(); }
+
+        foreach (var action in actions)
             action(app);
+
+        app.MapGet("/ivy/plugins/{pluginId}/assets/{**filePath}", (string pluginId, string filePath) =>
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                if (!_pluginStates.TryGetValue(pluginId, out var state))
+                    return Results.NotFound();
+
+                if (string.IsNullOrEmpty(filePath) || Path.IsPathRooted(filePath))
+                    return Results.NotFound();
+
+                var pluginDir = Path.GetFullPath(state.Directory);
+                var fullPath = Path.GetFullPath(Path.Join(pluginDir, filePath));
+
+                if (!fullPath.StartsWith(pluginDir + Path.DirectorySeparatorChar))
+                    return Results.NotFound();
+
+                if (!File.Exists(fullPath))
+                    return Results.NotFound();
+
+                var contentType = Path.GetExtension(fullPath).ToLowerInvariant() switch
+                {
+                    ".svg" => "image/svg+xml",
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".gif" => "image/gif",
+                    ".webp" => "image/webp",
+                    ".ico" => "image/x-icon",
+                    _ => "application/octet-stream"
+                };
+                return Results.File(fullPath, contentType);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        });
     }
 }
 
 internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase(server, builder);
-
-

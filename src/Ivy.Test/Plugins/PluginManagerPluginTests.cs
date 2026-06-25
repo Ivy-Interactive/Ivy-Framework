@@ -1,9 +1,23 @@
 using Ivy.Apps;
+using Ivy.Plugins;
 
 namespace Ivy.Test.Plugins;
 
 public class PluginManagerAppTests
 {
+    private class NullPluginConfigFactory : IIvyPluginConfigFactory
+    {
+        public IIvyPluginConfig Create(string pluginId) => new NullPluginConfig();
+    }
+
+    private class NullPluginConfig : IIvyPluginConfig
+    {
+        public string? GetValue(string key) => null;
+        public void SetValue(string key, string value) { }
+        public void RemoveValue(string key) { }
+        public void Save() { }
+    }
+
     [Fact]
     public void UsePlugins_RegistersPluginManagerApp()
     {
@@ -15,7 +29,7 @@ public class PluginManagerAppTests
         {
             var args = new ServerArgs();
             var server = new Server(args);
-            server.UsePlugins(tempPluginsDir, enableHotReload: false);
+            server.UsePlugins(tempPluginsDir, new NullPluginConfigFactory(), enableHotReload: false);
 
             // Act
             var app = server.AppRepository.GetApp("plugin-manager");

@@ -2,7 +2,7 @@ using Ivy.Plugins;
 
 namespace Ivy.Core.Plugins;
 
-internal class PluginStateService : IPluginStateService
+internal class PluginStateService : IPluginStateService, IDisposable
 {
     private readonly IPluginManager _pluginManager;
 
@@ -12,7 +12,6 @@ internal class PluginStateService : IPluginStateService
     {
         _pluginManager = pluginManager;
 
-        // Subscribe to plugin lifecycle events
         _pluginManager.PluginLoaded += OnPluginChanged;
         _pluginManager.PluginUnloaded += OnPluginChanged;
         _pluginManager.PluginReloaded += OnPluginChanged;
@@ -24,4 +23,13 @@ internal class PluginStateService : IPluginStateService
 
     public IReadOnlyList<string> GetActivePluginIds() =>
         _pluginManager.GetActivePluginIds();
+
+    public void Dispose()
+    {
+        _pluginManager.PluginLoaded -= OnPluginChanged;
+        _pluginManager.PluginUnloaded -= OnPluginChanged;
+        _pluginManager.PluginReloaded -= OnPluginChanged;
+        _pluginManager.PluginActivated -= OnPluginChanged;
+        _pluginManager.PluginDeactivated -= OnPluginChanged;
+    }
 }
