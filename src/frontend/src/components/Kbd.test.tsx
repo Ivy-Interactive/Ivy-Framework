@@ -3,9 +3,6 @@ import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { Kbd, ShortcutKeys } from "./Kbd";
 
-// Note: jsdom reports a non-Mac userAgent, so `isMac` is false here. Modifier keys
-// therefore render as text ("Ctrl", "Alt") rather than the Mac symbols (⌘, ⌥).
-
 let container: HTMLDivElement;
 let root: Root;
 
@@ -29,89 +26,34 @@ afterEach(() => {
 });
 
 describe("Kbd", () => {
-  it("renders each key in a combination as its own standalone cap", () => {
-    mount(<Kbd>Ctrl+Shift+C</Kbd>);
-    const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(3);
-  });
-
-  it("renders a single key as a single cap", () => {
-    mount(<Kbd>A</Kbd>);
+  it("renders the whole shortcut inside a single cap", () => {
+    mount(<Kbd keys="Ctrl+Shift+C" />);
     const caps = container.querySelectorAll("kbd");
     expect(caps).toHaveLength(1);
-    expect(caps[0].textContent).toBe("A");
   });
 
-  it("uppercases a single-letter key", () => {
-    mount(<Kbd>c</Kbd>);
+  it("uppercases a lone letter", () => {
+    mount(<Kbd keys="c" />);
     expect(container.querySelector("kbd")!.textContent).toBe("C");
   });
 
-  it("renders modifier keys as text on non-Mac platforms", () => {
-    mount(<Kbd>Ctrl+C</Kbd>);
-    const caps = container.querySelectorAll("kbd");
-    expect(caps[0].textContent).toBe("Ctrl");
-    expect(caps[1].textContent).toBe("C");
-  });
-
-  it("renders an icon (svg) for navigation keys like Enter", () => {
-    mount(<Kbd>Ctrl+Enter</Kbd>);
-    const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(2);
-    // The Enter cap should contain an icon, not text.
-    const enterCap = caps[1];
-    expect(enterCap.querySelector("svg")).not.toBeNull();
-    expect(enterCap.getAttribute("aria-label")).toBe("Enter");
-  });
-
-  it("renders arrow keys as icons", () => {
-    mount(<Kbd>ArrowUp</Kbd>);
+  it("renders symbols and modifier names verbatim, no icons", () => {
+    mount(<Kbd keys="⌘+⌥+N" />);
     const cap = container.querySelector("kbd")!;
-    expect(cap.querySelector("svg")).not.toBeNull();
-    expect(cap.getAttribute("aria-label")).toBe("Arrow Up");
+    expect(cap.querySelector("svg")).toBeNull();
+    // All single-character keys → no "+" separator.
+    expect(cap.textContent).toBe("\u2318\u2009\u2325\u2009N");
   });
 
-  it("renders non-string children inside a single cap unchanged", () => {
-    mount(
-      <Kbd>
-        <span data-testid="custom">x</span>
-      </Kbd>,
-    );
-    const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(1);
-    expect(caps[0].querySelector('[data-testid="custom"]')).not.toBeNull();
+  it("keeps a typed word like cmd as text (no symbol mapping)", () => {
+    mount(<Kbd keys="cmd+n" />);
+    // "cmd" is multi-character → keys joined with "+"; lone "n" uppercased.
+    expect(container.querySelector("kbd")!.textContent).toBe("cmd+N");
   });
 
-  it("tokenizes the `keys` prop into standalone caps", () => {
-    mount(<Kbd keys="Ctrl+Shift+C" />);
-    const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(3);
-  });
-
-  it("prefers the `keys` prop over children", () => {
-    mount(<Kbd keys="Ctrl+K">ignored</Kbd>);
-    const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(2);
-    expect(caps[0].textContent).toBe("Ctrl");
-    expect(caps[1].textContent).toBe("K");
-  });
-
-  it("renders a single-glyph cap as a fixed square", () => {
-    mount(<Kbd keys="A" />);
-    const cap = container.querySelector("kbd")!;
-    // h-4 + w-4 with no horizontal padding makes a single-glyph cap a perfect square.
-    expect(cap.className).toContain("h-4");
-    expect(cap.className).toContain("w-4");
-    expect(cap.className).not.toContain("px-1");
-  });
-
-  it("grows a multi-character cap wider than the square minimum", () => {
-    mount(<Kbd keys="Tab" />);
-    const cap = container.querySelector("kbd")!;
-    // Multi-char labels keep the height but grow wider via min-w-4 + padding.
-    expect(cap.className).toContain("h-4");
-    expect(cap.className).toContain("min-w-4");
-    expect(cap.className).toContain("px-1");
+  it("joins with + when any key is multi-character", () => {
+    mount(<Kbd keys="Ctrl+Enter" />);
+    expect(container.querySelector("kbd")!.textContent).toBe("Ctrl+Enter");
   });
 
   it("renders a ghost cap without background or border", () => {
@@ -124,12 +66,16 @@ describe("Kbd", () => {
 });
 
 describe("ShortcutKeys", () => {
-  it("tokenizes a shortcut string into standalone caps", () => {
+  it("renders the shortcut as text in a single cap", () => {
     mount(<ShortcutKeys shortcut="Ctrl+K" />);
     const caps = container.querySelectorAll("kbd");
-    expect(caps).toHaveLength(2);
-    expect(caps[0].textContent).toBe("Ctrl");
-    expect(caps[1].textContent).toBe("K");
+    expect(caps).toHaveLength(1);
+    expect(caps[0].textContent).toBe("Ctrl+K");
+  });
+
+  it("omits the + when every key is a single character", () => {
+    mount(<ShortcutKeys shortcut="⌘+⌥+N" />);
+    expect(container.querySelector("kbd")!.textContent).toBe("\u2318\u2009\u2325\u2009N");
   });
 
   it("renders nothing for an empty shortcut", () => {
