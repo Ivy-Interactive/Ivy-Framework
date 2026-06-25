@@ -82,6 +82,10 @@ describe("useScrollShadow direction parameter", () => {
   it("should disconnect ResizeObserver on cleanup", () => {
     expect(hookSource).toContain("resizeObserver?.disconnect()");
   });
+
+  it("should check for overflow before showing shadow for top direction", () => {
+    expect(hookSource).toContain("scrollHeight > clientHeight");
+  });
 });
 
 describe("useScrollShadow MutationObserver for dynamic content", () => {

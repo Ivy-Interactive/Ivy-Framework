@@ -24,7 +24,8 @@ export function useScrollShadow(
         setIsScrolled(viewport.scrollTop > 0);
       } else {
         const { scrollTop, scrollHeight, clientHeight } = viewport;
-        setIsScrolled(scrollTop < scrollHeight - clientHeight - 1);
+        const isOverflowing = scrollHeight > clientHeight + 1;
+        setIsScrolled(isOverflowing && scrollTop < scrollHeight - clientHeight - 1);
       }
     };
 
