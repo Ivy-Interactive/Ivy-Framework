@@ -4,20 +4,17 @@
 }
 
 /* Align flex containers inside table cells based on cell text alignment classes */
-.text-right .flex,
-.text-right ivy-widget > div {
+.text-right .flex {
   justify-content: flex-end !important;
   text-align: right !important;
 }
 
-.text-center .flex,
-.text-center ivy-widget > div {
+.text-center .flex {
   justify-content: center !important;
   text-align: center !important;
 }
 
-.text-left .flex,
-.text-left ivy-widget > div {
+.text-left .flex {
   justify-content: flex-start !important;
   text-align: left !important;
 }
