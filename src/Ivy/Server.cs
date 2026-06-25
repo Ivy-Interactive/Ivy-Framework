@@ -551,6 +551,7 @@ public class Server
 
     public Server UsePlugins(
         string pluginsDirectory,
+        IIvyPluginConfigFactory configFactory,
         Version? hostVersion = null,
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
         IEnumerable<string>? sharedAssemblyNames = null,
@@ -566,7 +567,9 @@ public class Server
             hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!,
             bootstrapProvider);
 
-        loader.SetConfiguration(Configuration);
+        loader.SetPluginConfigFactory(configFactory);
+        configFactory.SetPluginManager(loader);
+        Services.AddSingleton(configFactory);
 
         _pluginLoader = loader;
         _pluginContextFactory = contextFactory;
@@ -579,14 +582,15 @@ public class Server
         {
             var watcherLogger = loggerFactory.CreateLogger<PluginWatcher>();
             _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger, buildSourcePlugins);
-            _pluginWatcher.Start();
 
             var refsWatcherLogger = loggerFactory.CreateLogger<PluginReferencesWatcher>();
             var referencesFilePath = Path.Combine(pluginsDirectory, PluginReferencesWatcher.FileName);
             var initialRefs = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, pluginsDirectory, refsWatcherLogger);
             _pluginReferencesWatcher = new PluginReferencesWatcher(pluginsDirectory, loader, refsWatcherLogger, buildSourcePlugins);
             _pluginReferencesWatcher.SetInitialReferences(initialRefs);
-            _pluginReferencesWatcher.Start();
+            // Watchers are started later in BuildWebApplication after SetServiceProviderFactory
+            // to avoid a race condition where DLL changes from initial builds trigger reloads
+            // before the PluginLoader is fully initialized.
         }
 
         return this;
@@ -779,6 +783,10 @@ public class Server
         ServiceProvider = app.Services;
 
         _pluginLoader?.SetServiceProviderFactory(() => app.Services);
+
+        // Start plugin watchers now that the PluginLoader is fully initialized
+        _pluginWatcher?.Start();
+        _pluginReferencesWatcher?.Start();
 
         pluginContext?.Apply(app);
 
@@ -1018,6 +1026,7 @@ public class Server
         {
             _pluginWatcher?.Dispose();
             _pluginReferencesWatcher?.Dispose();
+            _pluginLoader?.ShutdownAllAsync().GetAwaiter().GetResult();
         });
 
         if (_args.Describe)

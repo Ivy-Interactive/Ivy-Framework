@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.Json;
+using Ivy.Core.ExternalWidgets;
 using Ivy.Plugins;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -17,8 +19,9 @@ public class PluginLoader : IPluginManager
     private readonly Dictionary<string, string> _knownPlugins = new(); // id -> directory
     private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
+    private readonly ConcurrentDictionary<string, object> _reloadLocks = new();
     private PluginContextBase? _pluginContext;
-    private IConfiguration? _configuration;
+    private IIvyPluginConfigFactory? _configFactory;
     private Func<IServiceProvider>? _serviceProviderFactory;
     private Version? _hostVersion;
 
@@ -38,8 +41,15 @@ public class PluginLoader : IPluginManager
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
             "Ivy.Plugin.Abstractions",
-            "Ivy"
+            "Ivy",
+            // Microsoft.Extensions types appear in the plugin contract surface
+            // (IServiceCollection, ILogger, etc.) and must share type identity with the host.
+            "Microsoft.Extensions.DependencyInjection",
+            "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Microsoft.Extensions.Logging.Abstractions",
         };
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => CleanupAllShadowDirectories();
     }
 
     public IReadOnlyList<LoadedPlugin> Plugins
@@ -62,68 +72,11 @@ public class PluginLoader : IPluginManager
             return;
         }
 
-        var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)>();
+        var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)>();
 
         // Load plugins from subdirectories of the plugins directory
         foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
-        {
-            try
-            {
-                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                    SourcePluginBuilder.BuildSync(directory, _logger);
-
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider);
-                if (loaded is null)
-                {
-                    // Track that this directory failed to load
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _failedPlugins[directory] = (
-                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
-                            DateTime.UtcNow);
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
-                    continue;
-                }
-
-                var manifest = loaded.Value.Instance.Manifest;
-
-                if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
-                {
-                    _logger.LogError(
-                        "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
-                        manifest.Id, minVersion, hostVersion);
-                    continue;
-                }
-
-                _knownPlugins[manifest.Id] = directory;
-                candidates.Add(loaded.Value);
-            }
-            catch (IOException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (BadImageFormatException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-        }
+            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
 
         // Load plugins from the references file
         var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
@@ -133,82 +86,17 @@ public class PluginLoader : IPluginManager
             if (!Directory.Exists(directory))
             {
                 _logger.LogWarning("Referenced plugin directory does not exist: {Directory}", directory);
-                _lock.EnterWriteLock();
-                try
-                {
-                    _failedPlugins[directory] = (
-                        $"Directory does not exist: {directory}",
-                        DateTime.UtcNow);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
+                RecordFailure(directory, $"Directory does not exist: {directory}");
                 continue;
             }
 
-            try
-            {
-                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-                    SourcePluginBuilder.BuildSync(directory, _logger);
-
-                var loaded = LoadPluginFromDirectory(directory, serviceProvider);
-                if (loaded is null)
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _failedPlugins[directory] = (
-                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
-                            DateTime.UtcNow);
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                    }
-                    continue;
-                }
-
-                var manifest = loaded.Value.Instance.Manifest;
-
-                if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
-                {
-                    _logger.LogError(
-                        "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
-                        manifest.Id, minVersion, hostVersion);
-                    continue;
-                }
-
-                _knownPlugins[manifest.Id] = directory;
-                candidates.Add(loaded.Value);
-            }
-            catch (IOException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (BadImageFormatException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogPluginLoadFailure(directory, ex);
-            }
+            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
         }
 
-        var sorted = TopologicalSort(candidates);
         _lock.EnterWriteLock();
         try
         {
-            _plugins.AddRange(sorted.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory)));
+            _plugins.AddRange(candidates.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory, c.ShadowDirectory)));
         }
         finally
         {
@@ -216,18 +104,23 @@ public class PluginLoader : IPluginManager
         }
 
         foreach (var plugin in _plugins)
+        {
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", plugin.Instance.Manifest.Id, plugin.Instance.Manifest.Version);
+            ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
+        }
     }
 
-    private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)? LoadPluginFromDirectory(
-        string directory, IServiceProvider serviceProvider)
+    private (IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)? LoadPluginFromDirectory(
+        string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
+        failureReason = null;
         var dllFiles = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
             .ToArray();
         if (dllFiles.Length == 0)
         {
             _logger.LogWarning("No DLL files found in plugin directory: {Directory}", directory);
+            failureReason = "No DLL files found";
             return null;
         }
 
@@ -260,6 +153,16 @@ public class PluginLoader : IPluginManager
 
         // Final fallback: first DLL
         mainDllPath ??= shadowFiles[0];
+
+        // Pre-flight check: verify the plugin's shared assembly dependencies are satisfied by the host
+        var compatError = CheckSharedAssemblyCompatibility(shadowDir, directory);
+        if (compatError is not null)
+        {
+            _logger.LogError("Plugin in '{Directory}' is incompatible: {Error}", directory, compatError);
+            failureReason = compatError;
+            DeleteShadowDirectory(shadowDir);
+            return null;
+        }
 
         // Create a single load context for the entire plugin
         var loadContext = new PluginAssemblyLoadContext(mainDllPath, _sharedAssemblyNames);
@@ -298,6 +201,8 @@ public class PluginLoader : IPluginManager
                 _logger.LogError(
                     "Assembly {Dll} has [IvyPlugin({Type})] but that type does not implement IIvyPlugin. Skipping directory.",
                     dllPath, attr.PluginType.FullName);
+                failureReason = $"[IvyPlugin({attr.PluginType.FullName})] does not implement IIvyPlugin";
+                DeleteShadowDirectory(shadowDir);
                 return null;
             }
 
@@ -307,6 +212,8 @@ public class PluginLoader : IPluginManager
         if (found.Count == 0)
         {
             _logger.LogDebug("No [assembly: IvyPlugin] attribute found in {Directory}. Skipping.", directory);
+            failureReason = "No [IvyPlugin] attribute found";
+            DeleteShadowDirectory(shadowDir);
             return null;
         }
 
@@ -315,62 +222,19 @@ public class PluginLoader : IPluginManager
             _logger.LogError(
                 "Multiple [assembly: IvyPlugin] attributes found in {Directory} ({Assemblies}). Skipping.",
                 directory, string.Join(", ", found.Select(f => Path.GetFileName(f.Assembly.Location))));
+            failureReason = "Multiple [IvyPlugin] attributes found";
+            DeleteShadowDirectory(shadowDir);
             return null;
         }
 
         var (pluginType, pluginAssembly) = found[0];
         var instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
-        return (instance, pluginAssembly, loadContext, directory);
+        return (instance, pluginAssembly, loadContext, directory, shadowDir);
     }
 
-    private List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> TopologicalSort(
-        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> candidates)
+    internal void SetPluginConfigFactory(IIvyPluginConfigFactory factory)
     {
-        var byId = candidates.ToDictionary(c => c.Instance.Manifest.Id);
-        var visited = new HashSet<string>();
-        var visiting = new HashSet<string>(); // cycle detection
-        var sorted = new List<(IIvyPlugin, Assembly, AssemblyLoadContext, string)>();
-
-        foreach (var candidate in candidates)
-        {
-            Visit(candidate.Instance.Manifest.Id);
-        }
-
-        return sorted;
-
-        void Visit(string id)
-        {
-            if (visited.Contains(id)) return;
-
-            if (!visiting.Add(id))
-            {
-                _logger.LogError("Circular dependency detected involving plugin '{Id}'. Skipping.", id);
-                return;
-            }
-
-            if (byId.TryGetValue(id, out var candidate))
-            {
-                foreach (var dep in candidate.Instance.Manifest.Dependencies)
-                {
-                    if (!byId.ContainsKey(dep))
-                    {
-                        _logger.LogWarning("Plugin '{Id}' depends on '{Dep}' which is not loaded.", id, dep);
-                        continue;
-                    }
-                    Visit(dep);
-                }
-
-                sorted.Add(candidate);
-            }
-
-            visiting.Remove(id);
-            visited.Add(id);
-        }
-    }
-
-    public void SetConfiguration(IConfiguration configuration)
-    {
-        _configuration = configuration;
+        _configFactory = factory;
     }
 
     internal void SetServiceProviderFactory(Func<IServiceProvider> factory)
@@ -390,9 +254,8 @@ public class PluginLoader : IPluginManager
                 if (plugin.Instance.ConfigurationSchema is { } schema)
                 {
                     var errors = ValidatePluginConfiguration(
-                        plugin.Instance.Manifest.ConfigSectionName,
                         schema,
-                        context.Configuration);
+                        CreatePluginConfig(plugin.Instance));
 
                     if (errors.Count > 0)
                     {
@@ -403,20 +266,13 @@ public class PluginLoader : IPluginManager
                         plugin.Status = PluginStatus.Unconfigured;
                         continue;
                     }
-
-                    // Apply defaults before calling Configure
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        plugin.Instance.Manifest.ConfigSectionName,
-                        schema,
-                        context.Configuration);
-
-                    context.PushConfiguration(configWithDefaults);
                 }
 
                 context.SetCurrentPlugin(plugin.Instance.Manifest.Id, plugin.Directory);
+                context.SetPluginConfig(CreatePluginConfig(plugin.Instance));
                 plugin.Instance.Configure(context);
                 context.ClearCurrentPlugin();
-                context.PopConfiguration();
+                context.ClearPluginConfig();
                 plugin.Status = PluginStatus.Active;
             }
         }
@@ -428,7 +284,9 @@ public class PluginLoader : IPluginManager
 
     public bool UnloadPlugin(string pluginId)
     {
-        _lock.EnterWriteLock();
+        // Get the plugin instance under read lock for shutdown hook
+        IIvyPlugin? pluginInstance;
+        _lock.EnterReadLock();
         try
         {
             var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
@@ -437,31 +295,34 @@ public class PluginLoader : IPluginManager
                 _logger.LogWarning("Plugin '{Id}' not found for unload.", pluginId);
                 return false;
             }
+            pluginInstance = plugin.Status == PluginStatus.Active ? plugin.Instance : null;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
 
-            // Check if other loaded plugins depend on this one
-            var dependents = _plugins
-                .Where(p => p.Instance.Manifest.Id != pluginId &&
-                            p.Instance.Manifest.Dependencies.Contains(pluginId))
-                .Select(p => p.Instance.Manifest.Id)
-                .ToList();
+        // Call shutdown hook outside the lock (blocks up to 5s)
+        if (pluginInstance is not null)
+            InvokeShutdownHook(pluginInstance, pluginId, PluginShutdownReason.Unload);
 
-            if (dependents.Count > 0)
-            {
-                _logger.LogError(
-                    "Cannot unload plugin '{Id}': plugins [{Dependents}] depend on it.",
-                    pluginId, string.Join(", ", dependents));
+        _lock.EnterWriteLock();
+        try
+        {
+            var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (plugin is null)
                 return false;
-            }
 
             // Remove contributions from context (only if it was active)
             if (plugin.Status == PluginStatus.Active)
                 _pluginContext?.RemovePluginContributions(pluginId);
 
-            // Dispose the plugin's service provider
-            (plugin.ServiceProvider as IDisposable)?.Dispose();
+            // Unregister external widgets before unloading the assembly
+            ExternalWidgetRegistry.Instance.UnregisterAssembly(plugin.Assembly);
 
             // Unload the assembly context
             plugin.LoadContext.Unload();
+            DeleteShadowDirectory(plugin.ShadowDirectory);
 
             _plugins.Remove(plugin);
             _logger.LogInformation("Unloaded plugin: {Id}", pluginId);
@@ -487,17 +348,20 @@ public class PluginLoader : IPluginManager
         }
 
         if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(pluginPath))
-            SourcePluginBuilder.BuildSync(pluginPath, _logger);
+        {
+            if (!SourcePluginBuilder.BuildSync(pluginPath, _logger))
+                return false;
+        }
 
         string? loadedPluginId = null;
         PluginStatus loadedStatus = PluginStatus.Active;
         _lock.EnterWriteLock();
         try
         {
-            var loaded = LoadPluginFromDirectory(pluginPath, _serviceProviderFactory());
+            var loaded = LoadPluginFromDirectory(pluginPath, _serviceProviderFactory(), out var loadFailReason);
             if (loaded is null)
             {
-                _logger.LogError("Failed to load plugin from {Path}.", pluginPath);
+                _logger.LogError("Failed to load plugin from {Path}: {Reason}", pluginPath, loadFailReason ?? "unknown");
                 return false;
             }
 
@@ -517,25 +381,14 @@ public class PluginLoader : IPluginManager
                 return false;
             }
 
-            // Check dependencies are loaded
-            foreach (var dep in manifest.Dependencies)
-            {
-                if (_plugins.All(p => p.Instance.Manifest.Id != dep))
-                {
-                    _logger.LogError("Plugin '{Id}' depends on '{Dep}' which is not loaded.", manifest.Id, dep);
-                    return false;
-                }
-            }
-
-            var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
+            var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
-            if (plugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            if (plugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
-                    manifest.ConfigSectionName,
                     schema,
-                    _configuration);
+                    CreatePluginConfig(plugin.Instance));
 
                 if (errors.Count > 0)
                 {
@@ -560,22 +413,12 @@ public class PluginLoader : IPluginManager
             // Configure context — plugin has valid config
             if (_pluginContext is not null)
             {
-                if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
-                {
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        manifest.ConfigSectionName,
-                        configSchema,
-                        _configuration);
-
-                    _pluginContext.PushConfiguration(configWithDefaults);
-                }
-
                 _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
+                _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
                 plugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
-                _pluginContext.PopConfiguration();
+                _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
-                plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
             plugin.Status = PluginStatus.Active;
@@ -585,6 +428,7 @@ public class PluginLoader : IPluginManager
             // Clear from failed plugins if it was there
             _failedPlugins.Remove(pluginPath);
 
+            ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
 
             loadedPluginId = manifest.Id;
@@ -620,6 +464,15 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        var reloadLock = _reloadLocks.GetOrAdd(pluginId, _ => new object());
+        lock (reloadLock)
+        {
+            return ReloadPluginCore(pluginId);
+        }
+    }
+
+    private bool ReloadPluginCore(string pluginId)
+    {
         string? directory;
         PluginStatus oldStatus;
         _lock.EnterReadLock();
@@ -628,26 +481,46 @@ public class PluginLoader : IPluginManager
             var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
             if (plugin is null)
             {
-                _logger.LogWarning("Plugin '{Id}' not found for reload.", pluginId);
-                return false;
+                // Plugin was discovered but failed to load previously — try a fresh load
+                if (_knownPlugins.TryGetValue(pluginId, out var knownDir))
+                {
+                    _logger.LogInformation("Plugin '{Id}' previously failed to load, attempting fresh load.", pluginId);
+                    directory = knownDir;
+                }
+                else
+                {
+                    _logger.LogWarning("Plugin '{Id}' not found for reload.", pluginId);
+                    return false;
+                }
+
+                // Release lock before attempting load
+                _lock.ExitReadLock();
+                return LoadPlugin(directory);
             }
             directory = plugin.Directory;
             oldStatus = plugin.Status;
         }
         finally
         {
-            _lock.ExitReadLock();
+            if (_lock.IsReadLockHeld)
+                _lock.ExitReadLock();
         }
 
         // Build source plugins before attempting reload
         if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
-            SourcePluginBuilder.BuildSync(directory, _logger);
+        {
+            if (!SourcePluginBuilder.BuildSync(directory, _logger))
+            {
+                _logger.LogError("Failed to reload plugin '{Id}': source build failed", pluginId);
+                return false;
+            }
+        }
 
         // Load the new plugin assembly first, before unloading the old one
-        var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!());
+        var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!(), out var reloadFailReason);
         if (loaded is null)
         {
-            _logger.LogError("Failed to reload plugin '{Id}': new version could not be loaded.", pluginId);
+            _logger.LogError("Failed to reload plugin '{Id}': {Reason}", pluginId, reloadFailReason ?? "new version could not be loaded");
             return false;
         }
 
@@ -662,6 +535,19 @@ public class PluginLoader : IPluginManager
 
         PluginStatus newStatus;
 
+        // Call shutdown hook on old plugin before swapping (blocks up to 5s)
+        _lock.EnterReadLock();
+        try
+        {
+            var oldPlugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (oldPlugin is not null && oldPlugin.Status == PluginStatus.Active)
+                InvokeShutdownHook(oldPlugin.Instance, pluginId, PluginShutdownReason.Reload);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
         // Now atomically swap: unload old, insert new
         _lock.EnterWriteLock();
         try
@@ -671,18 +557,19 @@ public class PluginLoader : IPluginManager
             {
                 if (oldPlugin.Status == PluginStatus.Active)
                     _pluginContext?.RemovePluginContributions(pluginId);
-                (oldPlugin.ServiceProvider as IDisposable)?.Dispose();
+                ExternalWidgetRegistry.Instance.UnregisterAssembly(oldPlugin.Assembly);
                 oldPlugin.LoadContext.Unload();
+                DeleteShadowDirectory(oldPlugin.ShadowDirectory);
                 _plugins.Remove(oldPlugin);
             }
 
-            var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
+            var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
-            if (newPlugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            if (newPlugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
-                    manifest.ConfigSectionName, schema, _configuration);
+                    schema, CreatePluginConfig(newPlugin.Instance));
 
                 if (errors.Count > 0)
                 {
@@ -704,19 +591,12 @@ public class PluginLoader : IPluginManager
 
             if (_pluginContext is not null)
             {
-                if (newPlugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
-                {
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        manifest.ConfigSectionName, configSchema, _configuration);
-                    _pluginContext.PushConfiguration(configWithDefaults);
-                }
-
                 _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
                 newPlugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
-                _pluginContext.PopConfiguration();
+                _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
-                newPlugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
             newPlugin.Status = PluginStatus.Active;
@@ -725,6 +605,7 @@ public class PluginLoader : IPluginManager
             _plugins.Add(newPlugin);
             _failedPlugins.Remove(directory);
 
+            ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
             _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
         }
         finally
@@ -754,7 +635,7 @@ public class PluginLoader : IPluginManager
 
     public bool ReconfigurePlugin(string pluginId)
     {
-        if (_configuration is null || _pluginContext is null)
+        if (_configFactory is null || _pluginContext is null)
         {
             _logger.LogError("Cannot reconfigure plugin: PluginLoader has not been initialized.");
             return false;
@@ -784,9 +665,8 @@ public class PluginLoader : IPluginManager
         if (plugin.Instance.ConfigurationSchema is { } schema)
         {
             errors = ValidatePluginConfiguration(
-                manifest.ConfigSectionName,
                 schema,
-                _configuration);
+                CreatePluginConfig(plugin.Instance));
         }
 
         if (errors.Count > 0)
@@ -794,13 +674,14 @@ public class PluginLoader : IPluginManager
             // Configuration is invalid
             if (oldStatus == PluginStatus.Active)
             {
+                // Call shutdown hook before deactivating
+                InvokeShutdownHook(plugin.Instance, pluginId, PluginShutdownReason.Reconfigure);
+
                 // Deactivate: remove contributions
                 _lock.EnterWriteLock();
                 try
                 {
                     _pluginContext.RemovePluginContributions(pluginId);
-                    (plugin.ServiceProvider as IDisposable)?.Dispose();
-                    plugin.ServiceProvider = null;
                     plugin.Status = PluginStatus.Unconfigured;
                 }
                 finally
@@ -818,6 +699,10 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        // Call shutdown hook before reconfiguring (if already active)
+        if (oldStatus == PluginStatus.Active)
+            InvokeShutdownHook(plugin.Instance, pluginId, PluginShutdownReason.Reconfigure);
+
         // Configuration is valid — activate or reconfigure
         _lock.EnterWriteLock();
         try
@@ -826,24 +711,14 @@ public class PluginLoader : IPluginManager
             if (oldStatus == PluginStatus.Active)
             {
                 _pluginContext.RemovePluginContributions(pluginId);
-                (plugin.ServiceProvider as IDisposable)?.Dispose();
-                plugin.ServiceProvider = null;
-            }
-
-            // Apply defaults and call Configure
-            if (plugin.Instance.ConfigurationSchema is { } configSchema)
-            {
-                var configWithDefaults = ApplyConfigurationDefaults(
-                    manifest.ConfigSectionName, configSchema, _configuration);
-                _pluginContext.PushConfiguration(configWithDefaults);
             }
 
             _pluginContext.SetCurrentPlugin(manifest.Id, plugin.Directory);
+            _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
             plugin.Instance.Configure(_pluginContext);
             _pluginContext.ClearCurrentPlugin();
-            _pluginContext.PopConfiguration();
+            _pluginContext.ClearPluginConfig();
             _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
-            plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             plugin.Status = PluginStatus.Active;
         }
         finally
@@ -880,6 +755,50 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    public PluginManifest? GetPluginManifest(string pluginId)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _plugins
+                .FirstOrDefault(p => p.Instance.Manifest.Id == pluginId)
+                ?.Instance.Manifest;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public PluginConfigurationSchema? GetPluginSchema(string pluginId)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _plugins
+                .FirstOrDefault(p => p.Instance.Manifest.Id == pluginId)
+                ?.Instance.ConfigurationSchema;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            return plugin?.Instance.BuildConfigurationView(config);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins()
     {
         _lock.EnterReadLock();
@@ -892,13 +811,13 @@ public class PluginLoader : IPluginManager
                 var schema = plugin.Instance.ConfigurationSchema;
                 if (schema is null) continue;
 
-                var errors = _configuration is not null
-                    ? ValidatePluginConfiguration(manifest.ConfigSectionName, schema, _configuration)
+                var errors = _configFactory is not null
+                    ? ValidatePluginConfiguration(schema, CreatePluginConfig(plugin.Instance))
                     : ["No configuration available"];
 
                 result.Add(new UnconfiguredPlugin(
                     manifest.Id,
-                    manifest.Name,
+                    manifest.Title,
                     plugin.Directory,
                     schema,
                     errors));
@@ -957,6 +876,98 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(5);
+
+    private void InvokeShutdownHook(IIvyPlugin pluginInstance, string pluginId, PluginShutdownReason reason)
+    {
+        using var cts = new CancellationTokenSource(ShutdownTimeout);
+        var shutdownContext = new PluginShutdownContext
+        {
+            CancellationToken = cts.Token,
+            Reason = reason,
+            Logger = _logger
+        };
+
+        try
+        {
+            Task.Run(() => pluginInstance.ShutdownAsync(shutdownContext)).Wait(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Plugin '{Id}' shutdown timed out after {Timeout}s", pluginId, ShutdownTimeout.TotalSeconds);
+        }
+        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        {
+            _logger.LogWarning("Plugin '{Id}' shutdown timed out after {Timeout}s", pluginId, ShutdownTimeout.TotalSeconds);
+        }
+        catch (AggregateException ex)
+        {
+            _logger.LogError(ex.InnerException ?? ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+        catch (ObjectDisposedException ex)
+        {
+            _logger.LogError(ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+    }
+
+    public async Task ShutdownAllAsync()
+    {
+        List<(IIvyPlugin Instance, string Id)> activePlugins;
+        _lock.EnterReadLock();
+        try
+        {
+            activePlugins = _plugins
+                .Where(p => p.Status == PluginStatus.Active)
+                .Select(p => (p.Instance, p.Instance.Manifest.Id))
+                .ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        if (activePlugins.Count == 0)
+            return;
+
+        using var cts = new CancellationTokenSource(ShutdownTimeout);
+        var tasks = activePlugins.Select(async p =>
+        {
+            var shutdownContext = new PluginShutdownContext
+            {
+                CancellationToken = cts.Token,
+                Reason = PluginShutdownReason.HostExit,
+                Logger = _logger
+            };
+
+            try
+            {
+                await p.Instance.ShutdownAsync(shutdownContext).WaitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Plugin '{Id}' shutdown timed out during host exit", p.Id);
+            }
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex.InnerException ?? ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                _logger.LogError(ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+
     private void LogPluginLoadFailure(string directory, Exception ex)
     {
         _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
@@ -974,6 +985,77 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    private void RecordFailure(string directory, string reason)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _failedPlugins[directory] = (reason, DateTime.UtcNow);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    private void TryLoadCandidate(
+        string directory,
+        IServiceProvider serviceProvider,
+        Version hostVersion,
+        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)> candidates)
+    {
+        try
+        {
+            if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory) && !SourcePluginBuilder.BuildSync(directory, _logger))
+            {
+                RecordFailure(directory, "Source plugin build failed");
+                return;
+            }
+
+            var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
+            if (loaded is null)
+            {
+                RecordFailure(directory, reason ?? "No valid plugin found");
+                return;
+            }
+
+            var manifest = loaded.Value.Instance.Manifest;
+
+            if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
+            {
+                _logger.LogError(
+                    "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
+                    manifest.Id, minVersion, hostVersion);
+                return;
+            }
+
+            ValidatePluginIcon(manifest, directory);
+
+            _knownPlugins[manifest.Id] = directory;
+            candidates.Add(loaded.Value);
+        }
+        catch (IOException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (BadImageFormatException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+        catch (InvalidOperationException ex)
+        {
+            LogPluginLoadFailure(directory, ex);
+        }
+    }
+
     internal void AddTestPlugin(IIvyPlugin instance, string directory)
     {
         _lock.EnterWriteLock();
@@ -987,17 +1069,37 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    private void ValidatePluginIcon(PluginManifest manifest, string directory)
+    {
+        if (manifest.Icon is { Kind: PluginIconKind.File } icon)
+        {
+            if (string.IsNullOrWhiteSpace(icon.Value) || Path.IsPathRooted(icon.Value))
+            {
+                _logger.LogWarning(
+                    "Plugin '{Id}' has an invalid icon path '{Path}' (must be relative).",
+                    manifest.Id, icon.Value);
+                return;
+            }
+
+            var fullPath = Path.GetFullPath(Path.Join(directory, icon.Value));
+            if (!File.Exists(fullPath))
+            {
+                _logger.LogWarning(
+                    "Plugin '{Id}' references icon file '{Path}' which does not exist in '{Directory}'.",
+                    manifest.Id, icon.Value, directory);
+            }
+        }
+    }
+
     internal List<string> ValidatePluginConfiguration(
-        string configSectionName,
         PluginConfigurationSchema schema,
-        IConfiguration config)
+        IIvyPluginConfig config)
     {
         var errors = new List<string>();
-        var section = config.GetSection($"Plugins:{configSectionName}");
 
         foreach (var field in schema.Fields)
         {
-            var value = section[field.Key];
+            var value = config.GetValue(field.Key);
 
             if (field.IsRequired && string.IsNullOrEmpty(value))
             {
@@ -1024,31 +1126,166 @@ public class PluginLoader : IPluginManager
         };
     }
 
-    internal IConfiguration ApplyConfigurationDefaults(
-        string configSectionName,
-        PluginConfigurationSchema schema,
-        IConfiguration config)
+    private IIvyPluginConfig CreatePluginConfig(IIvyPlugin plugin)
     {
-        var defaults = new Dictionary<string, string?>();
-        var section = config.GetSection($"Plugins:{configSectionName}");
+        if (_configFactory is null)
+            throw new InvalidOperationException(
+                $"No IIvyPluginConfigFactory has been set. Cannot create config for plugin '{plugin.Manifest.Id}'.");
 
-        foreach (var field in schema.Fields.Where(f => f.DefaultValue is not null))
+        var config = _configFactory.Create(plugin.Manifest.Id);
+
+        if (plugin.ConfigurationSchema is { } schema)
         {
-            var value = section[field.Key];
+            var defaults = schema.Fields
+                .Where(f => f.DefaultValue is not null)
+                .ToDictionary(f => f.Key, f => f.DefaultValue!);
 
-            // Only inject default if field is missing or empty
-            if (string.IsNullOrEmpty(value))
+            if (defaults.Count > 0)
+                return new PluginConfigWithDefaults(config, defaults);
+        }
+
+        return config;
+    }
+
+    private sealed class PluginConfigWithDefaults(IIvyPluginConfig inner, IReadOnlyDictionary<string, string> defaults) : IIvyPluginConfig
+    {
+        public string? GetValue(string key)
+        {
+            var value = inner.GetValue(key);
+            if (string.IsNullOrEmpty(value) && defaults.TryGetValue(key, out var defaultValue))
+                return defaultValue;
+            return value;
+        }
+
+        public void SetValue(string key, string value) => inner.SetValue(key, value);
+        public void RemoveValue(string key) => inner.RemoveValue(key);
+        public void Save() => inner.Save();
+    }
+
+    private void DeleteShadowDirectory(string? shadowDirectory)
+    {
+        if (shadowDirectory is null) return;
+        try
+        {
+            if (Directory.Exists(shadowDirectory))
+                Directory.Delete(shadowDirectory, recursive: true);
+        }
+        catch (IOException ex)
+        {
+            _logger.LogDebug(ex, "Failed to delete shadow directory: {Directory}", shadowDirectory);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogDebug(ex, "Failed to delete shadow directory: {Directory}", shadowDirectory);
+        }
+    }
+
+    private void CleanupAllShadowDirectories()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            foreach (var plugin in _plugins)
+                DeleteShadowDirectory(plugin.ShadowDirectory);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    /// <summary>
+    /// Checks that the plugin's deps.json does not require newer versions of shared assemblies
+    /// than what the host currently provides. Returns an error message if incompatible, null if OK.
+    /// </summary>
+    private string? CheckSharedAssemblyCompatibility(string shadowDir, string originalDirectory)
+    {
+        // Find all .deps.json files in the shadow directory
+        var depsFiles = Directory.GetFiles(shadowDir, "*.deps.json");
+        if (depsFiles.Length == 0)
+            return null; // No deps.json — can't verify, allow loading (will fail naturally if incompatible)
+
+        foreach (var depsFile in depsFiles)
+        {
+            try
             {
-                defaults[$"Plugins:{configSectionName}:{field.Key}"] = field.DefaultValue;
+                using var stream = File.OpenRead(depsFile);
+                using var doc = JsonDocument.Parse(stream);
+
+                if (!doc.RootElement.TryGetProperty("libraries", out var libraries))
+                    continue;
+
+                foreach (var library in libraries.EnumerateObject())
+                {
+                    // Library keys are in the format "PackageName/Version"
+                    var slashIndex = library.Name.LastIndexOf('/');
+                    if (slashIndex < 0) continue;
+
+                    var packageName = library.Name[..slashIndex];
+
+                    // Only check assemblies that are in our shared set
+                    if (!_sharedAssemblyNames.Contains(packageName))
+                        continue;
+
+                    var versionStr = library.Name[(slashIndex + 1)..];
+                    if (!Version.TryParse(versionStr, out var requiredVersion))
+                        continue;
+
+                    // Get the host's version of this assembly
+                    var hostAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(a => a.GetName().Name == packageName);
+
+                    if (hostAssembly is null)
+                    {
+                        // Try loading it to get its version
+                        try
+                        {
+                            hostAssembly = Assembly.Load(new AssemblyName(packageName));
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            // Assembly not available in host — plugin may still work if it's optional
+                            continue;
+                        }
+                        catch (FileLoadException)
+                        {
+                            continue;
+                        }
+                        catch (BadImageFormatException)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var hostVersion = hostAssembly.GetName().Version;
+                    if (hostVersion is null)
+                        continue;
+
+                    // Version 0.0.0.0 means the host was built from source without assembly
+                    // versioning (e.g. local dev with GenerateAssemblyInfo=false) — skip check.
+                    if (hostVersion == new Version(0, 0, 0, 0))
+                        continue;
+
+                    // Compare major.minor (ignore patch/revision for flexibility)
+                    // A plugin requiring 2.0.0 should not load on a host with 1.x
+                    if (requiredVersion.Major > hostVersion.Major ||
+                        (requiredVersion.Major == hostVersion.Major && requiredVersion.Minor > hostVersion.Minor))
+                    {
+                        return $"Requires {packageName} >= {requiredVersion} but host provides {hostVersion}";
+                    }
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogDebug(ex, "Could not parse {DepsFile}, skipping compatibility check.", depsFile);
+            }
+            catch (IOException ex)
+            {
+                _logger.LogDebug(ex, "Could not read {DepsFile}, skipping compatibility check.", depsFile);
             }
         }
 
-        // Create a configuration that layers defaults under the actual config
-        // Actual config takes precedence over defaults
-        return new ConfigurationBuilder()
-            .AddInMemoryCollection(defaults)
-            .AddConfiguration(config)
-            .Build();
+        return null;
     }
 }
 
@@ -1056,9 +1293,9 @@ public record LoadedPlugin(
     IIvyPlugin Instance,
     Assembly Assembly,
     AssemblyLoadContext LoadContext,
-    string Directory)
+    string Directory,
+    string? ShadowDirectory = null)
 {
     public PluginStatus Status { get; internal set; } = PluginStatus.Active;
     public ServiceCollection Services { get; } = new();
-    public IServiceProvider? ServiceProvider { get; internal set; }
 }

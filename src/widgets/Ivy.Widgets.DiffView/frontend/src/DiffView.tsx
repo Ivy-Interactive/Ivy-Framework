@@ -1,9 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { parseDiff, Diff, Hunk, type ChangeData } from "react-diff-view";
 import "react-diff-view/style/index.css";
 import "./custom-diff.css";
 import type { EventHandler } from "./types";
 import { getWidth, getHeight } from "./styles";
+
+/** Container width (px) below which the diff is too cramped for a side-by-side (split) view. */
+export const NARROW_BREAKPOINT = 768;
 
 interface DiffViewProps {
   id: string;
@@ -25,6 +28,52 @@ function getLineNumber(change: ChangeData | null): number {
   if (!change) return 0;
   if (change.type === "normal") return change.newLineNumber;
   return change.lineNumber;
+}
+
+function getBasename(path: string): string {
+  const parts = path.split("/");
+  return parts[parts.length - 1] || path;
+}
+
+/**
+ * Tracks whether a container is narrower than {@link NARROW_BREAKPOINT}, measured
+ * against the element's own width (via ResizeObserver) rather than the viewport.
+ *
+ * This matters because the DiffView is frequently embedded in a panel that is
+ * narrower than the browser window, so a viewport-level media query would report
+ * "wide" and try to render a side-by-side split that has no room to fit. Measuring
+ * the container keeps the inline (unified) fallback in sync with the space the
+ * widget actually has.
+ *
+ * Returns a ref to attach to the container and the current narrow state.
+ */
+export function useIsNarrow(): [React.RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+
+    const update = (width: number) => {
+      setIsNarrow((prev) => {
+        const next = width > 0 && width < NARROW_BREAKPOINT;
+        return prev === next ? prev : next;
+      });
+    };
+
+    update(element.getBoundingClientRect().width);
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        update(entry.contentRect.width);
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, isNarrow];
 }
 
 export const DiffView: React.FC<DiffViewProps> = ({
@@ -52,7 +101,36 @@ export const DiffView: React.FC<DiffViewProps> = ({
 
   const [collapsedState, setCollapsedState] = useState<Record<number, boolean>>({});
 
+  const [containerRef, isNarrow] = useIsNarrow();
   const diffViewType = viewType === "Split" ? "split" : "unified";
+  const effectiveViewType = isNarrow ? "unified" : diffViewType;
+  const effectiveWordWrap = isNarrow || wordWrap;
+
+  // Per-file display metadata, derived once so both the navigation dropdown and
+  // the file list render from the same source of truth.
+  const fileMeta = useMemo(() => {
+    return files.map((file, fileIndex) => {
+      const rawOld = oldRevision || file.oldPath || "";
+      const rawNew = newRevision || file.newPath || "";
+      const oldName = rawOld === "/dev/null" ? "" : rawOld;
+      const newName = rawNew === "/dev/null" ? "" : rawNew;
+      const isRename = oldName !== newName && oldName !== "" && newName !== "";
+      const hasHeader = Boolean(oldName || newName);
+      const elementId = `${id}-${file.newPath || file.oldPath || `diff-${fileIndex}`}`;
+      const label = isRename
+        ? `${getBasename(oldName)} → ${getBasename(newName)}`
+        : getBasename(newName || oldName) || `Diff ${fileIndex + 1}`;
+
+      return { oldName, newName, isRename, hasHeader, elementId, label };
+    });
+  }, [files, id, oldRevision, newRevision]);
+
+  const scrollToFile = useCallback((elementId: string) => {
+    if (typeof document === "undefined") return;
+    document
+      .getElementById(elementId)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const style: React.CSSProperties = {
     ...getWidth(width),
@@ -62,27 +140,48 @@ export const DiffView: React.FC<DiffViewProps> = ({
 
   if (!diff || files.length === 0) {
     return (
-      <div style={style} className="text-[var(--muted-foreground)] p-4 text-sm">
+      <div ref={containerRef} style={style} className="text-[var(--muted-foreground)] p-4 text-sm">
         No diff to display
       </div>
     );
   }
 
-  return (
-    <div style={style} className={`ivy-diff-view text-xs${wordWrap ? " diff-wrap" : ""}`}>
-      {files.map((file, fileIndex) => {
-        const rawOld = oldRevision || file.oldPath || "";
-        const rawNew = newRevision || file.newPath || "";
-        const oldName = rawOld === "/dev/null" ? "" : rawOld;
-        const newName = rawNew === "/dev/null" ? "" : rawNew;
-        const isRename = oldName !== newName && oldName !== "" && newName !== "";
-        const hasHeader = oldName || newName;
-        const fileId = file.newPath || file.oldPath || `diff-${fileIndex}`;
+  // On a narrow container, the stacked file headers crowd the limited space, so
+  // collapse the file list into a dropdown that jumps to the chosen file.
+  const showFileDropdown = isNarrow && fileMeta.length > 1;
 
-        const getBasename = (path: string) => {
-          const parts = path.split("/");
-          return parts[parts.length - 1] || path;
-        };
+  return (
+    <div ref={containerRef} style={style} className={`ivy-diff-view text-xs${effectiveWordWrap ? " diff-wrap" : ""}`}>
+      {showFileDropdown && (
+        <div
+          className="sticky top-0 z-20 flex items-center gap-2 px-3 py-1.5 bg-[var(--muted)] border-b border-[var(--border)]"
+          style={{ fontFamily: 'var(--font-sans, sans-serif)' }}
+        >
+          <span className="text-[11px] text-[var(--muted-foreground)] shrink-0">
+            {fileMeta.length} files
+          </span>
+          <select
+            aria-label="Jump to file"
+            className="flex-1 min-w-0 text-[11px] px-2 py-1 rounded bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)]"
+            style={{ fontFamily: 'var(--font-sans, sans-serif)' }}
+            defaultValue=""
+            onChange={(e) => {
+              if (e.target.value) scrollToFile(e.target.value);
+            }}
+          >
+            <option value="" disabled>
+              Jump to file…
+            </option>
+            {fileMeta.map((meta, fileIndex) => (
+              <option key={fileIndex} value={meta.elementId}>
+                {meta.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {files.map((file, fileIndex) => {
+        const { oldName, newName, isRename, hasHeader, elementId } = fileMeta[fileIndex];
 
         const isCollapsed = collapsible
           ? (collapsedState[fileIndex] ?? defaultCollapsed)
@@ -97,11 +196,16 @@ export const DiffView: React.FC<DiffViewProps> = ({
         };
 
         return (
-          <div key={fileIndex} id={fileId}>
+          // scrollMarginTop keeps the jump-to-file target clear of the sticky dropdown.
+          <div key={fileIndex} id={elementId} style={{ scrollMarginTop: showFileDropdown ? "2rem" : 0 }}>
             {hasHeader && (
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10${collapsible ? " cursor-pointer select-none" : ""}`}
-                style={{ fontFamily: 'var(--font-sans, sans-serif)' }}
+                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky z-10${collapsible ? " cursor-pointer select-none" : ""}`}
+                style={{
+                  fontFamily: 'var(--font-sans, sans-serif)',
+                  // Sit below the file dropdown when it is shown, otherwise at the top.
+                  top: showFileDropdown ? "2rem" : 0,
+                }}
                 onClick={collapsible ? toggleCollapsed : undefined}
               >
                 {collapsible && (
@@ -128,7 +232,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
             )}
             {!isCollapsed && (
               <Diff
-                viewType={diffViewType}
+                viewType={effectiveViewType}
                 diffType={file.type}
                 hunks={file.hunks}
                 gutterEvents={{

@@ -33,6 +33,7 @@ internal class PluginWatcher : IDisposable
         _watcher.Created += OnCreated;
         _watcher.Deleted += OnDeleted;
         _watcher.Changed += OnChanged;
+        _watcher.Renamed += OnRenamed;
     }
 
     public void Start()
@@ -130,6 +131,32 @@ internal class PluginWatcher : IDisposable
         }
     }
 
+    private void OnRenamed(object sender, RenamedEventArgs e)
+    {
+        if (e.FullPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            OnDllChanged(e.FullPath);
+            return;
+        }
+
+        if (Directory.Exists(e.FullPath))
+        {
+            var parent = Path.GetDirectoryName(e.FullPath);
+            if (parent != null &&
+                string.Equals(Path.GetFullPath(parent), Path.GetFullPath(_pluginsDirectory), StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("Plugin directory renamed into place: {Path}", e.FullPath);
+                _scheduler.ScheduleLoad(e.FullPath);
+            }
+            return;
+        }
+
+        if (_buildSourcePlugins && SourcePluginBuilder.IsSourceFile(e.FullPath))
+        {
+            OnSourceFileChanged(e.FullPath);
+        }
+    }
+
     private void OnDllChanged(string fullPath)
     {
         if (fullPath.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
@@ -182,6 +209,7 @@ internal class PluginWatcher : IDisposable
         _watcher.Created -= OnCreated;
         _watcher.Deleted -= OnDeleted;
         _watcher.Changed -= OnChanged;
+        _watcher.Renamed -= OnRenamed;
         _watcher.Dispose();
         _sourceBuilder?.Dispose();
         _scheduler.Dispose();

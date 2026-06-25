@@ -306,7 +306,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                         handleMouseDown(e, tabOrder.indexOf(id))
                       }
                       className={cn(
-                        "group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0",
+                        "group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-b border-border flex-shrink-0",
                         // Inactive tab styling - pure black in dark mode
                         "bg-background hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/20",
                         // Active tab styling (overrides inactive)

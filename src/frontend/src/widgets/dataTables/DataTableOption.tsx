@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 import { controlHeight, controlSize } from "@/components/ui/density-scale";
+import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
 
 /**
  * Display modes for DataTableOption
@@ -69,6 +70,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     setExpanded(propDefaultExpanded);
   }
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Constrain the expanded inline width on smaller screens so the filter never
+  // overflows the viewport horizontally. The interaction stays identical to
+  // desktop (inline expansion) — only the expanded width adapts.
+  const breakpoint = useCurrentBreakpoint();
+  const isCompact = breakpoint === "mobile" || breakpoint === "tablet";
 
   const heightClass = controlHeight[density] || controlHeight.Medium;
   const sizeClass = controlSize[density] || controlSize.Medium;
@@ -139,7 +146,14 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center",
+          // When expanded on compact screens the container spans the full available
+          // width so the panel can fill the viewport instead of overflowing it.
+          // min-w-0/max-w-full let the editor inside clamp and scroll horizontally
+          // rather than forcing the row wider than the screen.
+          // Collapsed (or on desktop) it shrinks to the button.
+          isCompact && expanded
+            ? "flex w-full min-w-0 max-w-full items-center"
+            : "inline-flex items-center",
           "rounded-field border border-input bg-transparent shadow-sm",
           "dark:border-white/10 dark:bg-white/5",
           "focus-within:outline-none focus-within:ring-1 focus-within:ring-ring",
@@ -163,17 +177,20 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           {buttonContent}
         </button>
 
-        {/* Content container - fixed dimensions when expanded */}
+        {/* Content container - fills remaining width on compact screens, fixed on desktop */}
         <div
           className={cn(
             `border-l ${heightClass}`,
             "transition-all duration-300 ease-in-out",
-            expanded ? "w-[450px] opacity-100 border-input" : "w-0 opacity-0 border-transparent",
+            expanded
+              ? cn("opacity-100 border-input", isCompact ? "flex-1 min-w-0" : "w-[450px]")
+              : "w-0 opacity-0 border-transparent",
           )}
         >
           <div
             className={cn(
-              "flex h-full min-h-0 min-w-0 w-[450px] max-w-full items-stretch",
+              "flex h-full min-h-0 min-w-0 max-w-full items-stretch",
+              isCompact ? "w-full" : "w-[450px]",
               "overflow-hidden rounded-l-none rounded-tr-fields rounded-br-fields",
               contentClassName,
             )}

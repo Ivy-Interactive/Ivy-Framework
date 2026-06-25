@@ -2,7 +2,6 @@ using Ivy.Core.Apps;
 using Ivy.Core.Plugins;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Test.Plugins;
@@ -18,27 +17,19 @@ public class PluginConfigurationValidationTests
         return new PluginLoader(tempDir, logger);
     }
 
-    private static IConfiguration BuildConfig(Dictionary<string, string?> values)
-    {
-        return new ConfigurationBuilder()
-            .AddInMemoryCollection(values)
-            .Build();
-    }
+    private static IIvyPluginConfig BuildConfig(Dictionary<string, string?> values) =>
+        new TestPluginConfig(values);
 
     [Fact]
     public void ValidateConfiguration_RequiredFieldMissing_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "BotToken", Type = ConfigFieldType.Secret, IsRequired = true }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>());
+        var schema = new SchemaBuilder()
+            .AddSecret("BotToken", isRequired: true)
+            .Build();
+        var config = BuildConfig([]);
 
-        var errors = loader.ValidatePluginConfiguration("Slack", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Single(errors);
         Assert.Contains("Required field 'BotToken' is missing", errors[0]);
@@ -48,19 +39,15 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_InvalidIntegerType_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddInteger("MaxRetries")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
-            ["Plugins:Test:MaxRetries"] = "not-a-number"
+            ["MaxRetries"] = "not-a-number"
         });
 
-        var errors = loader.ValidatePluginConfiguration("Test", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Single(errors);
         Assert.Contains("invalid type", errors[0]);
@@ -70,19 +57,15 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_InvalidBooleanType_ReturnsError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "Enabled", Type = ConfigFieldType.Boolean, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddBoolean("Enabled")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
-            ["Plugins:Test:Enabled"] = "not-a-bool"
+            ["Enabled"] = "not-a-bool"
         });
 
-        var errors = loader.ValidatePluginConfiguration("Test", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Single(errors);
         Assert.Contains("invalid type", errors[0]);
@@ -92,16 +75,12 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_OptionalFieldMissing_NoError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "DefaultChannel", Type = ConfigFieldType.String, IsRequired = false }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>());
+        var schema = new SchemaBuilder()
+            .AddString("DefaultChannel")
+            .Build();
+        var config = BuildConfig([]);
 
-        var errors = loader.ValidatePluginConfiguration("Slack", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Empty(errors);
     }
@@ -110,25 +89,21 @@ public class PluginConfigurationValidationTests
     public void ValidateConfiguration_AllFieldsValid_NoError()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "BotToken", Type = ConfigFieldType.Secret, IsRequired = true },
-                new() { Key = "DefaultChannel", Type = ConfigFieldType.String, IsRequired = false },
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false },
-                new() { Key = "Enabled", Type = ConfigFieldType.Boolean, IsRequired = false }
-            ]
-        };
+        var schema = new SchemaBuilder()
+            .AddSecret("BotToken", isRequired: true)
+            .AddString("DefaultChannel")
+            .AddInteger("MaxRetries")
+            .AddBoolean("Enabled")
+            .Build();
         var config = BuildConfig(new Dictionary<string, string?>
         {
-            ["Plugins:Slack:BotToken"] = "xoxb-test-token",
-            ["Plugins:Slack:DefaultChannel"] = "general",
-            ["Plugins:Slack:MaxRetries"] = "3",
-            ["Plugins:Slack:Enabled"] = "true"
+            ["BotToken"] = "xoxb-test-token",
+            ["DefaultChannel"] = "general",
+            ["MaxRetries"] = "3",
+            ["Enabled"] = "true"
         });
 
-        var errors = loader.ValidatePluginConfiguration("Slack", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Empty(errors);
     }
@@ -136,14 +111,13 @@ public class PluginConfigurationValidationTests
     [Fact]
     public void Configure_InvalidConfiguration_SkipsPlugin()
     {
-        var context = new TestPluginContext(new Dictionary<string, string?>());
+        var context = new TestPluginContext();
         var configured = false;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields = [new() { Key = "Required", Type = ConfigFieldType.String, IsRequired = true }]
-            },
+            schema: new SchemaBuilder()
+                .AddString("Required", isRequired: true)
+                .Build(),
             onConfigure: _ => configured = true);
 
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
@@ -151,8 +125,8 @@ public class PluginConfigurationValidationTests
         var tempDir = Path.Combine(Path.GetTempPath(), $"ivy-test-plugins-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
         var loader = new PluginLoader(tempDir, logger);
+        loader.SetPluginConfigFactory(new TestPluginConfigFactory([]));
 
-        // Use reflection to add the fake plugin to the internal list
         loader.AddTestPlugin(plugin, tempDir);
         loader.Configure(context);
 
@@ -162,17 +136,13 @@ public class PluginConfigurationValidationTests
     [Fact]
     public void Configure_ValidConfiguration_CallsPluginConfigure()
     {
-        var context = new TestPluginContext(new Dictionary<string, string?>
-        {
-            ["Plugins:Fake:ApiKey"] = "test-key"
-        });
+        var context = new TestPluginContext();
         var configured = false;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields = [new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true }]
-            },
+            schema: new SchemaBuilder()
+                .AddString("ApiKey", isRequired: true)
+                .Build(),
             onConfigure: _ => configured = true);
 
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
@@ -180,6 +150,10 @@ public class PluginConfigurationValidationTests
         var tempDir = Path.Combine(Path.GetTempPath(), $"ivy-test-plugins-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
         var loader = new PluginLoader(tempDir, logger);
+        loader.SetPluginConfigFactory(new TestPluginConfigFactory(new Dictionary<string, string?>
+        {
+            ["ApiKey"] = "test-key"
+        }));
 
         loader.AddTestPlugin(plugin, tempDir);
         loader.Configure(context);
@@ -201,79 +175,15 @@ public class PluginConfigurationValidationTests
     }
 
     [Fact]
-    public void ApplyDefaults_OptionalFieldMissing_InjectsDefault()
+    public void ValidateConfiguration_RequiredFieldWithDefault_StillValidatesPresence()
     {
         var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false, DefaultValue = "3" }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>());
+        var schema = new SchemaBuilder()
+            .AddString("ApiKey", defaultValue: "default-key", isRequired: true)
+            .Build();
+        var config = BuildConfig([]);
 
-        var configWithDefaults = loader.ApplyConfigurationDefaults("Test", schema, config);
-        var value = configWithDefaults.GetSection("Plugins:Test")["MaxRetries"];
-
-        Assert.Equal("3", value);
-    }
-
-    [Fact]
-    public void ApplyDefaults_OptionalFieldProvided_UsesProvidedValue()
-    {
-        var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false, DefaultValue = "3" }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>
-        {
-            ["Plugins:Test:MaxRetries"] = "5"
-        });
-
-        var configWithDefaults = loader.ApplyConfigurationDefaults("Test", schema, config);
-        var value = configWithDefaults.GetSection("Plugins:Test")["MaxRetries"];
-
-        Assert.Equal("5", value);
-    }
-
-    [Fact]
-    public void ApplyDefaults_NoDefaultValue_DoesNotInject()
-    {
-        var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "DefaultChannel", Type = ConfigFieldType.String, IsRequired = false }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>());
-
-        var configWithDefaults = loader.ApplyConfigurationDefaults("Test", schema, config);
-        var value = configWithDefaults.GetSection("Plugins:Test")["DefaultChannel"];
-
-        Assert.Null(value);
-    }
-
-    [Fact]
-    public void ApplyDefaults_RequiredFieldWithDefault_StillValidatesPresence()
-    {
-        var loader = CreateLoader();
-        var schema = new PluginConfigurationSchema
-        {
-            Fields =
-            [
-                new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true, DefaultValue = "default-key" }
-            ]
-        };
-        var config = BuildConfig(new Dictionary<string, string?>());
-
-        var errors = loader.ValidatePluginConfiguration("Test", schema, config);
+        var errors = loader.ValidatePluginConfiguration(schema, config);
 
         Assert.Single(errors);
         Assert.Contains("Required field 'ApiKey' is missing", errors[0]);
@@ -282,25 +192,17 @@ public class PluginConfigurationValidationTests
     [Fact]
     public void Configure_WithDefaults_PluginReceivesDefaultValues()
     {
-        var context = new TestPluginContext(new Dictionary<string, string?>
-        {
-            ["Plugins:Fake:ApiKey"] = "test-key"
-        });
+        var context = new TestPluginContext();
         string? receivedMaxRetries = null;
 
         var plugin = new FakePlugin(
-            schema: new PluginConfigurationSchema
-            {
-                Fields =
-                [
-                    new() { Key = "ApiKey", Type = ConfigFieldType.String, IsRequired = true },
-                    new() { Key = "MaxRetries", Type = ConfigFieldType.Integer, IsRequired = false, DefaultValue = "3" }
-                ]
-            },
+            schema: new SchemaBuilder()
+                .AddString("ApiKey", isRequired: true)
+                .AddInteger("MaxRetries", defaultValue: 3)
+                .Build(),
             onConfigure: ctx =>
             {
-                var section = ctx.Configuration.GetSection("Plugins:Fake");
-                receivedMaxRetries = section["MaxRetries"];
+                receivedMaxRetries = ctx.Config.GetValue("MaxRetries");
             });
 
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
@@ -308,6 +210,10 @@ public class PluginConfigurationValidationTests
         var tempDir = Path.Combine(Path.GetTempPath(), $"ivy-test-plugins-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
         var loader = new PluginLoader(tempDir, logger);
+        loader.SetPluginConfigFactory(new TestPluginConfigFactory(new Dictionary<string, string?>
+        {
+            ["ApiKey"] = "test-key"
+        }));
 
         loader.AddTestPlugin(plugin, tempDir);
         loader.Configure(context);
@@ -315,13 +221,26 @@ public class PluginConfigurationValidationTests
         Assert.Equal("3", receivedMaxRetries);
     }
 
-    private class TestPluginContext(Dictionary<string, string?> configValues)
+    private class TestPluginContext()
         : PluginContextBase(
-            new ConfigurationBuilder().AddInMemoryCollection(configValues).Build(),
             new AppRepository(),
             new HashSet<string>(),
             WebApplication.CreateBuilder());
 
+    private class TestPluginConfigFactory(Dictionary<string, string?> configValues) : IIvyPluginConfigFactory
+    {
+        public IIvyPluginConfig Create(string pluginId) => new TestPluginConfig(configValues);
+    }
+
+    private class TestPluginConfig(Dictionary<string, string?> configValues) : IIvyPluginConfig
+    {
+        public string? GetValue(string key) =>
+            configValues.TryGetValue(key, out var value) ? value : null;
+
+        public void SetValue(string key, string value) => configValues[key] = value;
+        public void RemoveValue(string key) => configValues.Remove(key);
+        public void Save() { }
+    }
 
     private class FakePlugin : IIvyPlugin
     {
@@ -336,8 +255,7 @@ public class PluginConfigurationValidationTests
         public PluginManifest Manifest { get; } = new()
         {
             Id = "Ivy.Plugin.Fake",
-            Name = "Fake",
-            ConfigSectionName = "Fake",
+            Title = "Fake",
             Version = new Version(1, 0, 0),
         };
 
