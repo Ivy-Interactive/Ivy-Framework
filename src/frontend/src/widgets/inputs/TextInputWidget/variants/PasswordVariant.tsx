@@ -187,21 +187,25 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
             onPaste={handlePaste}
             className={cn(
               textInputSizeVariant({ density }),
+              textInputEmbeddedInputClasses(hasAffixes, density),
               props.invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
-              !trailingBesideSuffix && (props.invalid || showClear) && "pr-14",
-              !trailingBesideSuffix && !props.invalid && !showClear && showPasswordToggle && "pr-8",
-              hasLastPass && "pr-3",
+              !trailingBesideSuffix && (props.invalid || showClear) && "!pr-14",
+              !trailingBesideSuffix &&
+                !props.invalid &&
+                !showClear &&
+                showPasswordToggle &&
+                "!pr-8",
+              hasLastPass && "!pr-3",
               !trailingBesideSuffix &&
                 showShortcut &&
                 !hasLastPass &&
                 !hasValue &&
                 !showClear &&
                 !props.invalid &&
-                "pr-24",
-              !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "pr-20",
+                "!pr-24",
+              !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "!pr-20",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              textInputEmbeddedInputClasses(hasAffixes, density),
               "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
             )}
             data-testid={props["data-testid"]}

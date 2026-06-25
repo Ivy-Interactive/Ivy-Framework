@@ -119,13 +119,13 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             onPaste={handlePaste}
             className={cn(
               textInputSizeVariant({ density }),
+              textInputEmbeddedInputClasses(hasAffixes, density),
               props.invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
-              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
-              !trailingBesideSuffix && showShortcut && "pr-16",
-              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+              !trailingBesideSuffix && (props.invalid || showClear) && "!pr-8",
+              !trailingBesideSuffix && showShortcut && "!pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "!pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              textInputEmbeddedInputClasses(hasAffixes, density),
             )}
             data-testid={props["data-testid"]}
           />

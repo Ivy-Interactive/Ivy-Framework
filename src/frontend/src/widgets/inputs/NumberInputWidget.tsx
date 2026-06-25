@@ -376,8 +376,8 @@ const NumberVariant = memo(
               textInputEmbeddedInputClasses(hasAffixes, density),
               invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
-              !trailingBesideSuffix && (invalid || showClear) && "pr-8",
-              !trailingBesideSuffix && showClear && invalid && "pr-16",
+              !trailingBesideSuffix && (invalid || showClear) && "!pr-8",
+              !trailingBesideSuffix && showClear && invalid && "!pr-16",
             )}
             data-testid={dataTestId}
           />

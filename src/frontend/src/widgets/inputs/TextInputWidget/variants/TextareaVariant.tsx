@@ -196,9 +196,9 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
               !props.height && "h-full min-h-0",
               hasAffixes && "resize-y",
               props.invalid && inputStyles.invalidInput,
-              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
-              !trailingBesideSuffix && showShortcut && "pr-16",
-              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+              !trailingBesideSuffix && (props.invalid || showClear) && "!pr-8",
+              !trailingBesideSuffix && showShortcut && "!pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "!pr-16",
               trailingBesideSuffix && showTrailing && "pr-2",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
             )}

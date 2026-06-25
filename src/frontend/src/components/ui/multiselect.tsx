@@ -392,7 +392,7 @@ const MultipleSelector = React.forwardRef<
                   disabled && "cursor-not-allowed opacity-50",
                   (!value || value.length === 0) && "text-muted-foreground",
                   invalid
-                    ? "border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive"
+                    ? "border-destructive focus-within:ring-destructive focus-within:border-destructive"
                     : undefined,
                   !ghost &&
                     "border-0 bg-transparent shadow-none focus-within:ring-0 dark:bg-transparent",
