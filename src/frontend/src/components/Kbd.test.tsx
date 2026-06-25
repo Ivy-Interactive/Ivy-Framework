@@ -96,12 +96,22 @@ describe("Kbd", () => {
     expect(caps[1].textContent).toBe("K");
   });
 
-  it("keeps caps square via a fixed height and matching minimum width", () => {
+  it("renders a single-glyph cap as a fixed square", () => {
     mount(<Kbd keys="A" />);
     const cap = container.querySelector("kbd")!;
-    // h-5 fixes the height and min-w-5 matches it, so a single-glyph cap is square.
+    // h-5 + w-5 with no horizontal padding makes a single-glyph cap a perfect square.
+    expect(cap.className).toContain("h-5");
+    expect(cap.className).toContain("w-5");
+    expect(cap.className).not.toContain("px-1");
+  });
+
+  it("grows a multi-character cap wider than the square minimum", () => {
+    mount(<Kbd keys="Tab" />);
+    const cap = container.querySelector("kbd")!;
+    // Multi-char labels keep the height but grow wider via min-w-5 + padding.
     expect(cap.className).toContain("h-5");
     expect(cap.className).toContain("min-w-5");
+    expect(cap.className).toContain("px-1");
   });
 
   it("renders a ghost cap without background or border", () => {

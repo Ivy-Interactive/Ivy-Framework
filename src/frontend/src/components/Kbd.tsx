@@ -24,11 +24,13 @@ const tokenForKey = (raw: string): KeyToken => {
   const key = raw.trim();
   const k = key.toLowerCase();
 
-  // Platform modifiers. On macOS each modifier has its own glyph (⌃ ⌘ ⇧ ⌥); on other
-  // platforms only Shift has a conventional symbol, so the rest render as short text.
+  // Platform modifiers. On macOS "Ctrl" is conventionally the Command key (⌘) — this
+  // mirrors parseShortcut(), which maps ctrl→meta on Mac so the binding fires on ⌘.
+  // Display and binding must agree, so render ctrl as ⌘ here too. On other platforms
+  // only Shift has a conventional symbol, so the rest render as short text.
   if (k === "ctrl" || k === "control") {
     return isMac
-      ? { icon: "ChevronUp", label: "⌃", aria: "Control" }
+      ? { icon: "Command", label: "⌘", aria: "Command" }
       : { label: "Ctrl", aria: "Control" };
   }
   if (k === "cmd" || k === "command" || k === "meta" || k === "win" || k === "super") {
@@ -86,13 +88,20 @@ const tokenForKey = (raw: string): KeyToken => {
 };
 
 /**
- * Base styling for a key cap. The height is fixed and the minimum width equals the
- * height, so a cap holding a single glyph or letter is a perfect square; multi-character
- * labels keep that height and simply grow wider. `box-border` keeps the border inside
- * the square so single-glyph caps stay exactly square.
+ * Base styling for a key cap. The height is fixed; `box-border` keeps the border inside
+ * the box so caps stay exactly sized. A cap holding a single glyph, letter, or icon is a
+ * perfect square (see `keyCapShape`); multi-character labels keep the height and grow wider.
  */
 const keyCapBase =
-  "box-border inline-flex h-5 min-w-5 items-center justify-center rounded-selector px-1 text-[0.7rem] font-medium leading-none";
+  "box-border inline-flex h-5 items-center justify-center rounded-selector text-xs font-semibold leading-none";
+
+/**
+ * Width/padding for a key cap. A token that renders an icon or a single character is a
+ * fixed square (width == height, no horizontal padding); a multi-character text label
+ * grows wider with the height as its minimum and small horizontal padding.
+ */
+const keyCapShape = (token: KeyToken): string =>
+  token.icon || token.label.length <= 1 ? "w-5" : "min-w-5 px-1";
 
 /**
  * Color/fill styling for a key cap.
@@ -110,17 +119,24 @@ const keyCapColor = ({ inherit, ghost }: { inherit?: boolean; ghost?: boolean })
 /**
  * Renders a single standalone key cap.
  */
-const KeyCap: React.FC<{ token: KeyToken; inherit?: boolean; ghost?: boolean }> = ({
-  token,
-  inherit,
-  ghost,
-}) => (
+const KeyCap: React.FC<{
+  token: KeyToken;
+  inherit?: boolean;
+  ghost?: boolean;
+}> = ({ token, inherit, ghost }) => (
   <kbd
     title={token.icon ? token.aria : undefined}
     aria-label={token.icon ? token.aria : undefined}
-    className={cn(keyCapBase, keyCapColor({ inherit, ghost }))}
+    className={cn(keyCapBase, keyCapShape(token), keyCapColor({ inherit, ghost }))}
   >
-    {token.icon ? <Icon name={token.icon} size={12} aria-hidden /> : token.label}
+    {token.icon ? (
+      // `!size-3` overrides the `[&_svg]:size-4` rule that container widgets such as
+      // Button apply to every descendant svg, which would otherwise force these caps
+      // to 16px.
+      <Icon name={token.icon} className="!size-3" aria-hidden />
+    ) : (
+      token.label
+    )}
   </kbd>
 );
 
@@ -166,10 +182,11 @@ export function Kbd({
     );
   }
 
-  // Non-string content (composed nodes) renders unchanged inside a single cap.
+  // Non-string content (composed nodes) renders unchanged inside a single cap that grows
+  // to fit its content rather than staying square.
   return (
     <span className="inline-flex items-center gap-0.5 align-middle">
-      <kbd className={cn(keyCapBase, keyCapColor({ ghost }))}>{children}</kbd>
+      <kbd className={cn(keyCapBase, "min-w-5 px-1", keyCapColor({ ghost }))}>{children}</kbd>
     </span>
   );
 }
