@@ -17,8 +17,9 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import { parseShortcut, formatShortcutForDisplay } from "@/lib/shortcut";
+import { parseShortcut } from "@/lib/shortcut";
 import { useShortcut } from "@/lib/useShortcut";
+import { ShortcutKeys } from "@/components/Kbd";
 
 const ButtonWithTooltip = withTooltip(Button);
 
@@ -113,7 +114,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
-  const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
@@ -261,9 +261,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             </Badge>
           )}
           {shortcutKey && title && (
-            <kbd className="ml-1 px-1 py-0.5 text-[0.65rem] font-medium border border-current/20 rounded-selector opacity-70">
-              {shortcutDisplay}
-            </kbd>
+            <ShortcutKeys shortcut={shortcutKey} className="ml-1.5 opacity-80" inherit />
           )}
           {iconPosition == "Right" && loading && (
             <Loader2 className="animate-spin" style={iconStyles} />

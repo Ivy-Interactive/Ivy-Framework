@@ -19,12 +19,8 @@ import {
   textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
-import {
-  useCursorPosition,
-  useEnterKeyBlur,
-  usePasteHandler,
-  formatShortcutForDisplay,
-} from "../hooks";
+import { useCursorPosition, useEnterKeyBlur, usePasteHandler } from "../hooks";
+import { ShortcutKeys } from "@/components/Kbd";
 
 interface PasswordVariantProps {
   props: Omit<TextInputWidgetProps, "variant">;
@@ -89,7 +85,6 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
     ...getWidth(props.width),
   };
 
-  const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
   const ghostTight = Boolean(props.ghost);
@@ -137,14 +132,10 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
             overlay && "pointer-events-auto",
           )}
         >
-          <kbd
-            className={cn(
-              "rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground",
-              !ghostTight && overlay && "ml-2",
-            )}
-          >
-            {shortcutDisplay}
-          </kbd>
+          <ShortcutKeys
+            shortcut={props.shortcutKey ?? ""}
+            className={cn(!ghostTight && overlay && "ml-2")}
+          />
         </div>
       )}
       {props.invalid && (

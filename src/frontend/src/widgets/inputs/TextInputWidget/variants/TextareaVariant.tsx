@@ -17,7 +17,8 @@ import {
   textInputTrailingInvalidSlotClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
-import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
+import { useCursorPosition, usePasteHandler } from "../hooks";
+import { ShortcutKeys } from "@/components/Kbd";
 import { Mic, X } from "lucide-react";
 
 interface TextareaVariantProps {
@@ -87,7 +88,6 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
     ...getHeight(props.height),
   };
 
-  const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
   const prefixContent = props.slots?.Prefix;
@@ -135,9 +135,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
       )}
       {showShortcut && (
         <div className={cn("flex shrink-0 items-center", overlay && "pointer-events-auto")}>
-          <kbd className="rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
-            {shortcutDisplay}
-          </kbd>
+          <ShortcutKeys shortcut={props.shortcutKey ?? ""} />
         </div>
       )}
       {props.invalid && (

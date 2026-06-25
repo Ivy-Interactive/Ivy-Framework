@@ -19,7 +19,7 @@ import { MenuItem } from "@/types/widgets";
 import Icon from "@/components/Icon";
 import { camelCase } from "@/lib/utils";
 import { getColor } from "@/lib/styles";
-import { formatShortcutForDisplay } from "@/lib/shortcut";
+import { ShortcutKeys } from "@/components/Kbd";
 import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
@@ -93,7 +93,9 @@ const DropDownMenuItemGroup = ({
           {item.label}
           {item.checked && <span className="ml-auto">✓</span>}
           {item.shortcut && (
-            <DropdownMenuShortcut>{formatShortcutForDisplay(item.shortcut)}</DropdownMenuShortcut>
+            <DropdownMenuShortcut>
+              <ShortcutKeys shortcut={item.shortcut} />
+            </DropdownMenuShortcut>
           )}
         </DropdownMenuItem>
       );
@@ -113,7 +115,9 @@ const DropDownMenuItemGroup = ({
           {item.label}
           {item.checked && <span className="ml-auto">●</span>}
           {item.shortcut && (
-            <DropdownMenuShortcut>{formatShortcutForDisplay(item.shortcut)}</DropdownMenuShortcut>
+            <DropdownMenuShortcut>
+              <ShortcutKeys shortcut={item.shortcut} />
+            </DropdownMenuShortcut>
           )}
         </DropdownMenuItem>
       );
@@ -127,7 +131,9 @@ const DropDownMenuItemGroup = ({
             {item.icon && <Icon name={item.icon} size={iconSize} style={colorStyle} />}
             {item.label}
             {item.shortcut && (
-              <DropdownMenuShortcut>{formatShortcutForDisplay(item.shortcut)}</DropdownMenuShortcut>
+              <DropdownMenuShortcut>
+                <ShortcutKeys shortcut={item.shortcut} />
+              </DropdownMenuShortcut>
             )}
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
@@ -156,7 +162,9 @@ const DropDownMenuItemGroup = ({
         {item.icon && <Icon name={item.icon} size={iconSize} style={colorStyle} />}
         {item.label}
         {item.shortcut && (
-          <DropdownMenuShortcut>{formatShortcutForDisplay(item.shortcut)}</DropdownMenuShortcut>
+          <DropdownMenuShortcut>
+            <ShortcutKeys shortcut={item.shortcut} />
+          </DropdownMenuShortcut>
         )}
       </DropdownMenuItem>
     );
