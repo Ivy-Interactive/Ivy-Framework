@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, Suspense, lazy, useEffect } from "react";
+import React, { useState, useCallback, useMemo, Suspense, lazy, useEffect, useRef } from "react";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import {
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
   textareaTrailingOverlayClasses,
 } from "@/components/ui/input/text-input-variant";
 import {
@@ -123,6 +124,20 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
   const densityKey = normalizeInputDensity(density);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isTall, setIsTall] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setIsTall(entry.contentRect.height > 50);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const serverValue = value || "";
   const [localValue, setLocalValue] = useOptimisticValue(serverValue, isFocused);
@@ -265,7 +280,15 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const codeEditor = () => (
     <div className="relative h-full min-h-0 w-full overflow-hidden">
       {trailingInOverlay && (
-        <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
+        <div
+          className={
+            isTall
+              ? textareaTrailingOverlayClasses(density)
+              : textInputTrailingOverlayClasses(density)
+          }
+        >
+          {trailingCluster(true)}
+        </div>
       )}
       <Suspense
         fallback={
@@ -313,6 +336,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   if (!hasAffixes) {
     return (
       <div
+        ref={containerRef}
         style={styles}
         className={cn(
           "relative flex w-full flex-col overflow-hidden group",
@@ -326,6 +350,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   return (
     <div
+      ref={containerRef}
       style={styles}
       className={cn(
         textInputFieldShellClasses({
