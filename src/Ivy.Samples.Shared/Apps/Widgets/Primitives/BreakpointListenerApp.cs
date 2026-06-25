@@ -7,14 +7,10 @@ public class BreakpointListenerApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // UseBreakpoint round-trips the browser's active breakpoint into server state. The returned
-        // listener widget is invisible and must be rendered for updates to arrive — see the Fragment below.
         var (breakpoint, listener) = Context.UseBreakpoint();
 
         var log = UseState(ImmutableArray<string>.Empty);
 
-        // Append a log line whenever the resolved breakpoint changes. Resize the browser window across
-        // 640 / 768 / 1024px to watch the widget fire OnChange and the value update server-side.
         UseEffect(() =>
         {
             log.Set(log.Value.Add($"[{DateTime.Now:HH:mm:ss}] Breakpoint → {breakpoint.Value}"));
@@ -34,7 +30,6 @@ public class BreakpointListenerApp : SampleBase
         ).Title("OnChange events");
 
         return new Fragment(
-            // The invisible listener — without it, breakpoint.Value never updates.
             listener,
             Layout.Vertical()
             | Text.H1("BreakpointListener")

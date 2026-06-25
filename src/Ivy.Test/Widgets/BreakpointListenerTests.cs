@@ -22,7 +22,6 @@ public class BreakpointListenerTests
     [InlineData("Wide", Breakpoint.Wide)]
     public async Task OnChange_RoundTripsBreakpointFromFrontendName(string wireName, Breakpoint expected)
     {
-        // Arrange: a listener whose handler captures the breakpoint the frontend reports.
         Breakpoint? captured = null;
         var widget = new BreakpointListener
         {
@@ -33,11 +32,9 @@ public class BreakpointListenerTests
             })
         };
 
-        // Act: simulate the frontend firing OnChange with the PascalCase enum name it sends on the wire.
         var args = new JsonArray { JsonValue.Create(wireName) };
         var handled = await widget.InvokeEventAsync("OnChange", args);
 
-        // Assert: the event resolves to the matching Breakpoint value.
         Assert.True(handled);
         Assert.Equal(expected, captured);
     }

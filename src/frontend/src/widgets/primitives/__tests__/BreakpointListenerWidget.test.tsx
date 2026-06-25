@@ -2,13 +2,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 
-// Control the breakpoint the widget observes.
 const mockBreakpoint = vi.fn().mockReturnValue("mobile");
 vi.mock("@/hooks/use-responsive", () => ({
   useBreakpoint: () => mockBreakpoint(),
 }));
 
-// Capture events the widget sends back to the server.
 const sentEvents: Array<{ name: string; id: string; args: unknown[] }> = [];
 vi.mock("@/components/event-handler/hooks", () => ({
   useEventHandler: () => (name: string, id: string, args: unknown[]) =>
@@ -53,14 +51,14 @@ describe("BreakpointListenerWidget", () => {
     render();
     sentEvents.length = 0;
     mockBreakpoint.mockReturnValue("desktop");
-    render(); // re-render with the new breakpoint
+    render();
     expect(sentEvents).toEqual([{ name: "OnChange", id: "bp", args: ["Desktop"] }]);
   });
 
   it("does not re-fire when the breakpoint is unchanged", () => {
     render();
     sentEvents.length = 0;
-    render(); // same breakpoint
+    render();
     expect(sentEvents).toHaveLength(0);
   });
 
