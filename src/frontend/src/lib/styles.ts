@@ -771,7 +771,7 @@ export const typography: Record<string, string> = {
   ul: "list-disc list-outside ps-5 flex flex-col gap-y-1",
   ol: "list-decimal list-outside ps-5 flex flex-col gap-y-1",
   li: "list-item",
-  liContent: "flex flex-col gap-y-1 [&>p]:my-0",
+  liContent: "[&>*+*]:mt-1 [&>p]:my-0",
 
   // Links
   a: "text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100",
