@@ -38,6 +38,13 @@ public class TooltipApp : SampleBase
             | Text.H2("Bubble (arrow)")
             | new Tooltip(new Button("Pointing Tooltip"), "I point at my trigger.").Bubble()
 
+            | Text.H2("Semantic colors")
+            | (Layout.Horizontal().Gap(4)
+               | new Tooltip(new Button("Error"), "Something went wrong.").Error().Bubble()
+               | new Tooltip(new Button("Info"), "Good to know.").Info().Bubble()
+               | new Tooltip(new Button("Success"), "All done!").Success().Bubble()
+               | new Tooltip(new Button("Warning"), "Be careful.").Warning().Bubble())
+
             | Text.H2("Persist (open until closed)")
             | new Tooltip(new Button("Hover to pin"), "Hover opens me; click the X to dismiss.").Persist()
 

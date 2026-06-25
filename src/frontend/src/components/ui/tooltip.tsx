@@ -119,6 +119,8 @@ interface TooltipContentProps extends React.ComponentPropsWithoutRef<
   breakType?: TooltipBreakType;
   /** Renders an arrow ("bubble") pointing at the trigger. */
   showArrow?: boolean;
+  /** Overrides the arrow fill class (defaults to fill-card to match the surface). */
+  arrowClassName?: string;
 }
 
 const TooltipContent = React.forwardRef<
@@ -126,7 +128,15 @@ const TooltipContent = React.forwardRef<
   TooltipContentProps
 >(
   (
-    { className, sideOffset = 4, breakType = "auto", showArrow = false, children, ...props },
+    {
+      className,
+      sideOffset = 4,
+      breakType = "auto",
+      showArrow = false,
+      arrowClassName,
+      children,
+      ...props
+    },
     ref,
   ) => {
     const getBreakClass = React.useMemo(() => {
@@ -163,9 +173,13 @@ const TooltipContent = React.forwardRef<
             {children}
           </div>
           {showArrow && (
-            // Arrow is a direct child of Content (outside the overflow wrapper) so it isn't clipped,
-            // and fill-card makes it melt into the borderless card background.
-            <TooltipPrimitive.Arrow width={12} height={6} className="fill-card" />
+            // Arrow is a direct child of Content (outside the overflow wrapper) so it isn't clipped.
+            // fill-card melts it into the surface; arrowClassName lets a colored tooltip match its bg.
+            <TooltipPrimitive.Arrow
+              width={12}
+              height={6}
+              className={arrowClassName ?? "fill-card"}
+            />
           )}
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>

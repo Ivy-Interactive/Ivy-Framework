@@ -2,18 +2,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import React from "react";
 import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
+import { colorNameToCssToken } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import { useEventHandler } from "@/components/event-handler";
 
 interface TooltipWidgetProps {
   id: string;
   density?: Densities;
-  /** Controlled open state. When provided, the tooltip is driven by this value instead of hover/focus. */
   open?: boolean;
-  /** Renders an arrow ("bubble") pointing at the trigger. Set via `.Bubble()` in C#. */
   showArrow?: boolean;
-  /** Keeps the tooltip open until dismissed and renders a close button. Set via `.Persist()` in C#. */
   persistent?: boolean;
+  background?: string;
   events?: string[];
   slots?: {
     Trigger?: React.ReactNode[];
@@ -38,10 +37,22 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
   open: openProp,
   showArrow = false,
   persistent = false,
+  background,
   events = EMPTY_EVENTS,
   slots,
 }) => {
   const eventHandler = useEventHandler();
+
+  // A semantic background color (e.g. Error -> red, Info -> blue) overrides the default card surface.
+  // The arrow fill is driven by the same CSS variable so it melts into the colored bubble.
+  const colorToken = background?.trim() ? colorNameToCssToken(background.trim()) : undefined;
+  const contentStyle: React.CSSProperties | undefined = colorToken
+    ? {
+        backgroundColor: `var(--${colorToken})`,
+        color: `var(--${colorToken}-foreground)`,
+        ["--tooltip-arrow-fill" as string]: `var(--${colorToken})`,
+      }
+    : undefined;
 
   // Server-controlled: the `open` prop is set, so the server owns the open state and the tooltip
   // appears in response to an event (e.g. an error). Persistent: stays open until dismissed.
@@ -121,6 +132,8 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
         </TooltipTrigger>
         <TooltipContent
           showArrow={showArrow}
+          style={contentStyle}
+          arrowClassName={colorToken ? "fill-[var(--tooltip-arrow-fill)]" : undefined}
           // A persistent tooltip stays put when the pointer leaves or focus changes.
           onPointerDownOutside={persistent ? (e) => e.preventDefault() : undefined}
           onEscapeKeyDown={persistent ? handleClose : undefined}
@@ -132,7 +145,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
                 type="button"
                 aria-label="Close"
                 onClick={handleClose}
-                className="-mr-1 -mt-0.5 shrink-0 rounded-selector p-0.5 text-card-foreground/70 hover:bg-foreground/10 hover:text-card-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="-mr-1 -mt-0.5 shrink-0 rounded-selector p-0.5 text-current/70 hover:bg-foreground/10 hover:text-current focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <Icon name="X" className="h-3 w-3" />
               </button>
