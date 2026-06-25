@@ -8,7 +8,7 @@ public record Kbd : WidgetBase<Kbd>
 {
     public Kbd(string content)
     {
-        Keys = content;
+        Content = content;
     }
 
     public Kbd(object content) : base(content)
@@ -17,7 +17,7 @@ public record Kbd : WidgetBase<Kbd>
 
     internal Kbd() { }
 
-    [Prop] public string? Keys { get; set; }
+    [Prop] public string? Content { get; set; }
 
     [Prop] public bool Ghost { get; set; }
 }
