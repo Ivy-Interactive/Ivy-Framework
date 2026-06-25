@@ -78,7 +78,7 @@
     <PackageReference Include="System.IO.Hashing" Version="10.0.9" />
     <PackageReference Include="Ivy.SystemTextJson.JsonDiffPatch" Version="2.0.4" />
     <PackageReference Include="Ivy.NativeJsonDiff" Version="2.0.0" />
-    <PackageReference Include="Ivy.DesignSystem" Version="1.1.31" />
+    <PackageReference Include="Ivy.DesignSystem" Version="1.1.32" />
   </ItemGroup>
 
   <ItemGroup>
