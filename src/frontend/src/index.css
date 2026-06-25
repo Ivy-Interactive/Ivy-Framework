@@ -9,11 +9,6 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
-/* Custom element for widget inspector */
-ivy-widget {
-  display: contents;
-}
-
 /* Radix ScrollArea's internal display:table viewport wrapper sizes to its widest descendant
    and overflows the viewport on mobile; force it to a capped block so content doesn't clip. */
 @media (max-width: 639.98px) {
