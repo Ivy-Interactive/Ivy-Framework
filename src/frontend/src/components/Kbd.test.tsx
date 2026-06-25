@@ -81,6 +81,36 @@ describe("Kbd", () => {
     expect(caps).toHaveLength(1);
     expect(caps[0].querySelector('[data-testid="custom"]')).not.toBeNull();
   });
+
+  it("tokenizes the `keys` prop into standalone caps", () => {
+    mount(<Kbd keys="Ctrl+Shift+C" />);
+    const caps = container.querySelectorAll("kbd");
+    expect(caps).toHaveLength(3);
+  });
+
+  it("prefers the `keys` prop over children", () => {
+    mount(<Kbd keys="Ctrl+K">ignored</Kbd>);
+    const caps = container.querySelectorAll("kbd");
+    expect(caps).toHaveLength(2);
+    expect(caps[0].textContent).toBe("Ctrl");
+    expect(caps[1].textContent).toBe("K");
+  });
+
+  it("keeps caps square via a fixed height and matching minimum width", () => {
+    mount(<Kbd keys="A" />);
+    const cap = container.querySelector("kbd")!;
+    // h-5 fixes the height and min-w-5 matches it, so a single-glyph cap is square.
+    expect(cap.className).toContain("h-5");
+    expect(cap.className).toContain("min-w-5");
+  });
+
+  it("renders a ghost cap without background or border", () => {
+    mount(<Kbd keys="A" ghost />);
+    const cap = container.querySelector("kbd")!;
+    expect(cap.className).toContain("border-0");
+    expect(cap.className).toContain("bg-transparent");
+    expect(cap.className).not.toContain("bg-muted");
+  });
 });
 
 describe("ShortcutKeys", () => {

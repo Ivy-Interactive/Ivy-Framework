@@ -24,10 +24,11 @@ const tokenForKey = (raw: string): KeyToken => {
   const key = raw.trim();
   const k = key.toLowerCase();
 
-  // Platform modifiers
+  // Platform modifiers. On macOS each modifier has its own glyph (⌃ ⌘ ⇧ ⌥); on other
+  // platforms only Shift has a conventional symbol, so the rest render as short text.
   if (k === "ctrl" || k === "control") {
     return isMac
-      ? { icon: "Command", label: "⌘", aria: "Command" }
+      ? { icon: "ChevronUp", label: "⌃", aria: "Control" }
       : { label: "Ctrl", aria: "Control" };
   }
   if (k === "cmd" || k === "command" || k === "meta" || k === "win" || k === "super") {
@@ -36,7 +37,7 @@ const tokenForKey = (raw: string): KeyToken => {
       : { label: "Win", aria: "Windows" };
   }
   if (k === "shift") {
-    return { icon: "ArrowBigUp", label: "Shift", aria: "Shift" };
+    return { icon: "ArrowBigUp", label: "⇧", aria: "Shift" };
   }
   if (k === "alt" || k === "option") {
     return isMac ? { icon: "Option", label: "⌥", aria: "Option" } : { label: "Alt", aria: "Alt" };
@@ -84,27 +85,40 @@ const tokenForKey = (raw: string): KeyToken => {
   return { label, aria: label };
 };
 
-/** Shared base styling for a single key cap. */
+/**
+ * Base styling for a key cap. The height is fixed and the minimum width equals the
+ * height, so a cap holding a single glyph or letter is a perfect square; multi-character
+ * labels keep that height and simply grow wider. `box-border` keeps the border inside
+ * the square so single-glyph caps stay exactly square.
+ */
 const keyCapBase =
-  "inline-flex h-5 min-w-5 items-center justify-center rounded-selector px-1.5 text-[0.7rem] font-medium leading-none";
+  "box-border inline-flex h-5 min-w-5 items-center justify-center rounded-selector px-1 text-[0.7rem] font-medium leading-none";
 
 /**
- * Color styling for a key cap. `inherit` adopts the surrounding text color (for use
- * on colored surfaces such as a primary button); otherwise the standard muted look.
+ * Color/fill styling for a key cap.
+ * - `ghost`   → no background or border, just the glyph.
+ * - `inherit` → adopts the surrounding text color (for colored surfaces such as a primary button).
+ * - default   → the standard muted key-cap look.
  */
-const keyCapColor = (inherit?: boolean) =>
-  inherit
+const keyCapColor = ({ inherit, ghost }: { inherit?: boolean; ghost?: boolean }) => {
+  if (ghost) return "border-0 bg-transparent text-current";
+  return inherit
     ? "border border-current/30 bg-transparent text-current"
     : "border border-border bg-muted/40 text-foreground";
+};
 
 /**
- * Renders a single standalone key box.
+ * Renders a single standalone key cap.
  */
-const KeyCap: React.FC<{ token: KeyToken; inherit?: boolean }> = ({ token, inherit }) => (
+const KeyCap: React.FC<{ token: KeyToken; inherit?: boolean; ghost?: boolean }> = ({
+  token,
+  inherit,
+  ghost,
+}) => (
   <kbd
     title={token.icon ? token.aria : undefined}
     aria-label={token.icon ? token.aria : undefined}
-    className={cn(keyCapBase, keyCapColor(inherit))}
+    className={cn(keyCapBase, keyCapColor({ inherit, ghost }))}
   >
     {token.icon ? <Icon name={token.icon} size={12} aria-hidden /> : token.label}
   </kbd>
@@ -121,27 +135,41 @@ const tokenizeShortcut = (value: string): KeyToken[] =>
     .map(tokenForKey);
 
 /**
- * Displays a keyboard shortcut. Each key is rendered as its own standalone box —
+ * Displays a keyboard shortcut. Each key is rendered as its own standalone cap —
  * "Ctrl+Enter" becomes [⌘][↵] rather than a single [Ctrl+Enter] cap. Modifier and
  * navigation keys are shown as icons where available.
+ *
+ * Pass `keys` (a shortcut string) for the tokenized, standalone-cap rendering; pass
+ * `children` for arbitrary composed content inside a single cap. Set `ghost` to drop
+ * the background and border.
  */
-export function Kbd({ children }: { children: React.ReactNode }) {
-  // Plain string shortcuts get tokenized into standalone, icon-aware key caps.
-  if (typeof children === "string" && children.trim().length > 0) {
-    const tokens = tokenizeShortcut(children);
+export function Kbd({
+  children,
+  keys,
+  ghost,
+}: {
+  children?: React.ReactNode;
+  keys?: string;
+  ghost?: boolean;
+}) {
+  // Prefer the keys string; otherwise fall back to a string child (legacy call sites).
+  const shortcut = keys ?? (typeof children === "string" ? children : undefined);
+
+  if (shortcut && shortcut.trim().length > 0) {
+    const tokens = tokenizeShortcut(shortcut);
     return (
       <span className="inline-flex items-center gap-0.5 align-middle">
         {tokens.map((token, i) => (
-          <KeyCap key={i} token={token} />
+          <KeyCap key={i} token={token} ghost={ghost} />
         ))}
       </span>
     );
   }
 
-  // Non-string content (composed nodes) renders unchanged inside a single key box.
+  // Non-string content (composed nodes) renders unchanged inside a single cap.
   return (
     <span className="inline-flex items-center gap-0.5 align-middle">
-      <kbd className={cn(keyCapBase, keyCapColor())}>{children}</kbd>
+      <kbd className={cn(keyCapBase, keyCapColor({ ghost }))}>{children}</kbd>
     </span>
   );
 }
@@ -155,17 +183,19 @@ export function ShortcutKeys({
   shortcut,
   className,
   inherit,
+  ghost,
 }: {
   shortcut: string;
   className?: string;
   inherit?: boolean;
+  ghost?: boolean;
 }) {
   const tokens = tokenizeShortcut(shortcut);
   if (tokens.length === 0) return null;
   return (
     <span className={cn("inline-flex items-center gap-0.5 align-middle", className)}>
       {tokens.map((token, i) => (
-        <KeyCap key={i} token={token} inherit={inherit} />
+        <KeyCap key={i} token={token} inherit={inherit} ghost={ghost} />
       ))}
     </span>
   );
