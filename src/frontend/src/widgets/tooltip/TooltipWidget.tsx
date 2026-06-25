@@ -96,7 +96,13 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
     <TooltipProvider>
       <Tooltip {...(isControlled ? { open } : {})} onOpenChange={handleOpenChange}>
         <TooltipTrigger asChild>
-          <span style={{ display: "inline-block" }} aria-label={ariaLabel}>
+          {/* width:fit-content (not just inline-block): inside a flex/grid layout the wrapper is
+              blockified and stretches to the row width, which makes Radix anchor — and center —
+              the tooltip on the full row instead of the trigger. */}
+          <span
+            style={{ display: "inline-block", width: "fit-content", maxWidth: "100%" }}
+            aria-label={ariaLabel}
+          >
             {slots.Trigger}
           </span>
         </TooltipTrigger>
