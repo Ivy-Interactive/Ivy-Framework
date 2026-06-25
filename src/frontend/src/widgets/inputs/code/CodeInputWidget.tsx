@@ -21,7 +21,7 @@ import {
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
-  textInputTrailingOverlayClasses,
+  textareaTrailingOverlayClasses,
 } from "@/components/ui/input/text-input-variant";
 import {
   keymap,
@@ -229,7 +229,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           type="button"
           onClick={() => copyToClipboard(localValue)}
           aria-label="Copy to clipboard"
-          className={textInputTrailingIconButtonClasses(overlay, density)}
+          className={cn(
+            textInputTrailingIconButtonClasses(overlay, density),
+            "opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200",
+          )}
         >
           <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
         </button>
@@ -260,15 +263,9 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   );
 
   const codeEditor = () => (
-    <div
-      className={cn(
-        "relative h-full min-h-0 w-full overflow-hidden",
-        trailingInOverlay && "pr-8",
-        trailingInOverlay && (showClear || invalid) && "pr-16",
-      )}
-    >
+    <div className="relative h-full min-h-0 w-full overflow-hidden">
       {trailingInOverlay && (
-        <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
+        <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
       )}
       <Suspense
         fallback={
@@ -297,6 +294,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
             "h-full overflow-hidden",
             "[&_.cm-editor]:border-0 [&_.cm-editor]:bg-transparent! [&_.cm-editor]:shadow-none",
             "[&_.cm-scroller]:bg-transparent! [&_.cm-content]:bg-transparent! [&_.cm-gutters]:bg-transparent!",
+            trailingInOverlay && "[&_.cm-content]:pr-8 [&_.cm-placeholder]:pr-8",
+            trailingInOverlay &&
+              (showClear || invalid) &&
+              "[&_.cm-content]:pr-16 [&_.cm-placeholder]:pr-16",
             hasAffixes && "[&_.cm-editor]:rounded-none",
             hasAffixes && hasPrefix && "[&_.cm-editor]:rounded-l-none",
             hasAffixes && (hasSuffix || trailingInAffixCell) && "[&_.cm-editor]:rounded-r-none",
@@ -314,7 +315,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       <div
         style={styles}
         className={cn(
-          "relative flex w-full flex-col overflow-hidden",
+          "relative flex w-full flex-col overflow-hidden group",
           textInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
         )}
       >
@@ -326,11 +327,14 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   return (
     <div
       style={styles}
-      className={textInputFieldShellClasses({
-        focused: isFocused,
-        invalid,
-        disabled,
-      })}
+      className={cn(
+        textInputFieldShellClasses({
+          focused: isFocused,
+          invalid,
+          disabled,
+        }),
+        "group",
+      )}
     >
       {hasPrefix && (
         <div className={codeInputAffixCellClasses("prefix", density, prefixContent)}>
