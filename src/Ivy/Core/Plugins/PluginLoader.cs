@@ -221,7 +221,7 @@ public class PluginLoader : IPluginManager
         {
             _logger.LogError(
                 "Multiple [assembly: IvyPlugin] attributes found in {Directory} ({Assemblies}). Skipping.",
-                directory, string.Join(", ", found.Select(f => Path.GetFileName(f.Assembly.Location))));
+                directory, string.Join(", ", found.Select(f => f.Assembly.GetName().Name)));
             failureReason = "Multiple [IvyPlugin] attributes found";
             DeleteShadowDirectory(shadowDir);
             return null;
