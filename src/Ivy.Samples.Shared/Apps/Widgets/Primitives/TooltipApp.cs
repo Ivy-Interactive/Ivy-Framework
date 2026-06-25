@@ -39,7 +39,7 @@ public class TooltipApp : SampleBase
             | new Tooltip(new Button("Pointing Tooltip"), "I point at my trigger.").Bubble()
 
             | Text.H2("Persist (open until closed)")
-            | new Tooltip(new Button("Persistent"), "Click the X to dismiss me.").Persist().Open()
+            | new Tooltip(new Button("Hover to pin"), "Hover opens me; click the X to dismiss.").Persist()
 
             | Text.H2("Appear on an event")
             | Text.Muted(lastEvent.Value)

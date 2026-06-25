@@ -43,10 +43,11 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  // Server-controlled: the `open` prop owns the open state, so the tooltip appears in response to an
-  // event (e.g. an error) and ignores hover/focus entirely.
+  // Server-controlled: the `open` prop is set, so the server owns the open state and the tooltip
+  // appears in response to an event (e.g. an error). Persistent: stays open until dismissed.
+  // Both modes are "controlled" — we own the open state in React and Radix must not auto-close on
+  // hover-out. A plain hover tooltip (neither flag) stays fully uncontrolled.
   const serverControlled = openProp !== undefined;
-  // Persistent (without an explicit `open`) still opens on hover, then stays until dismissed.
   const isControlled = serverControlled || persistent;
 
   // Local open state seeds from the server's `open` prop (or stays closed until hovered while persistent).
@@ -71,19 +72,22 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
 
   const handleOpenChange = React.useCallback(
     (next: boolean) => {
-      // Server-controlled tooltips don't react to hover/focus — only to the `open` prop. We still
-      // forward the request as an event so server code can decide whether to open/close.
-      if (serverControlled) {
-        emitOpenEvents(next);
+      // Radix requests a close on hover-out / blur. For controlled tooltips we ignore close requests
+      // (they're dismissed only via the close button / Escape, or the server flipping `open`) so the
+      // tooltip doesn't vanish when the cursor leaves the trigger.
+      if (isControlled && !next) {
+        emitOpenEvents(false);
         return;
       }
-      // A persistent tooltip never auto-closes — only the close button dismisses it.
-      if (persistent && !next) return;
-
+      // Server-controlled tooltips don't open on hover either — only the `open` prop opens them.
+      if (serverControlled && next) {
+        emitOpenEvents(true);
+        return;
+      }
       setOpen(next);
       emitOpenEvents(next);
     },
-    [serverControlled, persistent, emitOpenEvents],
+    [isControlled, serverControlled, emitOpenEvents],
   );
 
   const handleClose = React.useCallback(() => {
