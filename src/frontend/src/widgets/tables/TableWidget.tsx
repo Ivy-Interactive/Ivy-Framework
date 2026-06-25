@@ -18,13 +18,16 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   density = Densities.Medium,
   layout = "Auto",
 }) => {
-  const widthStyles = getWidth(width || "Full");
+  const resolvedWidth = width || "Full";
+  const widthStyles = getWidth(resolvedWidth);
+  const isFitContent = resolvedWidth.toLowerCase().startsWith("fit");
+  const widthClass = isFitContent ? "w-fit" : "w-full";
 
   return (
-    <div style={widthStyles} className="w-full">
+    <div style={widthStyles} className={widthClass}>
       <Table
         density={density}
-        className={cn("w-full caption-bottom border-collapse border border-border")}
+        className={cn(widthClass, "caption-bottom border-collapse border border-border")}
         style={{
           tableLayout: layout.toLowerCase() === "fixed" ? "fixed" : "auto",
         }}

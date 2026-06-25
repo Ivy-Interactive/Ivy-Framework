@@ -384,11 +384,15 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         Table RenderTable(TableRow[] tableRows)
         {
-            var tableWidth = _width ?? Size.Full();
+            var visibleColumns = _columns.Values.Where(e => !e.Removed).ToList();
+
+            bool allColumnsContentSized = visibleColumns.Count > 0 &&
+                visibleColumns.All(c => c.Width != null && c.Width.IsContentSized);
+
+            var tableWidth = _width ?? (allColumnsContentSized ? Size.Fit() : Size.Full());
             var table = new Table(tableRows).Width(tableWidth).Density(_density);
 
-            bool hasContentSizedColumn = _columns.Values
-                .Where(e => !e.Removed)
+            bool hasContentSizedColumn = visibleColumns
                 .Any(c => c.Width == null || c.Width.IsContentSized);
 
             table = table.Layout(hasContentSizedColumn ? "Auto" : "Fixed");
