@@ -21,6 +21,18 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
     }
   };
 
+  // Get padding based on density
+  const getPadding = (density: Densities) => {
+    switch (density) {
+      case Densities.Small:
+        return "4px 6px";
+      case Densities.Large:
+        return "8px 10px";
+      default:
+        return "6px 8px";
+    }
+  };
+
   // Base editor styles using CSS variables
   const baseTheme = EditorView.theme({
     "&": {
@@ -44,7 +56,7 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       backgroundColor: "transparent",
     },
     ".cm-content": {
-      padding: "10px",
+      padding: getPadding(density),
       wordWrap: "break-word",
       whiteSpace: "pre-wrap",
       width: "fit-content",
