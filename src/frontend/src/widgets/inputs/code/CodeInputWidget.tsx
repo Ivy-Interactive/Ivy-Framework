@@ -7,7 +7,7 @@ import { getHeight, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
-import { X, Copy, Loader2 } from "lucide-react";
+import { X, Copy, Loader2, Check } from "lucide-react";
 import {
   normalizeInputDensity,
   textInputAffixCellClasses,
@@ -142,6 +142,18 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const serverValue = value || "";
   const [localValue, setLocalValue] = useOptimisticValue(serverValue, isFocused);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await copyToClipboard(localValue);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  }, [localValue]);
+
   const debouncedOnChange = useDebouncedCallback((value: string) => {
     if (events.includes("OnChange")) {
       eventHandler("OnChange", id, [value]);
@@ -242,14 +254,19 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       {showCopy && (
         <button
           type="button"
-          onClick={() => copyToClipboard(localValue)}
+          onClick={handleCopy}
           aria-label="Copy to clipboard"
           className={cn(
             textInputTrailingIconButtonClasses(overlay, density),
             "opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200",
+            copied && "opacity-100 text-primary hover:text-primary",
           )}
         >
-          <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          {copied ? (
+            <Check className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          ) : (
+            <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          )}
         </button>
       )}
       {showClear && (
