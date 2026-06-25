@@ -72,16 +72,16 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
 
   const handleOpenChange = React.useCallback(
     (next: boolean) => {
-      // Radix requests a close on hover-out / blur. For controlled tooltips we ignore close requests
-      // (they're dismissed only via the close button / Escape, or the server flipping `open`) so the
-      // tooltip doesn't vanish when the cursor leaves the trigger.
+      // Controlled tooltips (persistent or server-controlled `open`) ignore Radix's hover/focus
+      // driven open/close entirely — including the close request Radix fires on hover-out. They open
+      // via hover-in (persistent) or the `open` prop (server), and close only via the close button /
+      // Escape. Crucially we must NOT emit close events on hover-out: a wired OnClose handler that
+      // flips `open` back to false would make the tooltip vanish when the cursor leaves.
       if (isControlled && !next) {
-        emitOpenEvents(false);
         return;
       }
       // Server-controlled tooltips don't open on hover either — only the `open` prop opens them.
       if (serverControlled && next) {
-        emitOpenEvents(true);
         return;
       }
       setOpen(next);
