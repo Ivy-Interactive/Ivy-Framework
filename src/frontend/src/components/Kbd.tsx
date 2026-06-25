@@ -1,13 +1,23 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
+// Keys shown as a symbol rather than their typed word. Only these few have a
+// universally recognized glyph; everything else is rendered verbatim.
+const KEY_SYMBOLS: Record<string, string> = {
+  enter: "↵",
+  return: "↵",
+  backspace: "⌫",
+};
+
 /**
- * Normalizes a single key for display. Pass-through except that a lone letter is
- * uppercased ("a" → "A"); modifiers, symbols, and multi-character names are left
- * exactly as written ("cmd" → "cmd", "⌘" → "⌘", "Ctrl" → "Ctrl").
+ * Normalizes a single key for display. Enter/Return/Backspace render as their symbol;
+ * a lone letter is uppercased ("a" → "A"); everything else is left exactly as written
+ * ("cmd" → "cmd", "⌘" → "⌘", "Ctrl" → "Ctrl").
  */
 const labelForKey = (raw: string): string => {
   const key = raw.trim();
+  const symbol = KEY_SYMBOLS[key.toLowerCase()];
+  if (symbol) return symbol;
   return key.length === 1 ? key.toUpperCase() : key;
 };
 

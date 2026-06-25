@@ -52,8 +52,21 @@ describe("Kbd", () => {
   });
 
   it("joins with + when any key is multi-character", () => {
+    mount(<Kbd keys="Ctrl+Shift" />);
+    expect(container.querySelector("kbd")!.textContent).toBe("Ctrl+Shift");
+  });
+
+  it("renders Enter and Backspace as symbols", () => {
+    mount(<Kbd keys="Enter" />);
+    expect(container.querySelector("kbd")!.textContent).toBe("↵");
+    mount(<Kbd keys="Backspace" />);
+    expect(container.querySelector("kbd")!.textContent).toBe("⌫");
+  });
+
+  it("treats a mapped symbol as single-character (no + with another single key)", () => {
     mount(<Kbd keys="Ctrl+Enter" />);
-    expect(container.querySelector("kbd")!.textContent).toBe("Ctrl+Enter");
+    // "Ctrl" (4 chars) forces the "+" join; Enter renders as its symbol.
+    expect(container.querySelector("kbd")!.textContent).toBe("Ctrl+↵");
   });
 
   it("renders a ghost cap without background or border", () => {
