@@ -93,7 +93,7 @@ const tokenForKey = (raw: string): KeyToken => {
  * perfect square (see `keyCapShape`); multi-character labels keep the height and grow wider.
  */
 const keyCapBase =
-  "box-border inline-flex h-5 items-center justify-center rounded-selector text-xs font-semibold leading-none";
+  "box-border inline-flex h-4 items-center justify-center rounded-[0.25rem] text-[10px] font-semibold leading-none";
 
 /**
  * Width/padding for a key cap. A token that renders an icon or a single character is a
@@ -101,7 +101,7 @@ const keyCapBase =
  * grows wider with the height as its minimum and small horizontal padding.
  */
 const keyCapShape = (token: KeyToken): string =>
-  token.icon || token.label.length <= 1 ? "w-5" : "min-w-5 px-1";
+  token.icon || token.label.length <= 1 ? "w-4" : "min-w-4 px-1";
 
 /**
  * Color/fill styling for a key cap.
@@ -130,10 +130,10 @@ const KeyCap: React.FC<{
     className={cn(keyCapBase, keyCapShape(token), keyCapColor({ inherit, ghost }))}
   >
     {token.icon ? (
-      // `!size-3` overrides the `[&_svg]:size-4` rule that container widgets such as
-      // Button apply to every descendant svg, which would otherwise force these caps
-      // to 16px.
-      <Icon name={token.icon} className="!size-3" aria-hidden />
+      // `!size-2.5` (10px) matches the letter caps' font size so icons and letters
+      // render at equal size. The `!` overrides the `[&_svg]:size-4` rule that container
+      // widgets such as Button apply to every descendant svg.
+      <Icon name={token.icon} className="!size-2.5" aria-hidden />
     ) : (
       token.label
     )}
@@ -186,7 +186,7 @@ export function Kbd({
   // to fit its content rather than staying square.
   return (
     <span className="inline-flex items-center gap-0.5 align-middle">
-      <kbd className={cn(keyCapBase, "min-w-5 px-1", keyCapColor({ ghost }))}>{children}</kbd>
+      <kbd className={cn(keyCapBase, "min-w-4 px-1", keyCapColor({ ghost }))}>{children}</kbd>
     </span>
   );
 }
