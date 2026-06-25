@@ -115,24 +115,10 @@ export const MemoizedWidget = React.memo(
 
     registerCallSite(node);
 
-    // Store raw content for text-editable widgets
-    const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
-    const rawContent = isTextEditable
-      ? (node.props.content as string) || (node.props.text as string) || ""
-      : undefined;
-
-    const skipWrapper = Component.skipWidgetWrapper === true;
-
-    const content = skipWrapper ? (
+    const content = (
       <Component {...props} slots={slots}>
         {slots.default}
       </Component>
-    ) : (
-      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
-        <Component {...props} slots={slots}>
-          {slots.default}
-        </Component>
-      </ivy-widget>
     );
 
     if (isLazyComponent(Component) && isChartComponent(node.type)) {
@@ -235,11 +221,9 @@ const renderExternalWidget = (node: WidgetNode, inheritedScale?: Densities): Rea
   registerCallSite(node);
 
   const content = (
-    <ivy-widget key={node.id} id={node.id} type={node.type}>
-      <ExternalWidgetWrapper Component={Component} props={props}>
-        {slots.default}
-      </ExternalWidgetWrapper>
-    </ivy-widget>
+    <ExternalWidgetWrapper Component={Component} props={props} key={node.id}>
+      {slots.default}
+    </ExternalWidgetWrapper>
   );
 
   return isLazyComponent(Component) ? <Suspense key={node.id}>{content}</Suspense> : content;
