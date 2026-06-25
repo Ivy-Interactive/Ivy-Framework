@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { GridCellKind } from "@glideapps/glide-data-grid";
 import {
   createEmptyCell,
@@ -922,6 +922,65 @@ describe("cellContent utilities", () => {
       const cell = getCellContent([0, 0], noWrapColumns, [], false, getNoWrapRowData);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.allowWrapping).toBe(false);
+      }
+    });
+  });
+
+  describe("getCellContent with isGrowColumn option", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    function mockCanvasMeasure(measure: (text: string) => number) {
+      const mockMeasureText = vi.fn((text: string) => ({ width: measure(text) }));
+      const mockGetContext = vi.fn().mockReturnValue({
+        font: "",
+        measureText: mockMeasureText,
+      });
+      vi.spyOn(document, "createElement").mockReturnValue({
+        getContext: mockGetContext,
+      } as unknown as HTMLCanvasElement);
+    }
+
+    it("should not truncate displayData when isGrowColumn is true", () => {
+      const columns: DataColumn[] = [{ name: "Name", type: ColType.Text, width: 50 }];
+      const rowData: DataRow[] = [
+        { values: ["Very long name that should normally be truncated at 50px width"] },
+      ];
+      const getRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < rowData.length ? rowData[rowIndex] : null;
+      };
+
+      const cell = getCellContent([0, 0], columns, [], false, getRowData, {
+        columnWidth: 50,
+        isGrowColumn: true,
+      });
+      expect(cell.kind).toBe(GridCellKind.Text);
+      if (cell.kind === GridCellKind.Text) {
+        expect(cell.displayData).toBe(
+          "Very long name that should normally be truncated at 50px width",
+        );
+      }
+    });
+
+    it("should truncate displayData when isGrowColumn is false or not provided", () => {
+      mockCanvasMeasure((text) => text.length * 8);
+
+      const columns: DataColumn[] = [{ name: "Name", type: ColType.Text, width: 50 }];
+      const rowData: DataRow[] = [
+        { values: ["Very long name that should normally be truncated at 50px width"] },
+      ];
+      const getRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < rowData.length ? rowData[rowIndex] : null;
+      };
+
+      const cell = getCellContent([0, 0], columns, [], false, getRowData, {
+        columnWidth: 50,
+        isGrowColumn: false,
+      });
+      expect(cell.kind).toBe(GridCellKind.Text);
+      if (cell.kind === GridCellKind.Text) {
+        expect(cell.displayData).toContain("…");
       }
     });
   });
