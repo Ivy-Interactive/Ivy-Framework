@@ -143,8 +143,9 @@ function truncateCellDisplayData(
   cellHorizontalPadding: number,
   cellFont: string,
   wrapText?: boolean,
+  isGrowColumn?: boolean,
 ): GridCell {
-  if (wrapText || columnWidth === undefined) return cell;
+  if (wrapText || columnWidth === undefined || isGrowColumn) return cell;
 
   const maxWidth = getMaxTextWidth(columnWidth, cellHorizontalPadding);
   if (maxWidth <= 0) return cell;
@@ -475,6 +476,7 @@ export interface GetCellContentOptions {
   columnWidth?: number;
   cellHorizontalPadding?: number;
   cellFont?: string;
+  isGrowColumn?: boolean;
 }
 
 export function getCellContent(
@@ -575,6 +577,7 @@ export function getCellContent(
     options.cellHorizontalPadding ?? DENSITY_CONFIG[Densities.Medium].cellHorizontalPadding,
     options.cellFont ?? getCellFont(),
     column.wrapText,
+    options.isGrowColumn,
   );
   if (column.hasCellAction) {
     return { ...withTruncation, cursor: "pointer" };
