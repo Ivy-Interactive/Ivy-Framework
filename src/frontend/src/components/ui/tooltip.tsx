@@ -117,9 +117,7 @@ interface TooltipContentProps extends React.ComponentPropsWithoutRef<
   typeof TooltipPrimitive.Content
 > {
   breakType?: TooltipBreakType;
-  /** Renders an arrow ("bubble") pointing at the trigger. */
   showArrow?: boolean;
-  /** Overrides the arrow fill class (defaults to fill-card to match the surface). */
   arrowClassName?: string;
 }
 
@@ -162,8 +160,6 @@ const TooltipContent = React.forwardRef<
           ref={ref}
           sideOffset={sideOffset}
           className={cn(
-            // No overflow-hidden here: it would clip the arrow, which sits at the content edge.
-            // Clipping of long content is handled by the inner wrapper instead.
             "z-50 rounded-selector bg-card px-3 py-1.5 text-xs text-card-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 max-w-sm",
             className,
           )}
@@ -173,8 +169,6 @@ const TooltipContent = React.forwardRef<
             {children}
           </div>
           {showArrow && (
-            // Arrow is a direct child of Content (outside the overflow wrapper) so it isn't clipped.
-            // fill-card melts it into the surface; arrowClassName lets a colored tooltip match its bg.
             <TooltipPrimitive.Arrow
               width={12}
               height={6}

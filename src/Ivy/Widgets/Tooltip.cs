@@ -3,6 +3,15 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum TooltipVariant
+{
+    Default,
+    Info,
+    Success,
+    Warning,
+    Error
+}
+
 /// <summary>
 /// A brief informational message that appears when hovering over an element.
 /// </summary>
@@ -22,7 +31,7 @@ public record Tooltip : WidgetBase<Tooltip>
 
     [Prop] public bool Persistent { get; set; }
 
-    [Prop] public Colors? Background { get; set; }
+    [Prop] public TooltipVariant Variant { get; set; } = TooltipVariant.Default;
 
     [Event] public EventHandler<Event<Tooltip>>? OnOpen { get; set; }
 
@@ -89,29 +98,29 @@ public static class TooltipExtensions
         return tooltip with { Persistent = persistent };
     }
 
-    public static Tooltip Color(this Tooltip tooltip, Colors? background)
+    public static Tooltip Variant(this Tooltip tooltip, TooltipVariant variant)
     {
-        return tooltip with { Background = background };
+        return tooltip with { Variant = variant };
     }
 
     public static Tooltip Error(this Tooltip tooltip)
     {
-        return tooltip with { Background = Colors.Destructive };
+        return tooltip with { Variant = TooltipVariant.Error };
     }
 
     public static Tooltip Info(this Tooltip tooltip)
     {
-        return tooltip with { Background = Colors.Info };
+        return tooltip with { Variant = TooltipVariant.Info };
     }
 
     public static Tooltip Success(this Tooltip tooltip)
     {
-        return tooltip with { Background = Colors.Success };
+        return tooltip with { Variant = TooltipVariant.Success };
     }
 
     public static Tooltip Warning(this Tooltip tooltip)
     {
-        return tooltip with { Background = Colors.Warning };
+        return tooltip with { Variant = TooltipVariant.Warning };
     }
 
     public static Tooltip HandleOpen(this Tooltip tooltip, Func<Event<Tooltip>, ValueTask> onOpen)
