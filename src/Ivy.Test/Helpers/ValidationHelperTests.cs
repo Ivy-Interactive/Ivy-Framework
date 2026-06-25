@@ -77,6 +77,24 @@ public class ValidationHelperTests
         Assert.False(ValidationHelper.IsEmptyContent(42));
     }
 
+    [Fact]
+    public void IsEmptyContent_EmptyList_ReturnsTrue()
+    {
+        Assert.True(ValidationHelper.IsEmptyContent(new List<string>()));
+    }
+
+    [Fact]
+    public void IsEmptyContent_EmptyArray_ReturnsTrue()
+    {
+        Assert.True(ValidationHelper.IsEmptyContent(Array.Empty<int>()));
+    }
+
+    [Fact]
+    public void IsEmptyContent_NonEmptyList_ReturnsFalse()
+    {
+        Assert.False(ValidationHelper.IsEmptyContent(new List<string> { "a" }));
+    }
+
     #endregion
 
     #region ValidateRedirectUrl
