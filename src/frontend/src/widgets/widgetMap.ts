@@ -62,6 +62,7 @@ import { LoadingWidget } from "@/widgets/primitives/LoadingWidget";
 import { LogoLoadingWidget } from "@/widgets/primitives/LogoLoadingWidget";
 import { AppHostWidget } from "@/widgets/primitives/AppHostWidget";
 import { AutoScrollWidget } from "@/widgets/primitives/AutoScrollWidget";
+import { BreakpointListenerWidget } from "@/widgets/primitives/BreakpointListenerWidget";
 import { TableWidget, TableRowWidget, TableCellWidget } from "@/widgets/tables";
 import { SmartSearch } from "@/docs-internal/SmartSearch";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -102,6 +103,7 @@ export const widgetMap = {
   "Ivy.LogoLoading": LogoLoadingWidget,
   "Ivy.AppHost": AppHostWidget,
   "Ivy.AutoScroll": AutoScrollWidget,
+  "Ivy.BreakpointListener": BreakpointListenerWidget,
   "Ivy.AudioPlayer": lazyWithRetry(() =>
     import("@/widgets/primitives/AudioPlayerWidget").then((m) => ({
       default: m.AudioPlayerWidget,
