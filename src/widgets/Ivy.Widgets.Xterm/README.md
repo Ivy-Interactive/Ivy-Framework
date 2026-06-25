@@ -63,6 +63,7 @@ new Terminal()
 | `Scrollback` | `int` | `1000` | Lines to keep in scrollback buffer |
 | `Theme` | `TerminalTheme?` | Dark theme | Terminal color theme |
 | `InitialContent` | `string?` | `null` | Initial content to display |
+| `AutoFocus` | `bool` | `true` | Automatically focus the terminal on mount so it receives keyboard input |
 | `Loading` | `bool` | `false` | Show a loading overlay (spinner + text) until the first stream data arrives |
 | `LoadingText` | `string?` | `"Loading..."` | Text shown in the loading overlay |
 

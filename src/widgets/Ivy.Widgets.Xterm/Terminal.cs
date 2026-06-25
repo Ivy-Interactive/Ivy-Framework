@@ -23,6 +23,7 @@ public record Terminal : WidgetBase<Terminal>
     [Prop] public string? InitialContent { get; init; }
     [Prop] public bool Closed { get; init; }
     [Prop] public bool AllowClipboard { get; init; } = true;
+    [Prop] public bool AutoFocus { get; init; } = true;
     [Prop] public bool Loading { get; init; }
     [Prop] public string? LoadingText { get; init; }
     [Prop] public Colors? Background { get; init; }
@@ -60,6 +61,9 @@ public static class TerminalExtensions
 
     public static Terminal AllowClipboard(this Terminal widget, bool allowClipboard = true) =>
         widget with { AllowClipboard = allowClipboard };
+
+    public static Terminal AutoFocus(this Terminal widget, bool autoFocus = true) =>
+        widget with { AutoFocus = autoFocus };
 
     public static Terminal Loading(this Terminal widget, bool loading = true) =>
         widget with { Loading = loading };
