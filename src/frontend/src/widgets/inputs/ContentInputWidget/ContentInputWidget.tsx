@@ -12,7 +12,7 @@ import { useFileAttachments } from "./useFileAttachments";
 import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import { formatShortcutForDisplay } from "@/lib/shortcut";
+import { ShortcutKeys } from "@/components/Kbd";
 import { useShortcut } from "@/lib/useShortcut";
 
 const toolbarVariant = cva("flex items-center gap-1", {
@@ -58,20 +58,6 @@ const dropTextVariant = cva("text-primary ml-1", {
   },
   defaultVariants: { density: "Medium" },
 });
-
-const shortcutBadgeVariant = cva(
-  "ml-auto font-medium text-muted-foreground bg-muted border border-border rounded-field",
-  {
-    variants: {
-      density: {
-        Small: "text-[10px] px-0.5 py-0",
-        Medium: "text-xs px-1 py-0.5",
-        Large: "text-sm px-1.5 py-0.5",
-      },
-    },
-    defaultVariants: { density: "Medium" },
-  },
-);
 
 export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   id,
@@ -182,8 +168,6 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
     }
   }, [autoFocus]);
 
-  const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
-
   useShortcut(
     id,
     shortcutKey,
@@ -275,7 +259,7 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           <div className={toolbarVariant({ density })}>
             {isDragging && <span className={dropTextVariant({ density })}>Drop files here</span>}
             {shortcutKey && !isFocused && (
-              <kbd className={shortcutBadgeVariant({ density })}>{shortcutDisplay}</kbd>
+              <ShortcutKeys shortcut={shortcutKey} className="ml-auto" />
             )}
           </div>
         )}

@@ -302,7 +302,8 @@ test.describe("Button Widget Tests", () => {
       // Verify shortcut badges are rendered on buttons
       const searchButton = page.getByRole("button", { name: /Search/ }).first();
       await searchButton.scrollIntoViewIfNeeded();
-      const kbd = searchButton.locator("kbd");
+      // Each key in a shortcut renders as its own standalone <kbd> cap.
+      const kbd = searchButton.locator("kbd").first();
       await expect(kbd).toBeVisible();
     });
   });

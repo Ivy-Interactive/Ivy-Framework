@@ -22,7 +22,8 @@ import {
   searchInputPaddingVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
-import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
+import { useCursorPosition, usePasteHandler } from "../hooks";
+import { ShortcutKeys } from "@/components/Kbd";
 
 interface SearchVariantProps {
   props: Omit<TextInputWidgetProps, "variant">;
@@ -90,7 +91,6 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
     ...getWidth(props.width),
   };
 
-  const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = Boolean(props.value && String(props.value).trim() !== "");
   const prefixContent = props.slots?.Prefix;
   const suffixContent = props.slots?.Suffix;
@@ -115,11 +115,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
     [focusRef, inputRef],
   );
 
-  const kbd = (
-    <kbd className="rounded-selector border border-border bg-muted px-1 py-0.25 text-xs text-foreground">
-      {shortcutDisplay}
-    </kbd>
-  );
+  const kbd = props.shortcutKey ? <ShortcutKeys shortcut={props.shortcutKey} /> : null;
 
   const trailingCluster = (overlay: boolean) => (
     <>
