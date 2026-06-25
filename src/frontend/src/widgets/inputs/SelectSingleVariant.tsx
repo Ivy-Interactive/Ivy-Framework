@@ -226,10 +226,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       ref={triggerRef}
       className={cn(
         "relative",
-        invalid &&
-          (hasAffixes
-            ? inputStyles.invalidInput
-            : "text-destructive-foreground placeholder-destructive-foreground"),
+        invalid && hasAffixes && inputStyles.invalidInput,
         !hasValue && "text-muted-foreground",
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",

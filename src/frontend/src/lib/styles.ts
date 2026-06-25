@@ -1,8 +1,7 @@
 export const inputStyles = {
   invalid:
     "bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
-  invalidInput:
-    "border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
+  invalidInput: "border-destructive focus-visible:border-destructive",
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
