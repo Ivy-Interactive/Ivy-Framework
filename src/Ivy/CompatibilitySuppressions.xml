@@ -3,6 +3,62 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Callout.Destructive(System.String,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Callout.Error(System.String,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Callout.Info(System.String,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Callout.Success(System.String,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Callout.Warning(System.String,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.LoadedPlugin.#ctor(Ivy.Plugins.IIvyPlugin,System.Reflection.Assembly,System.Runtime.Loader.AssemblyLoadContext,System.String)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.LoadedPlugin.Deconstruct(Ivy.Plugins.IIvyPlugin@,System.Reflection.Assembly@,System.Runtime.Loader.AssemblyLoadContext@,System.String@)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.LoadedPlugin.get_ServiceProvider</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Core.Plugins.PluginContextBase.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Ivy.Core.Apps.AppRepository,System.Collections.Generic.IReadOnlySet{System.String},Microsoft.AspNetCore.Builder.WebApplicationBuilder)</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
@@ -10,7 +66,28 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.AddBadgeProvider(System.String,System.Func{System.IServiceProvider,System.Int32})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Core.Plugins.PluginContextBase.AddFooterMenuItems(System.Func{System.Collections.Generic.IEnumerable{Ivy.MenuItem},Ivy.INavigator,System.Collections.Generic.IEnumerable{Ivy.MenuItem}})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.AddMenuItems(System.Func{System.Collections.Generic.IEnumerable{Ivy.MenuItem},System.Collections.Generic.IEnumerable{Ivy.MenuItem}})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.get_BadgeProviders</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -38,7 +115,21 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.get_MenuTransformers</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Core.Plugins.PluginLoader.SetConfiguration(Microsoft.Extensions.Configuration.IConfiguration)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.IIvyExtendedPluginContext.AddBadgeProvider(System.String,System.Func{System.IServiceProvider,System.Int32})</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -52,14 +143,14 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Ivy.Server.UsePlugins(System.String,System.Version,System.Func{Ivy.Server,Microsoft.AspNetCore.Builder.WebApplicationBuilder,Ivy.Core.Plugins.PluginContextBase},System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Boolean)</Target>
+    <Target>M:Ivy.Plugins.IIvyExtendedPluginContext.AddMenuItems(System.Func{System.Collections.Generic.IEnumerable{Ivy.MenuItem},System.Collections.Generic.IEnumerable{Ivy.MenuItem}})</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0003</DiagnosticId>
-    <Target>Ivy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</Target>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Server.UsePlugins(System.String,System.Version,System.Func{Ivy.Server,Microsoft.AspNetCore.Builder.WebApplicationBuilder,Ivy.Core.Plugins.PluginContextBase},System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Boolean)</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

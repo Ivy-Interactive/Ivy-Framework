@@ -77,8 +77,13 @@ They have no binary coupling to the target type. Old plugins are completely unaf
 ## Handling intentional breaks
 
 If a breaking change is truly necessary:
-1. Rebuild with `/p:ApiCompatGenerateSuppressionFile=true` to generate/update the
-   `CompatibilitySuppressions.xml` in the affected project
+1. Regenerate `CompatibilitySuppressions.xml` by running pack with the suppression flag:
+   ```bash
+   GITHUB_ACTIONS=true dotnet pack src/Ivy/Ivy.csproj --configuration Release /p:ApiCompatGenerateSuppressionFile=true /p:Version=99.0.0
+   GITHUB_ACTIONS=true dotnet pack src/Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release /p:ApiCompatGenerateSuppressionFile=true /p:Version=99.0.0
+   ```
+   `GITHUB_ACTIONS=true` matches CI's `GenerateAssemblyInfo` behavior; `/p:Version=99.0.0` ensures
+   the assembly version exceeds the baseline (required by CP0003). Only run for project(s) you changed.
 2. Document the migration in `src/.releases/Refactors/`
 3. Bump the minor version so `CheckSharedAssemblyCompatibility` in PluginLoader rejects
    incompatible old plugins gracefully rather than crashing at runtime
