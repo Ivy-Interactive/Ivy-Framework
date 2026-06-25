@@ -35,6 +35,15 @@ public static class ValidationHelper
             return !b;
         }
 
+        // Treat empty collections (lists, arrays, etc.) as empty content. Strings are also
+        // IEnumerable but are handled above, so they never reach here.
+        if (obj is System.Collections.IEnumerable enumerable)
+        {
+            foreach (var _ in enumerable)
+                return false;
+            return true;
+        }
+
         return false;
     }
 
