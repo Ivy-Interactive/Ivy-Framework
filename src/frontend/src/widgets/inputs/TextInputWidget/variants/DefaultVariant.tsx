@@ -19,12 +19,8 @@ import {
   textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
-import {
-  useCursorPosition,
-  useEnterKeyBlur,
-  usePasteHandler,
-  formatShortcutForDisplay,
-} from "../hooks";
+import { useCursorPosition, useEnterKeyBlur, usePasteHandler } from "../hooks";
+import { ShortcutKeys } from "@/components/Kbd";
 import { Mic, X } from "lucide-react";
 
 interface DefaultVariantProps {
@@ -75,7 +71,6 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
     ...getWidth(props.width),
   };
 
-  const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== "";
   const prefixContent = props.slots?.Prefix;
   const suffixContent = props.slots?.Suffix;
@@ -144,9 +139,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                     textInputTrailingShortcutWrapperClasses(density),
                   )}
                 >
-                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
-                    {shortcutDisplay}
-                  </kbd>
+                  <ShortcutKeys shortcut={props.shortcutKey ?? ""} />
                 </div>
               )}
               {showClear && (
@@ -200,11 +193,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           >
             {trailingBesideSuffix && showTrailing && (
               <>
-                {showShortcut && (
-                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
-                    {shortcutDisplay}
-                  </kbd>
-                )}
+                {showShortcut && <ShortcutKeys shortcut={props.shortcutKey ?? ""} />}
                 {showClear && (
                   <button
                     type="button"
