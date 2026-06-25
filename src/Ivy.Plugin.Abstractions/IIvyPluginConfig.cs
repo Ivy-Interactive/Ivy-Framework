@@ -30,7 +30,15 @@ public interface IIvyPluginConfig
         {
             return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
         }
-        catch
+        catch (FormatException)
+        {
+            return null;
+        }
+        catch (InvalidCastException)
+        {
+            return null;
+        }
+        catch (OverflowException)
         {
             return null;
         }

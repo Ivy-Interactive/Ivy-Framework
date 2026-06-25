@@ -904,7 +904,11 @@ public class PluginLoader : IPluginManager
         {
             _logger.LogError(ex.InnerException ?? ex, "Plugin '{Id}' shutdown failed", pluginId);
         }
-        catch (Exception ex)
+        catch (ObjectDisposedException ex)
+        {
+            _logger.LogError(ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Plugin '{Id}' shutdown failed", pluginId);
         }
@@ -947,7 +951,15 @@ public class PluginLoader : IPluginManager
             {
                 _logger.LogWarning("Plugin '{Id}' shutdown timed out during host exit", p.Id);
             }
-            catch (Exception ex)
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex.InnerException ?? ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                _logger.LogError(ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
             }
@@ -994,13 +1006,10 @@ public class PluginLoader : IPluginManager
     {
         try
         {
-            if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
+            if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory) && !SourcePluginBuilder.BuildSync(directory, _logger))
             {
-                if (!SourcePluginBuilder.BuildSync(directory, _logger))
-                {
-                    RecordFailure(directory, "Source plugin build failed");
-                    return;
-                }
+                RecordFailure(directory, "Source plugin build failed");
+                return;
             }
 
             var loaded = LoadPluginFromDirectory(directory, serviceProvider, out var reason);
@@ -1072,7 +1081,7 @@ public class PluginLoader : IPluginManager
                 return;
             }
 
-            var fullPath = Path.GetFullPath(Path.Combine(directory, icon.Value));
+            var fullPath = Path.GetFullPath(Path.Join(directory, icon.Value));
             if (!File.Exists(fullPath))
             {
                 _logger.LogWarning(
@@ -1161,7 +1170,11 @@ public class PluginLoader : IPluginManager
             if (Directory.Exists(shadowDirectory))
                 Directory.Delete(shadowDirectory, recursive: true);
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            _logger.LogDebug(ex, "Failed to delete shadow directory: {Directory}", shadowDirectory);
+        }
+        catch (UnauthorizedAccessException ex)
         {
             _logger.LogDebug(ex, "Failed to delete shadow directory: {Directory}", shadowDirectory);
         }
@@ -1229,9 +1242,17 @@ public class PluginLoader : IPluginManager
                         {
                             hostAssembly = Assembly.Load(new AssemblyName(packageName));
                         }
-                        catch (Exception) // CodeQL suppress: assembly load has many failure modes beyond IO
+                        catch (FileNotFoundException)
                         {
                             // Assembly not available in host — plugin may still work if it's optional
+                            continue;
+                        }
+                        catch (FileLoadException)
+                        {
+                            continue;
+                        }
+                        catch (BadImageFormatException)
+                        {
                             continue;
                         }
                     }
