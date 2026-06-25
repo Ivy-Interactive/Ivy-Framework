@@ -1,18 +1,37 @@
 import { cn } from "@/lib/utils";
+import { isMac } from "@/lib/shortcut";
 import React from "react";
 
-// Keys shown as a symbol rather than their typed word. Only these few have a
+// Keys shown as a symbol rather than their typed word. Enter/Backspace have a
 // universally recognized glyph; everything else is rendered verbatim.
+//
+// Modifiers are symbolized only on macOS, where ⌘/⌥/⇧/⌃ are conventional. "Ctrl"
+// maps to ⌘ to match parseShortcut(), which treats ctrl→meta on Mac so the binding
+// fires on Command. On other platforms modifiers stay as their typed word.
 const KEY_SYMBOLS: Record<string, string> = {
   enter: "↵",
   return: "↵",
   backspace: "⌫",
+  ...(isMac
+    ? {
+        ctrl: "⌘",
+        control: "⌘",
+        cmd: "⌘",
+        command: "⌘",
+        meta: "⌘",
+        win: "⌘",
+        super: "⌘",
+        alt: "⌥",
+        option: "⌥",
+        shift: "⇧",
+      }
+    : {}),
 };
 
 /**
- * Normalizes a single key for display. Enter/Return/Backspace render as their symbol;
- * a lone letter is uppercased ("a" → "A"); everything else is left exactly as written
- * ("cmd" → "cmd", "⌘" → "⌘", "Ctrl" → "Ctrl").
+ * Normalizes a single key for display. Mapped keys (Enter, Backspace, and — on Mac —
+ * the modifiers) render as their symbol; a lone letter is uppercased ("a" → "A");
+ * everything else is left exactly as written ("cmd" → "cmd" off Mac, "⌘" → "⌘").
  */
 const labelForKey = (raw: string): string => {
   const key = raw.trim();
@@ -61,8 +80,8 @@ const keyCapColor = ({ inherit, ghost }: { inherit?: boolean; ghost?: boolean })
 
 /**
  * Displays a keyboard shortcut as text inside a single cap. Pass `keys` (a shortcut
- * string) or a string child; modifiers and keys are rendered verbatim (no icons or
- * symbol substitution). Set `ghost` to drop the background and border.
+ * string) or a string child. Keys render as text (no icons); Enter/Backspace — and, on
+ * Mac, the modifiers — show as symbols. Set `ghost` to drop the background and border.
  */
 export function Kbd({
   children,
