@@ -1,10 +1,4 @@
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import React from "react";
 import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
@@ -49,10 +43,13 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  // A persistent or server-controlled tooltip is controlled; a plain hover tooltip is uncontrolled.
-  const isControlled = persistent || openProp !== undefined;
+  // Server-controlled: the `open` prop owns the open state, so the tooltip appears in response to an
+  // event (e.g. an error) and ignores hover/focus entirely.
+  const serverControlled = openProp !== undefined;
+  // Persistent (without an explicit `open`) still opens on hover, then stays until dismissed.
+  const isControlled = serverControlled || persistent;
 
-  // Local open state seeds from the server's `open` prop (or stays open while persistent).
+  // Local open state seeds from the server's `open` prop (or stays closed until hovered while persistent).
   const [open, setOpen] = React.useState<boolean>(openProp ?? false);
 
   // Keep local state in sync when the server pushes a new `open` value.
@@ -60,12 +57,8 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
     if (openProp !== undefined) setOpen(openProp);
   }, [openProp]);
 
-  const handleOpenChange = React.useCallback(
+  const emitOpenEvents = React.useCallback(
     (next: boolean) => {
-      // A persistent tooltip never auto-closes — only the close button dismisses it.
-      if (persistent && !next) return;
-
-      setOpen(next);
       if (events.includes("OnOpenChange")) eventHandler("OnOpenChange", id, [next]);
       if (next) {
         if (events.includes("OnOpen")) eventHandler("OnOpen", id, []);
@@ -73,14 +66,30 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
         eventHandler("OnClose", id, []);
       }
     },
-    [persistent, events, eventHandler, id],
+    [events, eventHandler, id],
+  );
+
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      // Server-controlled tooltips don't react to hover/focus — only to the `open` prop. We still
+      // forward the request as an event so server code can decide whether to open/close.
+      if (serverControlled) {
+        emitOpenEvents(next);
+        return;
+      }
+      // A persistent tooltip never auto-closes — only the close button dismisses it.
+      if (persistent && !next) return;
+
+      setOpen(next);
+      emitOpenEvents(next);
+    },
+    [serverControlled, persistent, emitOpenEvents],
   );
 
   const handleClose = React.useCallback(() => {
     setOpen(false);
-    if (events.includes("OnOpenChange")) eventHandler("OnOpenChange", id, [false]);
-    if (events.includes("OnClose")) eventHandler("OnClose", id, []);
-  }, [events, eventHandler, id]);
+    emitOpenEvents(false);
+  }, [emitOpenEvents]);
 
   if (!slots?.Trigger || !slots?.Content) {
     return (
@@ -107,7 +116,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
           </span>
         </TooltipTrigger>
         <TooltipContent
-          className="bg-popover text-popover-foreground shadow-md"
+          showArrow={showArrow}
           // A persistent tooltip stays put when the pointer leaves or focus changes.
           onPointerDownOutside={persistent ? (e) => e.preventDefault() : undefined}
           onEscapeKeyDown={persistent ? handleClose : undefined}
@@ -119,13 +128,12 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
                 type="button"
                 aria-label="Close"
                 onClick={handleClose}
-                className="-mr-1 -mt-0.5 shrink-0 rounded-selector p-0.5 text-popover-foreground/70 hover:bg-foreground/10 hover:text-popover-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="-mr-1 -mt-0.5 shrink-0 rounded-selector p-0.5 text-card-foreground/70 hover:bg-foreground/10 hover:text-card-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <Icon name="X" className="h-3 w-3" />
               </button>
             )}
           </div>
-          {showArrow && <TooltipArrow width={11} height={5} />}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
