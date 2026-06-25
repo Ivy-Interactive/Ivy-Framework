@@ -10,8 +10,10 @@ internal class PluginReloadScheduler : IDisposable
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _pendingReloads = new();
     private readonly ConcurrentDictionary<string, DateTime> _reloadCooldowns = new();
+    private readonly ConcurrentDictionary<string, int> _consecutiveFailures = new();
     private readonly TimeSpan _debounceDelay = TimeSpan.FromMilliseconds(500);
     private readonly TimeSpan _cooldownPeriod = TimeSpan.FromSeconds(2);
+    private const int MaxConsecutiveFailures = 5;
     private bool _disposed;
 
     public PluginReloadScheduler(IPluginManager pluginManager, ILogger logger)
@@ -23,6 +25,9 @@ internal class PluginReloadScheduler : IDisposable
     public void ScheduleLoad(string pluginDirectory)
     {
         if (_reloadCooldowns.TryGetValue(pluginDirectory, out var cooldownUntil) && DateTime.UtcNow < cooldownUntil)
+            return;
+
+        if (_consecutiveFailures.TryGetValue(pluginDirectory, out var failures) && failures >= MaxConsecutiveFailures)
             return;
 
         if (_pendingReloads.TryRemove(pluginDirectory, out var existingCts))
@@ -46,14 +51,11 @@ internal class PluginReloadScheduler : IDisposable
                 {
                     _pluginManager.LoadPlugin(pluginDirectory);
                     _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
+                    _consecutiveFailures.TryRemove(pluginDirectory, out _);
                 }
-                catch (InvalidOperationException ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    _logger.LogError(ex, "Failed to load plugin from {Directory}", pluginDirectory);
-                }
-                catch (IOException ex)
-                {
-                    _logger.LogError(ex, "Failed to load plugin from {Directory}", pluginDirectory);
+                    RecordFailure(pluginDirectory, ex);
                 }
             }
             catch (OperationCanceledException)
@@ -70,6 +72,9 @@ internal class PluginReloadScheduler : IDisposable
     public void ScheduleReload(string pluginDirectory)
     {
         if (_reloadCooldowns.TryGetValue(pluginDirectory, out var cooldownUntil) && DateTime.UtcNow < cooldownUntil)
+            return;
+
+        if (_consecutiveFailures.TryGetValue(pluginDirectory, out var failures) && failures >= MaxConsecutiveFailures)
             return;
 
         if (_pendingReloads.ContainsKey(pluginDirectory))
@@ -94,48 +99,53 @@ internal class PluginReloadScheduler : IDisposable
                     if (pluginId != null)
                     {
                         _logger.LogInformation("Reloading plugin: {PluginId}", pluginId);
-                        try
-                        {
-                            _pluginManager.ReloadPlugin(pluginId);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            _logger.LogError(ex, "Failed to reload plugin {PluginId}", pluginId);
-                        }
-                        catch (IOException ex)
-                        {
-                            _logger.LogError(ex, "Failed to reload plugin {PluginId}", pluginId);
-                        }
+                        _pluginManager.ReloadPlugin(pluginId);
                     }
                     else
                     {
                         _logger.LogInformation("Plugin not yet loaded, loading from: {Directory}", pluginDirectory);
-                        try
-                        {
-                            _pluginManager.LoadPlugin(pluginDirectory);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            _logger.LogError(ex, "Failed to load plugin from {Directory}", pluginDirectory);
-                        }
-                        catch (IOException ex)
-                        {
-                            _logger.LogError(ex, "Failed to load plugin from {Directory}", pluginDirectory);
-                        }
+                        _pluginManager.LoadPlugin(pluginDirectory);
                     }
                 }
 
                 _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
+                _consecutiveFailures.TryRemove(pluginDirectory, out _);
             }
             catch (OperationCanceledException)
             {
                 _logger.LogDebug("Plugin reload cancelled for {Directory}", pluginDirectory);
+            }
+            catch (Exception ex)
+            {
+                RecordFailure(pluginDirectory, ex);
             }
             finally
             {
                 _pendingReloads.TryRemove(pluginDirectory, out _);
             }
         });
+    }
+
+    public void ResetFailures(string pluginDirectory)
+    {
+        _consecutiveFailures.TryRemove(pluginDirectory, out _);
+    }
+
+    private void RecordFailure(string pluginDirectory, Exception ex)
+    {
+        var count = _consecutiveFailures.AddOrUpdate(pluginDirectory, 1, (_, c) => c + 1);
+        _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + GetBackoffCooldown(count);
+        _logger.LogError(ex, "Failed to load/reload plugin from {Directory} (attempt {Count}/{Max})",
+            pluginDirectory, count, MaxConsecutiveFailures);
+        if (count >= MaxConsecutiveFailures)
+            _logger.LogWarning("Plugin {Directory} has failed {Max} consecutive times, suspending reload attempts until source changes",
+                pluginDirectory, MaxConsecutiveFailures);
+    }
+
+    private TimeSpan GetBackoffCooldown(int failureCount)
+    {
+        var seconds = Math.Min(2 * Math.Pow(2, failureCount - 1), 60);
+        return TimeSpan.FromSeconds(seconds);
     }
 
     public void Cancel(string pluginDirectory)

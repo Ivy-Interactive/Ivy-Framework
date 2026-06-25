@@ -195,6 +195,7 @@ internal class PluginReferencesWatcher : IDisposable
             !fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") &&
             SourcePluginBuilder.IsSourcePlugin(pluginDirectory))
         {
+            _scheduler.ResetFailures(pluginDirectory);
             _sourceBuilder?.ScheduleBuild(pluginDirectory);
         }
     }
