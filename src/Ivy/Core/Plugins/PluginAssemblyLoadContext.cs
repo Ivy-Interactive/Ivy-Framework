@@ -10,9 +10,14 @@ internal class PluginAssemblyLoadContext(string pluginPath, IReadOnlySet<string>
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        // Shared assemblies are loaded from the host so types match across contexts
-        if (sharedAssemblyNames.Contains(assemblyName.Name!))
-            return null; // fall back to Default context
+        if (assemblyName.Name is null)
+            return null;
+
+        // Shared assemblies are loaded from the host so types match across contexts.
+        // Explicitly load by name (ignoring version) from the Default context to handle
+        // version mismatches between NuGet-referenced plugins and locally-built host assemblies.
+        if (sharedAssemblyNames.Contains(assemblyName.Name))
+            return Default.LoadFromAssemblyName(new AssemblyName(assemblyName.Name));
 
         var path = _resolver.ResolveAssemblyToPath(assemblyName);
         return path != null ? LoadFromAssemblyPath(path) : null;
