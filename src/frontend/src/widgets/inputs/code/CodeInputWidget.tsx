@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, Suspense, lazy, useEffect } from "react";
+import React, { useState, useCallback, useMemo, Suspense, lazy, useEffect, useRef } from "react";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
@@ -7,7 +7,7 @@ import { getHeight, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
-import { X, Copy, Loader2 } from "lucide-react";
+import { X, Copy, Loader2, Check } from "lucide-react";
 import {
   normalizeInputDensity,
   textInputAffixCellClasses,
@@ -22,6 +22,7 @@ import {
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
   textInputTrailingOverlayClasses,
+  textareaTrailingOverlayClasses,
 } from "@/components/ui/input/text-input-variant";
 import {
   keymap,
@@ -124,8 +125,34 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const densityKey = normalizeInputDensity(density);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isTall, setIsTall] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setIsTall(entry.contentRect.height > 50);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const serverValue = value || "";
   const [localValue, setLocalValue] = useOptimisticValue(serverValue, isFocused);
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await copyToClipboard(localValue);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  }, [localValue]);
 
   const debouncedOnChange = useDebouncedCallback((value: string) => {
     if (events.includes("OnChange")) {
@@ -227,11 +254,19 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       {showCopy && (
         <button
           type="button"
-          onClick={() => copyToClipboard(localValue)}
+          onClick={handleCopy}
           aria-label="Copy to clipboard"
-          className={textInputTrailingIconButtonClasses(overlay, density)}
+          className={cn(
+            textInputTrailingIconButtonClasses(overlay, density),
+            "opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200",
+            copied && "opacity-100 text-primary hover:text-primary",
+          )}
         >
-          <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          {copied ? (
+            <Check className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          ) : (
+            <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+          )}
         </button>
       )}
       {showClear && (
@@ -260,15 +295,17 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   );
 
   const codeEditor = () => (
-    <div
-      className={cn(
-        "relative h-full min-h-0 w-full overflow-hidden",
-        trailingInOverlay && "pr-8",
-        trailingInOverlay && (showClear || invalid) && "pr-16",
-      )}
-    >
+    <div className="relative h-full min-h-0 w-full overflow-hidden">
       {trailingInOverlay && (
-        <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
+        <div
+          className={
+            isTall
+              ? textareaTrailingOverlayClasses(density)
+              : textInputTrailingOverlayClasses(density)
+          }
+        >
+          {trailingCluster(true)}
+        </div>
       )}
       <Suspense
         fallback={
@@ -297,6 +334,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
             "h-full overflow-hidden",
             "[&_.cm-editor]:border-0 [&_.cm-editor]:bg-transparent! [&_.cm-editor]:shadow-none",
             "[&_.cm-scroller]:bg-transparent! [&_.cm-content]:bg-transparent! [&_.cm-gutters]:bg-transparent!",
+            trailingInOverlay && "[&_.cm-content]:pr-8 [&_.cm-placeholder]:pr-8",
+            trailingInOverlay &&
+              (showClear || invalid) &&
+              "[&_.cm-content]:pr-16 [&_.cm-placeholder]:pr-16",
             hasAffixes && "[&_.cm-editor]:rounded-none",
             hasAffixes && hasPrefix && "[&_.cm-editor]:rounded-l-none",
             hasAffixes && (hasSuffix || trailingInAffixCell) && "[&_.cm-editor]:rounded-r-none",
@@ -312,9 +353,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   if (!hasAffixes) {
     return (
       <div
+        ref={containerRef}
         style={styles}
         className={cn(
-          "relative flex w-full flex-col overflow-hidden",
+          "relative flex w-full flex-col overflow-hidden group",
           textInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
         )}
       >
@@ -325,12 +367,16 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   return (
     <div
+      ref={containerRef}
       style={styles}
-      className={textInputFieldShellClasses({
-        focused: isFocused,
-        invalid,
-        disabled,
-      })}
+      className={cn(
+        textInputFieldShellClasses({
+          focused: isFocused,
+          invalid,
+          disabled,
+        }),
+        "group",
+      )}
     >
       {hasPrefix && (
         <div className={codeInputAffixCellClasses("prefix", density, prefixContent)}>

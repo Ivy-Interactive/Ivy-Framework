@@ -1,8 +1,7 @@
 export const inputStyles = {
   invalid:
     "bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
-  invalidInput:
-    "border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
+  invalidInput: "border-destructive focus-visible:border-destructive",
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
@@ -780,7 +779,7 @@ export const typography: Record<string, string> = {
   blockquote: "border-l-2 pl-6 italic",
 
   // Code
-  code: "relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono font-semibold h-fit",
+  code: "relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono font-semibold h-fit w-fit",
 
   // Table
   table: "w-full border-collapse border border-border",

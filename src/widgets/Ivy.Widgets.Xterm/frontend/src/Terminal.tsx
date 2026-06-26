@@ -54,6 +54,7 @@ interface TerminalProps {
   stream?: { id: string };
   closed?: boolean;
   allowClipboard?: boolean;
+  autoFocus?: boolean;
   loading?: boolean;
   loadingText?: string;
   background?: string;
@@ -115,6 +116,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   stream,
   closed = false,
   allowClipboard = true,
+  autoFocus = true,
   loading = false,
   loadingText = "Loading...",
   background,
@@ -447,6 +449,12 @@ export const Terminal: React.FC<TerminalProps> = ({
 
       // Mark terminal as ready after initialization is complete
       terminalReadyRef.current = true;
+
+      // Automatically focus the terminal on mount so it receives keyboard
+      // input immediately, unless read-only or auto focus is disabled.
+      if (autoFocus && !isReadOnly) {
+        term.focus();
+      }
     });
 
     const handleWindowResize = () => {

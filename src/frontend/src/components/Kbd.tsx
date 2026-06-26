@@ -1,102 +1,73 @@
-import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import { isMac } from "@/lib/shortcut";
 import React from "react";
 
-/**
- * A single key to render inside a <Kbd>. Either an icon (lucide name) or a text label.
- */
-interface KeyToken {
-  /** Lucide icon name to render for this key, when one is available. */
-  icon?: string;
-  /** Text label to render when no icon is used. */
-  label: string;
-  /** Accessible label, used as the title/aria for icon-only keys. */
-  aria: string;
-}
-
-/**
- * Maps a normalized key name to an icon-based or text-based token.
- * Modifier and navigation keys resolve to platform-appropriate icons; everything
- * else falls back to an uppercased text label.
- */
-const tokenForKey = (raw: string): KeyToken => {
-  const key = raw.trim();
-  const k = key.toLowerCase();
-
-  // Platform modifiers. On macOS each modifier has its own glyph (⌃ ⌘ ⇧ ⌥); on other
-  // platforms only Shift has a conventional symbol, so the rest render as short text.
-  if (k === "ctrl" || k === "control") {
-    return isMac
-      ? { icon: "ChevronUp", label: "⌃", aria: "Control" }
-      : { label: "Ctrl", aria: "Control" };
-  }
-  if (k === "cmd" || k === "command" || k === "meta" || k === "win" || k === "super") {
-    return isMac
-      ? { icon: "Command", label: "⌘", aria: "Command" }
-      : { label: "Win", aria: "Windows" };
-  }
-  if (k === "shift") {
-    return { icon: "ArrowBigUp", label: "⇧", aria: "Shift" };
-  }
-  if (k === "alt" || k === "option") {
-    return isMac ? { icon: "Option", label: "⌥", aria: "Option" } : { label: "Alt", aria: "Alt" };
-  }
-
-  // Navigation / editing keys
-  const iconKeys: Record<string, { icon: string; aria: string }> = {
-    enter: { icon: "CornerDownLeft", aria: "Enter" },
-    return: { icon: "CornerDownLeft", aria: "Enter" },
-    backspace: { icon: "Delete", aria: "Backspace" },
-    arrowup: { icon: "ArrowUp", aria: "Arrow Up" },
-    up: { icon: "ArrowUp", aria: "Arrow Up" },
-    arrowdown: { icon: "ArrowDown", aria: "Arrow Down" },
-    down: { icon: "ArrowDown", aria: "Arrow Down" },
-    arrowleft: { icon: "ArrowLeft", aria: "Arrow Left" },
-    left: { icon: "ArrowLeft", aria: "Arrow Left" },
-    arrowright: { icon: "ArrowRight", aria: "Arrow Right" },
-    right: { icon: "ArrowRight", aria: "Arrow Right" },
-  };
-  if (k in iconKeys) {
-    const { icon, aria } = iconKeys[k];
-    return { icon, label: aria, aria };
-  }
-
-  // Text-only special keys (rendered as words, not single chars)
-  const textKeys: Record<string, string> = {
-    esc: "Esc",
-    escape: "Esc",
-    tab: "Tab",
-    space: "Space",
-    delete: "Del",
-    del: "Del",
-    home: "Home",
-    end: "End",
-    pageup: "PgUp",
-    pagedown: "PgDn",
-    insert: "Ins",
-  };
-  if (k in textKeys) {
-    return { label: textKeys[k], aria: textKeys[k] };
-  }
-
-  // Single character → uppercase; longer tokens keep their casing capitalized.
-  const label = key.length === 1 ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1);
-  return { label, aria: label };
+// Keys shown as a symbol rather than their typed word. Enter/Backspace have a
+// universally recognized glyph; everything else is rendered verbatim.
+//
+// Modifiers are symbolized only on macOS, where ⌘/⌥/⇧/⌃ are conventional. "Ctrl"
+// maps to ⌘ to match parseShortcut(), which treats ctrl→meta on Mac so the binding
+// fires on Command. On other platforms modifiers stay as their typed word.
+const KEY_SYMBOLS: Record<string, string> = {
+  enter: "↵",
+  return: "↵",
+  backspace: "⌫",
+  ...(isMac
+    ? {
+        ctrl: "⌘",
+        control: "⌘",
+        cmd: "⌘",
+        command: "⌘",
+        meta: "⌘",
+        win: "⌘",
+        super: "⌘",
+        alt: "⌥",
+        option: "⌥",
+        shift: "⇧",
+      }
+    : {}),
 };
 
 /**
- * Base styling for a key cap. The height is fixed and the minimum width equals the
- * height, so a cap holding a single glyph or letter is a perfect square; multi-character
- * labels keep that height and simply grow wider. `box-border` keeps the border inside
- * the square so single-glyph caps stay exactly square.
+ * Normalizes a single key for display. Mapped keys (Enter, Backspace, and — on Mac —
+ * the modifiers) render as their symbol; a lone letter is uppercased ("a" → "A");
+ * everything else is left exactly as written ("cmd" → "cmd" off Mac, "⌘" → "⌘").
+ */
+const labelForKey = (raw: string): string => {
+  const key = raw.trim();
+  const symbol = KEY_SYMBOLS[key.toLowerCase()];
+  if (symbol) return symbol;
+  return key.length === 1 ? key.toUpperCase() : key;
+};
+
+/**
+ * Splits a shortcut string into its keys and joins them for display. When every key
+ * is a single character (e.g. "⌘+⌥+N") the keys are shown side by side with no "+";
+ * if any key is multi-character (e.g. "Ctrl+Shift+N") the keys are joined with " + ".
+ */
+const formatShortcut = (value: string): string => {
+  const keys = value
+    .split("+")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0)
+    .map(labelForKey);
+  if (keys.length === 0) return "";
+  const allSingle = keys.every((k) => k.length === 1);
+  // Single-char keys are separated by a thin space (U+2009); multi-char keys by "+".
+  return allSingle ? keys.join("\u2009") : keys.join("+");
+};
+
+/**
+ * Base styling for a key cap. The height is fixed; `box-border` keeps the border inside
+ * the box so the cap stays exactly sized. A single-character cap is a perfect square; a
+ * longer label keeps the height and grows wider.
  */
 const keyCapBase =
-  "box-border inline-flex h-5 min-w-5 items-center justify-center rounded-selector px-1 text-[0.7rem] font-medium leading-none";
+  "box-border inline-flex h-4 min-w-4 items-center justify-center rounded-[0.25rem] px-1 text-[10px] leading-[0.5]";
 
 /**
  * Color/fill styling for a key cap.
- * - `ghost`   → no background or border, just the glyph.
+ * - `ghost`   → no background or border, just the text.
  * - `inherit` → adopts the surrounding text color (for colored surfaces such as a primary button).
  * - default   → the standard muted key-cap look.
  */
@@ -108,40 +79,9 @@ const keyCapColor = ({ inherit, ghost }: { inherit?: boolean; ghost?: boolean })
 };
 
 /**
- * Renders a single standalone key cap.
- */
-const KeyCap: React.FC<{ token: KeyToken; inherit?: boolean; ghost?: boolean }> = ({
-  token,
-  inherit,
-  ghost,
-}) => (
-  <kbd
-    title={token.icon ? token.aria : undefined}
-    aria-label={token.icon ? token.aria : undefined}
-    className={cn(keyCapBase, keyCapColor({ inherit, ghost }))}
-  >
-    {token.icon ? <Icon name={token.icon} size={12} aria-hidden /> : token.label}
-  </kbd>
-);
-
-/**
- * Splits a shortcut string such as "Ctrl+Enter" into its individual key tokens.
- */
-const tokenizeShortcut = (value: string): KeyToken[] =>
-  value
-    .split("+")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0)
-    .map(tokenForKey);
-
-/**
- * Displays a keyboard shortcut. Each key is rendered as its own standalone cap —
- * "Ctrl+Enter" becomes [⌘][↵] rather than a single [Ctrl+Enter] cap. Modifier and
- * navigation keys are shown as icons where available.
- *
- * Pass `keys` (a shortcut string) for the tokenized, standalone-cap rendering; pass
- * `children` for arbitrary composed content inside a single cap. Set `ghost` to drop
- * the background and border.
+ * Displays a keyboard shortcut as text inside a single cap. Pass `keys` (a shortcut
+ * string) or a string child. Keys render as text (no icons); Enter/Backspace — and, on
+ * Mac, the modifiers — show as symbols. Set `ghost` to drop the background and border.
  */
 export function Kbd({
   children,
@@ -156,28 +96,25 @@ export function Kbd({
   const shortcut = keys ?? (typeof children === "string" ? children : undefined);
 
   if (shortcut && shortcut.trim().length > 0) {
-    const tokens = tokenizeShortcut(shortcut);
     return (
-      <span className="inline-flex items-center gap-0.5 align-middle">
-        {tokens.map((token, i) => (
-          <KeyCap key={i} token={token} ghost={ghost} />
-        ))}
+      <span className="inline-flex items-center align-middle">
+        <kbd className={cn(keyCapBase, keyCapColor({ ghost }))}>{formatShortcut(shortcut)}</kbd>
       </span>
     );
   }
 
   // Non-string content (composed nodes) renders unchanged inside a single cap.
   return (
-    <span className="inline-flex items-center gap-0.5 align-middle">
+    <span className="inline-flex items-center align-middle">
       <kbd className={cn(keyCapBase, keyCapColor({ ghost }))}>{children}</kbd>
     </span>
   );
 }
 
 /**
- * Renders the tokens for a shortcut string as standalone key caps. Exposed for
- * widgets (e.g. Button) that already hold a shortcut string and want the same look.
- * Set `inherit` when rendering on a colored surface so the caps adopt its text color.
+ * Renders a shortcut string as text inside a single cap. Exposed for widgets (e.g.
+ * Button) that already hold a shortcut string and want the same look. Set `inherit`
+ * when rendering on a colored surface so the cap adopts its text color.
  */
 export function ShortcutKeys({
   shortcut,
@@ -190,13 +127,11 @@ export function ShortcutKeys({
   inherit?: boolean;
   ghost?: boolean;
 }) {
-  const tokens = tokenizeShortcut(shortcut);
-  if (tokens.length === 0) return null;
+  const text = formatShortcut(shortcut);
+  if (text.length === 0) return null;
   return (
-    <span className={cn("inline-flex items-center gap-0.5 align-middle", className)}>
-      {tokens.map((token, i) => (
-        <KeyCap key={i} token={token} inherit={inherit} ghost={ghost} />
-      ))}
+    <span className={cn("inline-flex items-center align-middle", className)}>
+      <kbd className={cn(keyCapBase, keyCapColor({ inherit, ghost }))}>{text}</kbd>
     </span>
   );
 }
