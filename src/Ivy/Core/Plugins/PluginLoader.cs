@@ -114,8 +114,12 @@ public class PluginLoader : IPluginManager
         string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
         failureReason = null;
+        var sep = Path.DirectorySeparatorChar;
         var dllFiles = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
-            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+            .Where(f => !f.Contains($"{sep}obj{sep}"))
+            .GroupBy(Path.GetFileName)
+            .Select(g => g.Count() == 1 ? g.First()
+                : g.FirstOrDefault(f => f.Contains($"{sep}Debug{sep}")) ?? g.First())
             .ToArray();
         if (dllFiles.Length == 0)
         {
