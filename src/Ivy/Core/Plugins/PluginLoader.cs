@@ -74,11 +74,7 @@ public class PluginLoader : IPluginManager
 
         var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory, string ShadowDirectory)>();
 
-        // Load plugins from subdirectories of the plugins directory
-        foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
-            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
-
-        // Load plugins from the references file
+        // Load plugins from the references file first (explicit references take priority)
         var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
         var referencedPaths = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, _pluginsDirectory, _logger);
         foreach (var directory in referencedPaths)
@@ -92,6 +88,10 @@ public class PluginLoader : IPluginManager
 
             TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
         }
+
+        // Load plugins from subdirectories of the plugins directory
+        foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
+            TryLoadCandidate(directory, serviceProvider, hostVersion, candidates);
 
         _lock.EnterWriteLock();
         try
@@ -114,8 +114,12 @@ public class PluginLoader : IPluginManager
         string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
         failureReason = null;
+        var sep = Path.DirectorySeparatorChar;
         var dllFiles = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
-            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+            .Where(f => !f.Contains($"{sep}obj{sep}"))
+            .GroupBy(Path.GetFileName)
+            .Select(g => g.Count() == 1 ? g.First()
+                : g.FirstOrDefault(f => f.Contains($"{sep}Debug{sep}")) ?? g.First())
             .ToArray();
         if (dllFiles.Length == 0)
         {
@@ -1030,6 +1034,18 @@ public class PluginLoader : IPluginManager
             }
 
             ValidatePluginIcon(manifest, directory);
+
+            // Reject duplicates — if a plugin with this ID was already discovered, skip it.
+            var existingIndex = candidates.FindIndex(c => c.Instance.Manifest.Id == manifest.Id);
+            if (existingIndex >= 0)
+            {
+                _logger.LogWarning(
+                    "Plugin '{Id}' from '{Directory}' skipped: already loaded from '{ExistingDirectory}'.",
+                    manifest.Id, directory, candidates[existingIndex].Directory);
+                loaded.Value.Context.Unload();
+                DeleteShadowDirectory(loaded.Value.ShadowDirectory);
+                return;
+            }
 
             _knownPlugins[manifest.Id] = directory;
             candidates.Add(loaded.Value);
