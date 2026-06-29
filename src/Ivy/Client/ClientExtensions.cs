@@ -80,6 +80,33 @@ public static class ClientExtensions
 
     public static void CopyToClipboard(this IClientProvider client, string content)
     {
+        if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+        {
+            try
+            {
+                using var process = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "pbcopy",
+                        UseShellExecute = false,
+                        RedirectStandardInput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                process.Start();
+                using (var writer = process.StandardInput)
+                {
+                    writer.Write(content);
+                }
+                process.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[CopyToClipboard] Failed to copy natively using pbcopy: {ex.Message}");
+            }
+        }
+
         client.Sender.Send("CopyToClipboard", content);
     }
 
