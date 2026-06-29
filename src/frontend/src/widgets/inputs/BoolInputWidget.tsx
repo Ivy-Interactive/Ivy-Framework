@@ -102,9 +102,7 @@ const InputLabel: React.FC<{
         </Label>
       )}
       {description && (
-        <p className={cn("block truncate", descriptionSizeVariant({ density: d }))}>
-          {description}
-        </p>
+        <p className={cn("block", descriptionSizeVariant({ density: d }))}>{description}</p>
       )}
     </div>
   );
