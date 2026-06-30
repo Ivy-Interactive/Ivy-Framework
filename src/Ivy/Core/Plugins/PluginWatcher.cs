@@ -114,6 +114,10 @@ internal class PluginWatcher : IDisposable
                     _logger.LogError(ex, "Failed to unload plugin {PluginId}", pluginId);
                 }
             }
+            else
+            {
+                loader.RemoveFailedPlugin(e.FullPath);
+            }
         }
     }
 

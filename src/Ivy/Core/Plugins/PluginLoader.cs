@@ -880,6 +880,20 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    internal void RemoveFailedPlugin(string directory)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _failedPlugins.Remove(directory);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+        PluginUnloaded?.Invoke(Path.GetFileName(directory));
+    }
+
     private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(5);
 
     private void InvokeShutdownHook(IIvyPlugin pluginInstance, string pluginId, PluginShutdownReason reason)
