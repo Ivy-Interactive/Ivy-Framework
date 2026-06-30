@@ -890,6 +890,19 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    internal void ForgetPlugin(string pluginId)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _knownPlugins.Remove(pluginId);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
     internal void RemoveFailedPlugin(string directory)
     {
         _lock.EnterWriteLock();

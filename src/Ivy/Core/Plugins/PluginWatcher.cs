@@ -108,6 +108,7 @@ internal class PluginWatcher : IDisposable
                 try
                 {
                     _pluginManager.UnloadPlugin(pluginId);
+                    loader.ForgetPlugin(pluginId);
                 }
                 catch (Exception ex)
                 {
