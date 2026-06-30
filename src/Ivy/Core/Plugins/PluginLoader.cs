@@ -425,12 +425,25 @@ public class PluginLoader : IPluginManager
             // Configure context — plugin has valid config
             if (_pluginContext is not null)
             {
-                _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
-                _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
-                plugin.Instance.Configure(_pluginContext);
-                _pluginContext.ClearCurrentPlugin();
-                _pluginContext.ClearPluginConfig();
-                _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
+                try
+                {
+                    _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
+                    _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
+                    plugin.Instance.Configure(_pluginContext);
+                    _pluginContext.ClearCurrentPlugin();
+                    _pluginContext.ClearPluginConfig();
+                    _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
+                }
+                catch (Exception ex)
+                {
+                    _pluginContext.ClearCurrentPlugin();
+                    _pluginContext.ClearPluginConfig();
+                    plugin.LoadContext.Unload();
+                    DeleteShadowDirectory(plugin.ShadowDirectory);
+                    RecordFailure(pluginPath, ex, fireEvent: false);
+                    loadFailureReason = $"Exception during load: {ex.Message}";
+                    goto done;
+                }
             }
 
             plugin.Status = PluginStatus.Active;
