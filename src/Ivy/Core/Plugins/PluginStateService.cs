@@ -15,6 +15,7 @@ internal class PluginStateService : IPluginStateService, IDisposable
         _pluginManager.PluginLoaded += OnPluginChanged;
         _pluginManager.PluginLoadFailed += OnPluginChanged;
         _pluginManager.PluginUnloaded += OnPluginChanged;
+        _pluginManager.PluginRemoved += OnPluginChanged;
         _pluginManager.PluginReloaded += OnPluginChanged;
         _pluginManager.PluginActivated += OnPluginChanged;
         _pluginManager.PluginDeactivated += OnPluginChanged;
@@ -30,6 +31,7 @@ internal class PluginStateService : IPluginStateService, IDisposable
         _pluginManager.PluginLoaded -= OnPluginChanged;
         _pluginManager.PluginLoadFailed -= OnPluginChanged;
         _pluginManager.PluginUnloaded -= OnPluginChanged;
+        _pluginManager.PluginRemoved -= OnPluginChanged;
         _pluginManager.PluginReloaded -= OnPluginChanged;
         _pluginManager.PluginActivated -= OnPluginChanged;
         _pluginManager.PluginDeactivated -= OnPluginChanged;

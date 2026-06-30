@@ -28,6 +28,7 @@ public class PluginLoader : IPluginManager
     public event Action<string>? PluginLoaded;
     public event Action<string>? PluginLoadFailed;
     public event Action<string>? PluginUnloaded;
+    public event Action<string>? PluginRemoved;
     public event Action<string>? PluginReloaded;
     public event Action<string>? PluginActivated;
     public event Action<string>? PluginDeactivated;
@@ -901,6 +902,7 @@ public class PluginLoader : IPluginManager
         {
             _lock.ExitWriteLock();
         }
+        PluginRemoved?.Invoke(pluginId);
     }
 
     internal void RemoveFailedPlugin(string directory)
@@ -914,7 +916,7 @@ public class PluginLoader : IPluginManager
         {
             _lock.ExitWriteLock();
         }
-        PluginUnloaded?.Invoke(Path.GetFileName(directory));
+        PluginRemoved?.Invoke(Path.GetFileName(directory));
     }
 
     private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(5);

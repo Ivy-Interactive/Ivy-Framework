@@ -22,6 +22,7 @@ public interface IPluginManager
     event Action<string>? PluginLoaded;
     event Action<string>? PluginLoadFailed;
     event Action<string>? PluginUnloaded;
+    event Action<string>? PluginRemoved;
     event Action<string>? PluginReloaded;
     event Action<string>? PluginActivated;
     event Action<string>? PluginDeactivated;
