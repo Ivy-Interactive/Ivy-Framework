@@ -82,8 +82,7 @@ public class PluginLoader : IPluginManager
         {
             if (!Directory.Exists(directory))
             {
-                _logger.LogWarning("Referenced plugin directory does not exist: {Directory}", directory);
-                RecordFailure(directory, $"Directory does not exist: {directory}");
+                RecordFailure(directory, "Directory does not exist");
                 continue;
             }
 
@@ -355,10 +354,14 @@ public class PluginLoader : IPluginManager
         if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(pluginPath))
         {
             if (!SourcePluginBuilder.BuildSync(pluginPath, _logger))
+            {
+                RecordFailure(pluginPath, "Build failed");
                 return false;
+            }
         }
 
         string? loadedPluginId = null;
+        string? loadFailureReason = null;
         PluginStatus loadedStatus = PluginStatus.Active;
         _lock.EnterWriteLock();
         try
@@ -366,8 +369,9 @@ public class PluginLoader : IPluginManager
             var loaded = LoadPluginFromDirectory(pluginPath, _serviceProviderFactory(), out var loadFailReason);
             if (loaded is null)
             {
-                _logger.LogError("Failed to load plugin from {Path}: {Reason}", pluginPath, loadFailReason ?? "unknown");
-                return false;
+                RecordFailure(pluginPath, loadFailReason ?? "unknown", fireEvent: false);
+                loadFailureReason = loadFailReason;
+                goto done;
             }
 
             var manifest = loaded.Value.Instance.Manifest;
@@ -375,7 +379,7 @@ public class PluginLoader : IPluginManager
             if (_plugins.Any(p => p.Instance.Manifest.Id == manifest.Id))
             {
                 _logger.LogError("Plugin '{Id}' is already loaded.", manifest.Id);
-                return false;
+                goto done;
             }
 
             if (manifest.MinimumHostVersion is { } minVersion && _hostVersion < minVersion)
@@ -383,7 +387,9 @@ public class PluginLoader : IPluginManager
                 _logger.LogError(
                     "Plugin '{Id}' requires host version {Required} but current is {Current}.",
                     manifest.Id, minVersion, _hostVersion);
-                return false;
+                loadFailureReason = $"Requires host version {minVersion} but current is {_hostVersion}";
+                RecordFailure(pluginPath, loadFailureReason, fireEvent: false);
+                goto done;
             }
 
             var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
@@ -453,10 +459,13 @@ public class PluginLoader : IPluginManager
                 _pluginContext!.RefreshApps(appIds);
         }
 
+        done:
         // Fire event outside the lock to avoid deadlocks — subscribers may call
         // GetActivePluginIds() which needs a read lock.
         if (loadedPluginId is not null)
             PluginLoaded?.Invoke(loadedPluginId);
+        else if (loadFailureReason is not null)
+            PluginLoadFailed?.Invoke(Path.GetFileName(pluginPath));
 
         return loadedPluginId is not null;
     }
@@ -987,35 +996,40 @@ public class PluginLoader : IPluginManager
         await Task.WhenAll(tasks);
     }
 
-    private void LogPluginLoadFailure(string directory, Exception ex)
-    {
-        _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
+    private void RecordFailure(string directory, Exception ex, bool fireEvent = true)
+        => RecordFailure(directory, $"Exception during load: {ex.Message}", fireEvent);
 
-        _lock.EnterWriteLock();
-        try
-        {
-            _failedPlugins[directory] = (
-                $"Exception during load: {ex.Message}",
-                DateTime.UtcNow);
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
-
-    private void RecordFailure(string directory, string reason)
+    private void RecordFailure(string directory, string reason, bool fireEvent = true)
     {
-        _lock.EnterWriteLock();
-        try
+        _logger.LogError("Failed to load plugin from {Directory}: {Reason}", directory, reason);
+
+        var writeLockHeld = _lock.IsWriteLockHeld;
+        if (writeLockHeld)
         {
             _failedPlugins[directory] = (reason, DateTime.UtcNow);
         }
-        finally
+        else
         {
-            _lock.ExitWriteLock();
+            _lock.EnterWriteLock();
+            try
+            {
+                _failedPlugins[directory] = (reason, DateTime.UtcNow);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
-        PluginLoadFailed?.Invoke(Path.GetFileName(directory));
+
+        if (fireEvent)
+        {
+            if (writeLockHeld)
+            {
+                throw new InvalidOperationException("Cannot fire PluginLoadFailed event while holding write lock");
+            }
+
+            PluginLoadFailed?.Invoke(Path.GetFileName(directory));
+        }
     }
 
     private void TryLoadCandidate(
@@ -1068,23 +1082,23 @@ public class PluginLoader : IPluginManager
         }
         catch (IOException ex)
         {
-            LogPluginLoadFailure(directory, ex);
+            RecordFailure(directory, ex);
         }
         catch (UnauthorizedAccessException ex)
         {
-            LogPluginLoadFailure(directory, ex);
+            RecordFailure(directory, ex);
         }
         catch (BadImageFormatException ex)
         {
-            LogPluginLoadFailure(directory, ex);
+            RecordFailure(directory, ex);
         }
         catch (ReflectionTypeLoadException ex)
         {
-            LogPluginLoadFailure(directory, ex);
+            RecordFailure(directory, ex);
         }
         catch (InvalidOperationException ex)
         {
-            LogPluginLoadFailure(directory, ex);
+            RecordFailure(directory, ex);
         }
     }
 
