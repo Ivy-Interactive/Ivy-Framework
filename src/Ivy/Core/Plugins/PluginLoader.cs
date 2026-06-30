@@ -26,6 +26,7 @@ public class PluginLoader : IPluginManager
     private Version? _hostVersion;
 
     public event Action<string>? PluginLoaded;
+    public event Action<string>? PluginLoadFailed;
     public event Action<string>? PluginUnloaded;
     public event Action<string>? PluginReloaded;
     public event Action<string>? PluginActivated;
@@ -1014,6 +1015,7 @@ public class PluginLoader : IPluginManager
         {
             _lock.ExitWriteLock();
         }
+        PluginLoadFailed?.Invoke(Path.GetFileName(directory));
     }
 
     private void TryLoadCandidate(
