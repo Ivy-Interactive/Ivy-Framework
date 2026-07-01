@@ -85,10 +85,10 @@ export const textInputAffixCellVariant = cva(
     compoundVariants: [
       // Outer pl tracks standalone field px-*; inner pr/pl is the prefix↔content seam.
       { side: "prefix", density: "Small", class: "pl-2 pr-0 text-xs" },
-      { side: "prefix", density: "Medium", class: "pl-3 pr-0.5 text-sm" },
+      { side: "prefix", density: "Medium", class: "pl-2 pr-0 text-sm" },
       { side: "prefix", density: "Large", class: "pl-4 pr-1 text-base" },
       { side: "suffix", density: "Small", class: "pl-0 pr-2 text-xs" },
-      { side: "suffix", density: "Medium", class: "pl-0.5 pr-3 text-sm" },
+      { side: "suffix", density: "Medium", class: "pl-0 pr-2 text-sm" },
       { side: "suffix", density: "Large", class: "pl-1 pr-4 text-base" },
     ],
     defaultVariants: {
@@ -228,7 +228,7 @@ export function textInputFieldShellClasses(options: {
   ghost?: boolean;
 }): string {
   return cn(
-    "relative flex w-full min-w-0 items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5 py-0.5",
+    "relative flex w-full min-w-0 items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
     options.focused
       ? "border-ring outline-none dark:border-ring"
       : "border-input dark:border-white/10",
