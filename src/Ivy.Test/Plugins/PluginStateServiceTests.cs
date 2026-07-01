@@ -95,7 +95,9 @@ public class PluginStateServiceTests
         public List<string> ActivePluginIds { get; set; } = [];
 
         public event Action<string>? PluginLoaded;
+        public event Action<string>? PluginLoadFailed;
         public event Action<string>? PluginUnloaded;
+        public event Action<string>? PluginRemoved;
         public event Action<string>? PluginReloaded;
         public event Action<string>? PluginActivated;
         public event Action<string>? PluginDeactivated;
@@ -121,7 +123,9 @@ public class PluginStateServiceTests
         public object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config) => null;
 
         public void RaisePluginLoaded(string pluginId) => PluginLoaded?.Invoke(pluginId);
+        public void RaisePluginLoadFailed(string pluginId) => PluginLoadFailed?.Invoke(pluginId);
         public void RaisePluginUnloaded(string pluginId) => PluginUnloaded?.Invoke(pluginId);
+        public void RaisePluginRemoved(string pluginId) => PluginRemoved?.Invoke(pluginId);
         public void RaisePluginReloaded(string pluginId) => PluginReloaded?.Invoke(pluginId);
         public void RaisePluginActivated(string pluginId) => PluginActivated?.Invoke(pluginId);
         public void RaisePluginDeactivated(string pluginId) => PluginDeactivated?.Invoke(pluginId);
