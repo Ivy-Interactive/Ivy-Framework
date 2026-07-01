@@ -12,7 +12,8 @@ public class DialogApp : SampleBase
                    | new CreateDialogExample()
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()
-                   | new AutoFocusDialogExample();
+                   | new AutoFocusDialogExample()
+                   | new NonDismissableDialogExample();
     }
 }
 
@@ -191,6 +192,33 @@ public class AutoFocusDialogExample : ViewBase
                            new Button("Cancel", _ => isOpen.Set(false), variant: ButtonVariant.Outline)
                        )
                    )
+                   : null);
+    }
+}
+
+public class NonDismissableDialogExample : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        return Layout.Vertical().Gap(2)
+               | new Card(
+                   Layout.Vertical().Gap(3)
+                   | Layout.Horizontal()
+                       | Icons.Lock
+                       | Text.H3("Non-Dismissable Dialog")
+                   | Text.P("Cannot be closed by clicking outside or pressing ESC. Use the X button or Done button.")
+                   | new Button("Open", _ => isOpen.Set(true)).Primary()
+               )
+               | (isOpen.Value
+                   ? new Dialog(
+                       _ => isOpen.Set(false),
+                       new DialogHeader("Important Action"),
+                       new DialogBody(Text.P("This dialog prevents accidental dismissal. Click outside or press ESC — nothing will happen. Use the close button (X) or Done to close.")),
+                       new DialogFooter(
+                           new Button("Done", _ => isOpen.Set(false))
+                       )
+                   ).Dismissable(false)
                    : null);
     }
 }

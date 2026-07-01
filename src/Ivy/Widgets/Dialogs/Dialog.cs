@@ -24,6 +24,7 @@ public record Dialog : WidgetBase<Dialog>
     }
 
     [Event] public EventHandler<Event<Dialog>>? OnClose { get; set; }
+    [Prop] public bool Dismissable { get; set; } = true;
 
     public static Dialog operator |(Dialog dialog, object child)
     {
@@ -45,6 +46,11 @@ public record Dialog : WidgetBase<Dialog>
 
 public static class DialogExtensions
 {
+    public static Dialog Dismissable(this Dialog dialog, bool dismissable = true)
+    {
+        return dialog with { Dismissable = dismissable };
+    }
+
     [OverloadResolutionPriority(-1)]
     public static IView ToDialog(this object content, IState<bool> isOpen, string? title = null, string? description = null, Size? width = null)
     {
