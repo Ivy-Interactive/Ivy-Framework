@@ -20,10 +20,7 @@ interface DialogWidgetProps {
   width?: string;
   events?: string[];
   dismissable?: boolean;
-  closeConfirmationTitle?: string;
-  closeConfirmationDescription?: string;
-  closeConfirmationButton?: string;
-  closeConfirmationCancelButton?: string;
+  confirmationMessage?: string;
 }
 
 const EMPTY_EVENTS: string[] = [];
@@ -34,17 +31,13 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
   width,
   events = EMPTY_EVENTS,
   dismissable = true,
-  closeConfirmationTitle,
-  closeConfirmationDescription,
-  closeConfirmationButton,
-  closeConfirmationCancelButton,
+  confirmationMessage,
 }) => {
   const eventHandler = useEventHandler();
   const isVisible = true;
   const [confirmingClose, setConfirmingClose] = useState(false);
 
-  const requiresCloseConfirmation =
-    dismissable === false && Boolean(closeConfirmationTitle || closeConfirmationDescription);
+  const requiresCloseConfirmation = dismissable === false && Boolean(confirmationMessage);
 
   const widthStyles = getWidth(width);
   const styles = {
@@ -90,22 +83,18 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
           <AlertDialog open={confirmingClose} onOpenChange={setConfirmingClose}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                {closeConfirmationTitle && (
-                  <AlertDialogTitle>{closeConfirmationTitle}</AlertDialogTitle>
-                )}
-                {closeConfirmationDescription && (
-                  <AlertDialogDescription>{closeConfirmationDescription}</AlertDialogDescription>
-                )}
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>{confirmationMessage}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{closeConfirmationCancelButton || "Cancel"}</AlertDialogCancel>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
                     setConfirmingClose(false);
                     emitClose();
                   }}
                 >
-                  {closeConfirmationButton || "Close"}
+                  Close
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

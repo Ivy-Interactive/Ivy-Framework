@@ -118,7 +118,7 @@ public class FormDialogExample : ViewBase
 
 Use `.Dismissable(false)` to stop a dialog from being closed by clicking the backdrop or pressing ESC. The close button (X) and any footer buttons still work.
 
-To guard against accidental closes via the X button, pass confirmation text to `.Dismissable(...)`. When set, clicking X opens a confirmation dialog and `OnClose` only fires once the user confirms:
+To guard against accidental closes via the X button, pass a `confirmationMessage` to `.Dismissable(...)`. When set, clicking X opens a confirmation dialog and `OnClose` only fires once the user confirms:
 
 ```csharp demo-below
 public class ConfirmCloseDialogExample : ViewBase
@@ -138,10 +138,7 @@ public class ConfirmCloseDialogExample : ViewBase
                     new DialogFooter(new Button("Save", _ => isOpen.Set(false)))
                   ).Dismissable(
                       false,
-                      confirmationTitle: "Discard changes?",
-                      confirmationDescription: "Your unsaved changes will be lost.",
-                      confirmationButton: "Discard",
-                      confirmationCancelButton: "Keep editing")
+                      confirmationMessage: "Your unsaved changes will be lost.")
                 : null
         );
     }

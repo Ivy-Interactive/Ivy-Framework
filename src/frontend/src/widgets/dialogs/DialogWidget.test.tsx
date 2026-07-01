@@ -29,6 +29,16 @@ function queryByText(text: string) {
   return Array.from(document.body.querySelectorAll("*")).find((el) => el.textContent === text);
 }
 
+function clickConfirmationButton(text: string) {
+  const alert = document.body.querySelector('[role="alertdialog"]');
+  if (!alert) throw new Error("Confirmation dialog not found");
+  const button = Array.from(alert.querySelectorAll("button")).find((b) => b.textContent === text);
+  if (!button) throw new Error(`Confirmation button "${text}" not found`);
+  act(() => {
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+}
+
 beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -68,16 +78,13 @@ describe("DialogWidget", () => {
     expect(eventHandler).toHaveBeenCalledWith("OnClose", "test-dialog", []);
   });
 
-  it("shows a confirmation before closing a non-dismissable dialog with confirmation text", () => {
+  it("shows a confirmation before closing a non-dismissable dialog with a confirmation message", () => {
     mount(
       <DialogWidget
         id="test-dialog"
         events={["OnClose"]}
         dismissable={false}
-        closeConfirmationTitle="Discard changes?"
-        closeConfirmationDescription="Your changes will be lost."
-        closeConfirmationButton="Discard"
-        closeConfirmationCancelButton="Keep editing"
+        confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
       </DialogWidget>,
@@ -86,7 +93,7 @@ describe("DialogWidget", () => {
     clickCloseButton();
 
     expect(eventHandler).not.toHaveBeenCalled();
-    expect(queryByText("Discard changes?")).toBeTruthy();
+    expect(queryByText("Are you sure?")).toBeTruthy();
     expect(queryByText("Your changes will be lost.")).toBeTruthy();
   });
 
@@ -96,8 +103,7 @@ describe("DialogWidget", () => {
         id="test-dialog"
         events={["OnClose"]}
         dismissable={false}
-        closeConfirmationTitle="Discard changes?"
-        closeConfirmationButton="Discard"
+        confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
       </DialogWidget>,
@@ -106,11 +112,7 @@ describe("DialogWidget", () => {
     clickCloseButton();
     expect(eventHandler).not.toHaveBeenCalled();
 
-    const confirmButton = queryByText("Discard") as HTMLElement | undefined;
-    expect(confirmButton).toBeTruthy();
-    act(() => {
-      confirmButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    clickConfirmationButton("Close");
 
     expect(eventHandler).toHaveBeenCalledWith("OnClose", "test-dialog", []);
   });
@@ -121,8 +123,7 @@ describe("DialogWidget", () => {
         id="test-dialog"
         events={["OnClose"]}
         dismissable={false}
-        closeConfirmationTitle="Discard changes?"
-        closeConfirmationCancelButton="Keep editing"
+        confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
       </DialogWidget>,
@@ -130,11 +131,7 @@ describe("DialogWidget", () => {
 
     clickCloseButton();
 
-    const cancelButton = queryByText("Keep editing") as HTMLElement | undefined;
-    expect(cancelButton).toBeTruthy();
-    act(() => {
-      cancelButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    clickConfirmationButton("Cancel");
 
     expect(eventHandler).not.toHaveBeenCalled();
   });

@@ -257,10 +257,7 @@ public class ConfirmCloseDialogExample : ViewBase
                        )
                    ).Dismissable(
                        false,
-                       confirmationTitle: "Discard changes?",
-                       confirmationDescription: "Your unsaved changes will be lost. Are you sure you want to close?",
-                       confirmationButton: "Discard",
-                       confirmationCancelButton: "Keep editing")
+                       confirmationMessage: "Your unsaved changes will be lost. Are you sure you want to close?")
                    : null);
     }
 }
