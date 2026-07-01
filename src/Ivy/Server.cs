@@ -556,16 +556,23 @@ public class Server
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
         IEnumerable<string>? sharedAssemblyNames = null,
         bool enableHotReload = true,
-        bool buildSourcePlugins = false)
+        bool buildSourcePlugins = false,
+        bool deferPluginLoads = false)
     {
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
         var logger = loggerFactory.CreateLogger<PluginLoader>();
-        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames, buildSourcePlugins);
+        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames, buildSourcePlugins, deferPluginLoads);
 
-        using var bootstrapProvider = Services.BuildServiceProvider();
-        loader.DiscoverAndLoad(
-            hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!,
-            bootstrapProvider);
+        var effectiveHostVersion = hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!;
+        if (!deferPluginLoads)
+        {
+            using var bootstrapProvider = Services.BuildServiceProvider();
+            loader.DiscoverAndLoad(effectiveHostVersion, bootstrapProvider);
+        }
+        else
+        {
+            loader.SetHostVersion(effectiveHostVersion);
+        }
 
         loader.SetPluginConfigFactory(configFactory);
         configFactory.SetPluginManager(loader);

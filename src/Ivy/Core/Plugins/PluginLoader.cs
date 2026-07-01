@@ -34,12 +34,14 @@ public class PluginLoader : IPluginManager
     public event Action<string>? PluginDeactivated;
 
     internal bool BuildSourcePlugins { get; }
+    internal bool DeferPluginLoads { get; }
 
-    internal PluginLoader(string pluginsDirectory, ILogger<PluginLoader> logger, IEnumerable<string>? sharedAssemblyNames = null, bool buildSourcePlugins = false)
+    internal PluginLoader(string pluginsDirectory, ILogger<PluginLoader> logger, IEnumerable<string>? sharedAssemblyNames = null, bool buildSourcePlugins = false, bool deferPluginLoads = false)
     {
         _pluginsDirectory = pluginsDirectory;
         _logger = logger;
         BuildSourcePlugins = buildSourcePlugins;
+        DeferPluginLoads = deferPluginLoads;
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
             "Ivy.Plugin.Abstractions",
@@ -237,6 +239,11 @@ public class PluginLoader : IPluginManager
         return (instance, pluginAssembly, loadContext, directory, shadowDir);
     }
 
+    internal void SetHostVersion(Version version)
+    {
+        _hostVersion = version;
+    }
+
     internal void SetPluginConfigFactory(IIvyPluginConfigFactory factory)
     {
         _configFactory = factory;
@@ -245,6 +252,57 @@ public class PluginLoader : IPluginManager
     internal void SetServiceProviderFactory(Func<IServiceProvider> factory)
     {
         _serviceProviderFactory = factory;
+        if (DeferPluginLoads)
+            LoadDeferredPluginsAsync();
+    }
+
+    private void LoadDeferredPluginsAsync()
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                _logger.LogInformation("Loading plugins in background...");
+                var directories = DiscoverPluginDirectories();
+                foreach (var directory in directories)
+                {
+                    try
+                    {
+                        LoadPlugin(directory);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error loading deferred plugin from {Directory}", directory);
+                    }
+                }
+                _logger.LogInformation("Background plugin loading complete. {Count} plugin(s) loaded.", Plugins.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during background plugin loading");
+            }
+        });
+    }
+
+    private List<string> DiscoverPluginDirectories()
+    {
+        var directories = new List<string>();
+        if (!Directory.Exists(_pluginsDirectory)) return directories;
+
+        // Referenced plugins first (explicit references take priority)
+        var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
+        var referencedPaths = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, _pluginsDirectory, _logger);
+        foreach (var directory in referencedPaths)
+        {
+            if (Directory.Exists(directory))
+                directories.Add(directory);
+        }
+
+        // Then subdirectories of the plugins directory
+        foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
+            directories.Add(directory);
+
+        return directories;
     }
 
     public void Configure(PluginContextBase context)
