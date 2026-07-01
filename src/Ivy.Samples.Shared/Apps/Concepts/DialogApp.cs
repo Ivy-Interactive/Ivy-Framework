@@ -13,7 +13,8 @@ public class DialogApp : SampleBase
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()
                    | new AutoFocusDialogExample()
-                   | new NonDismissableDialogExample();
+                   | new NonDismissableDialogExample()
+                   | new ConfirmCloseDialogExample();
     }
 }
 
@@ -219,6 +220,47 @@ public class NonDismissableDialogExample : ViewBase
                            new Button("Done", _ => isOpen.Set(false))
                        )
                    ).Dismissable(false)
+                   : null);
+    }
+}
+
+public class ConfirmCloseDialogExample : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var client = UseService<IClientProvider>();
+        return Layout.Vertical().Gap(2)
+               | new Card(
+                   Layout.Vertical().Gap(3)
+                   | Layout.Horizontal()
+                       | Icons.TriangleAlert
+                       | Text.H3("Confirm Close Dialog")
+                   | Text.P("Clicking X on a non-dismissable dialog asks for confirmation with custom text before closing.")
+                   | new Button("Open", _ => isOpen.Set(true)).Primary()
+               )
+               | (isOpen.Value
+                   ? new Dialog(
+                       _ =>
+                       {
+                           isOpen.Set(false);
+                           client.Toast("Changes discarded.");
+                       },
+                       new DialogHeader("Unsaved Changes"),
+                       new DialogBody(Text.P("You have unsaved changes. Closing this dialog with the X button will ask you to confirm.")),
+                       new DialogFooter(
+                           new Button("Save", _ =>
+                           {
+                               isOpen.Set(false);
+                               client.Toast("Changes saved.");
+                           })
+                       )
+                   ).Dismissable(
+                       false,
+                       confirmationTitle: "Discard changes?",
+                       confirmationDescription: "Your unsaved changes will be lost. Are you sure you want to close?",
+                       confirmationButton: "Discard",
+                       confirmationCancelButton: "Keep editing")
                    : null);
     }
 }

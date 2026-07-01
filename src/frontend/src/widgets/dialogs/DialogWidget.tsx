@@ -1,5 +1,15 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import React from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import React, { useState } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { getWidth } from "@/lib/styles";
 import { cn } from "@/lib/utils";
@@ -10,6 +20,10 @@ interface DialogWidgetProps {
   width?: string;
   events?: string[];
   dismissable?: boolean;
+  closeConfirmationTitle?: string;
+  closeConfirmationDescription?: string;
+  closeConfirmationButton?: string;
+  closeConfirmationCancelButton?: string;
 }
 
 const EMPTY_EVENTS: string[] = [];
@@ -20,9 +34,17 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
   width,
   events = EMPTY_EVENTS,
   dismissable = true,
+  closeConfirmationTitle,
+  closeConfirmationDescription,
+  closeConfirmationButton,
+  closeConfirmationCancelButton,
 }) => {
   const eventHandler = useEventHandler();
   const isVisible = true;
+  const [confirmingClose, setConfirmingClose] = useState(false);
+
+  const requiresCloseConfirmation =
+    dismissable === false && Boolean(closeConfirmationTitle || closeConfirmationDescription);
 
   const widthStyles = getWidth(width);
   const styles = {
@@ -30,11 +52,19 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
     ...(width && widthStyles.width && !widthStyles.maxWidth ? { maxWidth: widthStyles.width } : {}),
   };
 
+  const emitClose = () => {
+    if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+  };
+
   return (
     <Dialog
       open={true}
       onOpenChange={() => {
-        if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+        if (requiresCloseConfirmation) {
+          setConfirmingClose(true);
+          return;
+        }
+        emitClose();
       }}
     >
       <DialogContent
@@ -56,6 +86,31 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         {children}
+        {requiresCloseConfirmation && (
+          <AlertDialog open={confirmingClose} onOpenChange={setConfirmingClose}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                {closeConfirmationTitle && (
+                  <AlertDialogTitle>{closeConfirmationTitle}</AlertDialogTitle>
+                )}
+                {closeConfirmationDescription && (
+                  <AlertDialogDescription>{closeConfirmationDescription}</AlertDialogDescription>
+                )}
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{closeConfirmationCancelButton || "Cancel"}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setConfirmingClose(false);
+                    emitClose();
+                  }}
+                >
+                  {closeConfirmationButton || "Close"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </DialogContent>
     </Dialog>
   );

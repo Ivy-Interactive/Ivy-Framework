@@ -25,6 +25,10 @@ public record Dialog : WidgetBase<Dialog>
 
     [Event] public EventHandler<Event<Dialog>>? OnClose { get; set; }
     [Prop] public bool Dismissable { get; set; } = true;
+    [Prop] public string? CloseConfirmationTitle { get; set; }
+    [Prop] public string? CloseConfirmationDescription { get; set; }
+    [Prop] public string? CloseConfirmationButton { get; set; }
+    [Prop] public string? CloseConfirmationCancelButton { get; set; }
 
     public static Dialog operator |(Dialog dialog, object child)
     {
@@ -46,9 +50,22 @@ public record Dialog : WidgetBase<Dialog>
 
 public static class DialogExtensions
 {
-    public static Dialog Dismissable(this Dialog dialog, bool dismissable = true)
+    public static Dialog Dismissable(
+        this Dialog dialog,
+        bool dismissable = true,
+        string? confirmationTitle = null,
+        string? confirmationDescription = null,
+        string? confirmationButton = null,
+        string? confirmationCancelButton = null)
     {
-        return dialog with { Dismissable = dismissable };
+        return dialog with
+        {
+            Dismissable = dismissable,
+            CloseConfirmationTitle = confirmationTitle,
+            CloseConfirmationDescription = confirmationDescription,
+            CloseConfirmationButton = confirmationButton,
+            CloseConfirmationCancelButton = confirmationCancelButton
+        };
     }
 
     [OverloadResolutionPriority(-1)]
