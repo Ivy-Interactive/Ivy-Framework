@@ -17,11 +17,13 @@ export function normalizeInputDensity(density?: Densities | string | null): Inpu
 
 /**
  * Ivy.Button in affix: outer cell owns spacing (`px-3` or tighter for icon-only).
- * Text buttons: strip `sm` px. Icon-only (`icon-sm` / `icon`): shrink hit box — the
- * `size-7`/`size-9` target is larger than the glyph, which reads as extra padding.
+ * Text buttons: `rounded-sm` + `px-2` so the button chrome sits inset from the
+ * field's rounded corner instead of clipping square against it. Icon-only
+ * (`icon-sm` / `icon`): shrink hit box — the `size-7`/`size-9` target is larger
+ * than the glyph, which reads as extra padding.
  */
 export const affixEmbeddedButtonClasses =
-  "[&_button:not([data-invalid-icon])]:!px-0 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded-none [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
+  "[&_button:not([data-invalid-icon])]:!px-2 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded-sm [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
 
 /** Tighter affix cell padding when the slot only contains an icon-sized Ivy button (not trailing invalid). */
 export const affixIconOnlyCellPaddingClasses =
