@@ -71,8 +71,8 @@ export const textInputAffixCellVariant = cva(
   {
     variants: {
       side: {
-        prefix: "rounded-none",
-        suffix: "rounded-none",
+        prefix: "rounded-none first:rounded-l-field",
+        suffix: "rounded-none last:rounded-r-field",
       },
       density: {
         Small: "",
