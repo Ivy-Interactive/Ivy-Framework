@@ -13,8 +13,7 @@ public class DialogApp : SampleBase
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()
                    | new AutoFocusDialogExample()
-                   | new NonDismissableDialogExample()
-                   | new ConfirmCloseDialogExample();
+                   | new NonDismissableDialogExample();
     }
 }
 
@@ -202,41 +201,14 @@ public class NonDismissableDialogExample : ViewBase
     public override object? Build()
     {
         var isOpen = UseState(false);
+        var client = UseService<IClientProvider>();
         return Layout.Vertical().Gap(2)
                | new Card(
                    Layout.Vertical().Gap(3)
                    | Layout.Horizontal()
                        | Icons.Lock
                        | Text.H3("Non-Dismissable Dialog")
-                   | Text.P("Cannot be closed by clicking outside or pressing ESC. Use the X button or Done button.")
-                   | new Button("Open", _ => isOpen.Set(true)).Primary()
-               )
-               | (isOpen.Value
-                   ? new Dialog(
-                       _ => isOpen.Set(false),
-                       new DialogHeader("Important Action"),
-                       new DialogBody(Text.P("This dialog prevents accidental dismissal. Click outside or press ESC — nothing will happen. Use the close button (X) or Done to close.")),
-                       new DialogFooter(
-                           new Button("Done", _ => isOpen.Set(false))
-                       )
-                   ).Dismissable(false)
-                   : null);
-    }
-}
-
-public class ConfirmCloseDialogExample : ViewBase
-{
-    public override object? Build()
-    {
-        var isOpen = UseState(false);
-        var client = UseService<IClientProvider>();
-        return Layout.Vertical().Gap(2)
-               | new Card(
-                   Layout.Vertical().Gap(3)
-                   | Layout.Horizontal()
-                       | Icons.TriangleAlert
-                       | Text.H3("Confirm Close Dialog")
-                   | Text.P("Clicking X on a non-dismissable dialog asks for confirmation with custom text before closing.")
+                   | Text.P("Cannot be closed by clicking outside or pressing ESC. The X button asks for confirmation before closing.")
                    | new Button("Open", _ => isOpen.Set(true)).Primary()
                )
                | (isOpen.Value
@@ -247,7 +219,7 @@ public class ConfirmCloseDialogExample : ViewBase
                            client.Toast("Changes discarded.");
                        },
                        new DialogHeader("Unsaved Changes"),
-                       new DialogBody(Text.P("You have unsaved changes. Closing this dialog with the X button will ask you to confirm.")),
+                       new DialogBody(Text.P("This dialog prevents accidental dismissal. Clicking outside or pressing ESC does nothing, and closing with the X button asks you to confirm.")),
                        new DialogFooter(
                            new Button("Save", _ =>
                            {
