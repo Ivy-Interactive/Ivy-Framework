@@ -226,7 +226,7 @@ export function textInputFieldShellClasses(options: {
   ghost?: boolean;
 }): string {
   return cn(
-    "relative flex w-full min-w-0 items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+    "relative flex w-full min-w-0 items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5 py-0.5",
     options.focused
       ? "border-ring outline-none dark:border-ring"
       : "border-input dark:border-white/10",
