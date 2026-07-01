@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { DialogWidget } from "./DialogWidget";
@@ -33,14 +33,7 @@ describe("DialogWidget", () => {
   });
 
   it("prevents dismiss when dismissable is false", () => {
-    const onClose = vi.fn();
-    mount(
-      <DialogWidget
-        id="test-dialog"
-        dismissable={false}
-        events={["OnClose"]}
-      />
-    );
+    mount(<DialogWidget id="test-dialog" dismissable={false} events={["OnClose"]} />);
 
     const dialogContent = container.querySelector("[role='dialog']");
     expect(dialogContent).toBeTruthy();
