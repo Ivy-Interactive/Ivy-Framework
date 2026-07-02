@@ -64,7 +64,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
     dismissedNews === null ? [] : articles.filter(({ id }) => !dismissedNews.includes(id));
   const cardCount = cards.length;
 
-  const [prevCardCount, setPrevCardCount] = React.useState(cardCount);
+  const [prevCardCount, setPrevCardCount] = React.useState<number | null>(null);
   if (cardCount !== prevCardCount) {
     setPrevCardCount(cardCount);
     if (cardCount > 0) {
