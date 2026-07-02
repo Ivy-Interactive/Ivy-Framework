@@ -122,4 +122,23 @@ public class DetailsBuilderNavigationTests
         Assert.Equal("hello", defaultBuilder.Build("hello", new Product()));
         Assert.Equal(3.14m, defaultBuilder.Build(3.14m, new Product()));
     }
+
+    [Fact]
+    public void DetailsBuilder_ViewBaseProperty_NotTreatedAsNavigationProperty()
+    {
+        // This test verifies the fix for issue #4550
+        // IView/ViewBase types should NOT be treated as navigation properties
+        var model = new
+        {
+            Name = "John",
+            Address = new { Street = "123 Main St", City = "Anytown" }.ToDetails()
+        };
+        var builder = model.ToDetails();
+        var result = builder.Build();
+
+        // The nested DetailsBuilder should be rendered as a Details widget, not crash
+        // Without the fix, this would throw TargetInvocationException during Build()
+        Assert.NotNull(result);
+        Assert.IsType<Details>(result);
+    }
 }
