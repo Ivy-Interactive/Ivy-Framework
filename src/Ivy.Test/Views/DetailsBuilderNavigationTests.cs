@@ -128,7 +128,8 @@ public class DetailsBuilderNavigationTests
     {
         // This test verifies the fix for issue #4550
         // IView/ViewBase types should NOT be treated as navigation properties
-        var model = new {
+        var model = new
+        {
             Name = "John",
             Address = new { Street = "123 Main St", City = "Anytown" }.ToDetails()
         };
