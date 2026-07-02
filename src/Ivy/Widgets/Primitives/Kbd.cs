@@ -17,7 +17,7 @@ public record Kbd : WidgetBase<Kbd>
 
     internal Kbd() { }
 
-    [Prop] public string? Content { get; set; }
+    [Prop] public string Content { get; set; } = string.Empty;
 
     [Prop] public bool Ghost { get; set; }
 }
