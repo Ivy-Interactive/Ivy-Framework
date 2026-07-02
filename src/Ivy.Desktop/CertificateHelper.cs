@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -25,15 +26,18 @@ public static class CertificateHelper
         }
 
         // 2. If not found, use a persistent self-signed certificate in the user's home directory (~/.ivy/certs/...)
-        var certDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ivy", "certs");
+        var userProfileDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (string.IsNullOrWhiteSpace(userProfileDir))
+            userProfileDir = AppDomain.CurrentDomain.BaseDirectory;
+        var certDir = Path.Join(userProfileDir, ".ivy", "certs");
         bool isBundledPath = false;
 
         // Also check if there's a pre-bundled certificate in the app bundle resources (macOS)
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         if (OperatingSystem.IsMacOS() && baseDir.Contains(".app/Contents/MacOS"))
         {
-            var bundleCertDir = Path.GetFullPath(Path.Combine(baseDir, "..", "Resources", "certs"));
-            if (File.Exists(Path.Combine(bundleCertDir, "localhost.pfx")))
+            var bundleCertDir = Path.GetFullPath(Path.Join(baseDir, "..", "Resources", "certs"));
+            if (File.Exists(Path.Join(bundleCertDir, "localhost.pfx")))
             {
                 certDir = bundleCertDir;
                 isBundledPath = true;
@@ -42,8 +46,8 @@ public static class CertificateHelper
         else
         {
             // On Windows (or other OS if not in macOS app bundle), check local certs folder under base directory
-            var localCertDir = Path.Combine(baseDir, "certs");
-            if (File.Exists(Path.Combine(localCertDir, "localhost.pfx")))
+            var localCertDir = Path.Join(baseDir, "certs");
+            if (File.Exists(Path.Join(localCertDir, "localhost.pfx")))
             {
                 certDir = localCertDir;
                 isBundledPath = true;
@@ -55,8 +59,8 @@ public static class CertificateHelper
             Directory.CreateDirectory(certDir);
         }
 
-        var pfxPath = Path.Combine(certDir, "localhost.pfx");
-        var crtPath = Path.Combine(certDir, "localhost.crt");
+        var pfxPath = Path.Join(certDir, "localhost.pfx");
+        var crtPath = Path.Join(certDir, "localhost.crt");
 
         X509Certificate2? loadedCert = null;
 
@@ -172,22 +176,12 @@ public static class CertificateHelper
         {
             using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
-            foreach (var cert in store.Certificates)
-            {
-                if (cert.Subject.Contains("CN=localhost", StringComparison.OrdinalIgnoreCase))
-                {
-                    foreach (var extension in cert.Extensions)
-                    {
-                        if (extension.Oid?.Value == "1.3.6.1.4.1.311.84.1.1") // ASP.NET Core HTTPS developer certificate
-                        {
-                            if (DateTime.UtcNow >= cert.NotBefore.ToUniversalTime() && DateTime.UtcNow <= cert.NotAfter.ToUniversalTime())
-                            {
-                                return cert;
-                            }
-                        }
-                    }
-                }
-            }
+            return store.Certificates
+                .Cast<X509Certificate2>()
+                .Where(cert => cert.Subject.Contains("CN=localhost", StringComparison.OrdinalIgnoreCase))
+                .Where(cert => cert.Extensions.Cast<X509Extension>()
+                    .Any(extension => extension.Oid?.Value == "1.3.6.1.4.1.311.84.1.1")) // ASP.NET Core HTTPS developer certificate
+                .FirstOrDefault(cert => DateTime.UtcNow >= cert.NotBefore.ToUniversalTime() && DateTime.UtcNow <= cert.NotAfter.ToUniversalTime());
         }
         catch (Exception ex)
         {
