@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
-import { controlHeight } from "@/components/ui/density-scale";
+import { controlHeight, controlSize } from "@/components/ui/density-scale";
 
 const copyIconVariant = cva("", {
   variants: {
@@ -20,13 +20,13 @@ const copyIconVariant = cva("", {
 });
 
 const copyButtonSizeVariant = cva(
-  "p-2 rounded bg-transparent hover:bg-accent focus:outline-none cursor-pointer flex items-center",
+  "rounded bg-transparent hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center",
   {
     variants: {
       density: {
-        Small: controlHeight.Small,
-        Medium: controlHeight.Medium,
-        Large: controlHeight.Large,
+        Small: controlSize.Small,
+        Medium: controlSize.Medium,
+        Large: controlSize.Large,
       },
     },
     defaultVariants: {
