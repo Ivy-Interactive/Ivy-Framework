@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
-import { controlHeight, controlSize } from "@/components/ui/density-scale";
+import { controlSize } from "@/components/ui/density-scale";
 
 const copyIconVariant = cva("", {
   variants: {
