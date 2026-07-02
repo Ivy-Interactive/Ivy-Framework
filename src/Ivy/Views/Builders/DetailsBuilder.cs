@@ -87,7 +87,8 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             {
                 item.IsRemoved = true;
             }
-            else if (!TypeHelper.IsSimpleType(field.Type) && field.Type != typeof(string) && field.Type.IsClass)
+            else if (!TypeHelper.IsSimpleType(field.Type) && field.Type != typeof(string) && field.Type.IsClass
+                     && !typeof(IView).IsAssignableFrom(field.Type))
             {
                 item.Builder = new NavigationPropertyBuilder<TModel>();
             }
