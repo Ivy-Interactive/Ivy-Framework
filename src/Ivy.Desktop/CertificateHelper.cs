@@ -72,46 +72,16 @@ public static class CertificateHelper
                     loadedCert = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[WARNING] Failed to load existing certificate from {pfxPath}: {ex.Message}");
                 loadedCert = null;
             }
         }
 
         if (loadedCert == null)
         {
-            // Generate new certificate
-            using var rsa = RSA.Create(2048);
-            var request = new CertificateRequest(
-                "CN=localhost",
-                rsa,
-                HashAlgorithmName.SHA256,
-                RSASignaturePadding.Pkcs1);
-
-            request.CertificateExtensions.Add(
-                new X509BasicConstraintsExtension(false, false, 0, false));
-
-            request.CertificateExtensions.Add(
-                new X509KeyUsageExtension(
-                    X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment,
-                    false));
-
-            request.CertificateExtensions.Add(
-                new X509EnhancedKeyUsageExtension(
-                    new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, // Server Authentication
-                    false));
-
-            var sanBuilder = new SubjectAlternativeNameBuilder();
-            sanBuilder.AddDnsName("localhost");
-            sanBuilder.AddIpAddress(IPAddress.Loopback);
-            sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
-            request.CertificateExtensions.Add(sanBuilder.Build());
-
-            var cert = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
-
-            // Export as PFX (with private key) and CRT (public key only)
-            var pfxBytes = cert.Export(X509ContentType.Pfx);
-            var crtBytes = cert.Export(X509ContentType.Cert);
+            var (pfxBytes, crtBytes) = GenerateSelfSignedCertificateBytes();
 
             File.WriteAllBytes(pfxPath, pfxBytes);
             File.WriteAllBytes(crtPath, crtBytes);
@@ -147,6 +117,20 @@ public static class CertificateHelper
 
     public static void GenerateAndSaveCertificate(string pfxPath, string crtPath)
     {
+        var (pfxBytes, crtBytes) = GenerateSelfSignedCertificateBytes();
+
+        var pfxDir = Path.GetDirectoryName(pfxPath);
+        if (!string.IsNullOrEmpty(pfxDir)) Directory.CreateDirectory(pfxDir);
+
+        var crtDir = Path.GetDirectoryName(crtPath);
+        if (!string.IsNullOrEmpty(crtDir)) Directory.CreateDirectory(crtDir);
+
+        File.WriteAllBytes(pfxPath, pfxBytes);
+        File.WriteAllBytes(crtPath, crtBytes);
+    }
+
+    private static (byte[] PfxBytes, byte[] CrtBytes) GenerateSelfSignedCertificateBytes()
+    {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest(
             "CN=localhost",
@@ -179,14 +163,7 @@ public static class CertificateHelper
         var pfxBytes = cert.Export(X509ContentType.Pfx);
         var crtBytes = cert.Export(X509ContentType.Cert);
 
-        var pfxDir = Path.GetDirectoryName(pfxPath);
-        if (!string.IsNullOrEmpty(pfxDir)) Directory.CreateDirectory(pfxDir);
-
-        var crtDir = Path.GetDirectoryName(crtPath);
-        if (!string.IsNullOrEmpty(crtDir)) Directory.CreateDirectory(crtDir);
-
-        File.WriteAllBytes(pfxPath, pfxBytes);
-        File.WriteAllBytes(crtPath, crtBytes);
+        return (pfxBytes, crtBytes);
     }
 
     private static X509Certificate2? FindDeveloperCertificate()
@@ -223,18 +200,15 @@ public static class CertificateHelper
     {
         try
         {
+            // Only check Root store - that's what actually indicates trust on macOS
             using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
             var results = store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
-            if (results.Count > 0) return true;
-
-            using var storeMy = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            storeMy.Open(OpenFlags.ReadOnly);
-            var resultsMy = storeMy.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
-            return resultsMy.Count > 0;
+            return results.Count > 0;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[WARNING] Failed to check macOS root certificate trust: {ex.Message}");
             return false;
         }
     }
@@ -249,10 +223,21 @@ public static class CertificateHelper
                 FileName = "security",
                 Arguments = $"add-trusted-cert -d -r trustRoot -k \"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}/Library/Keychains/login.keychain-db\" \"{crtPath}\"",
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                RedirectStandardError = true
             };
             using var process = Process.Start(psi);
-            process?.WaitForExit();
+            if (process != null)
+            {
+                var stderrTask = process.StandardError.ReadToEndAsync();
+                process.WaitForExit();
+                var stderr = stderrTask.Result;
+
+                if (process.ExitCode != 0)
+                {
+                    Console.WriteLine($"[WARNING] Certificate trust command exited with code {process.ExitCode}. Error: {stderr}");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -269,8 +254,9 @@ public static class CertificateHelper
             var results = store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
             return results.Count > 0;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[WARNING] Failed to check Windows root certificate trust: {ex.Message}");
             return false;
         }
     }
