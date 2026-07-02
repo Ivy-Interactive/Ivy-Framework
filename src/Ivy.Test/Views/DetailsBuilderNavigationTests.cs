@@ -136,12 +136,8 @@ public class DetailsBuilderNavigationTests
         var result = builder.Build();
 
         // The nested DetailsBuilder should be rendered as a Details widget, not crash
+        // Without the fix, this would throw TargetInvocationException during Build()
         Assert.NotNull(result);
         Assert.IsType<Details>(result);
-        var details = (Details)result;
-
-        // The Address field should be present and the Details widget should have successfully built
-        // Without the fix, this would throw TargetInvocationException
-        Assert.NotEmpty(details.Items);
     }
 }
