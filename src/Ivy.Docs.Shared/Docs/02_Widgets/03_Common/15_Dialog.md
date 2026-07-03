@@ -114,11 +114,21 @@ public class FormDialogExample : ViewBase
 }
 ```
 
-## Preventing Dismissal
+## Restricting Close Actions (ClosedBy)
 
-Use `.Dismissable(false)` to stop a dialog from being closed by clicking the backdrop or pressing ESC. The close button (X) and any footer buttons still work.
+By default, dialogs can be closed by clicking the backdrop (outside the dialog), pressing the ESC key, or clicking the close button (X).
 
-To guard against accidental closes via the X button, pass a `confirmationMessage` to `.Dismissable(...)`. When set, clicking X opens a confirmation dialog and `OnClose` only fires once the user confirms:
+Use the `.ClosedBy(...)` extension method to customize which actions are allowed to close the dialog:
+
+- `DialogClosedBy.Any` (default): Backdrop click, Escape key, and close button (X) all close the dialog.
+- `DialogClosedBy.CloseRequest`: Backdrop click is blocked. Escape key and close button (X) close the dialog.
+- `DialogClosedBy.None`: Backdrop click and Escape key are both blocked. Only the close button (X) closes the dialog.
+
+You can also specify an optional `confirmationMessage`. If set, any allowed close action (including the close button) will prompt the user with a confirmation dialog before closing.
+
+### Restricting to Close Button Only with Confirmation
+
+Pass a custom confirmation message directly to `.ClosedBy(string message)` to block backdrop and Escape closes, and require confirmation when the close button is clicked:
 
 ```csharp demo-below
 public class ConfirmCloseDialogExample : ViewBase
@@ -136,9 +146,7 @@ public class ConfirmCloseDialogExample : ViewBase
                     new DialogHeader("Unsaved Changes"),
                     new DialogBody(Text.P("Closing with the X button will ask you to confirm.")),
                     new DialogFooter(new Button("Save", _ => isOpen.Set(false)))
-                  ).Dismissable(
-                      false,
-                      confirmationMessage: "Your unsaved changes will be lost.")
+                  ).ClosedBy("Your unsaved changes will be lost.")
                 : null
         );
     }

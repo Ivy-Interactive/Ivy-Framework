@@ -24,7 +24,7 @@ public record Dialog : WidgetBase<Dialog>
     }
 
     [Event] public EventHandler<Event<Dialog>>? OnClose { get; set; }
-    [Prop] public bool Dismissable { get; set; } = true;
+    [Prop] public DialogClosedBy ClosedBy { get; set; } = DialogClosedBy.Any;
     [Prop] public string? ConfirmationMessage { get; set; }
 
     public static Dialog operator |(Dialog dialog, object child)
@@ -45,16 +45,35 @@ public record Dialog : WidgetBase<Dialog>
     internal Dialog() { }
 }
 
+public enum DialogClosedBy
+{
+    Any,
+    CloseRequest,
+    None
+}
+
 public static class DialogExtensions
 {
-    public static Dialog Dismissable(
+    public static Dialog ClosedBy(
         this Dialog dialog,
-        bool dismissable = true,
+        DialogClosedBy closedBy,
         string? confirmationMessage = null)
     {
         return dialog with
         {
-            Dismissable = dismissable,
+            ClosedBy = closedBy,
+            ConfirmationMessage = confirmationMessage
+        };
+    }
+
+    [OverloadResolutionPriority(-1)]
+    public static Dialog ClosedBy(
+        this Dialog dialog,
+        string confirmationMessage)
+    {
+        return dialog with
+        {
+            ClosedBy = DialogClosedBy.None,
             ConfirmationMessage = confirmationMessage
         };
     }

@@ -13,7 +13,7 @@ public class DialogApp : SampleBase
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()
                    | new AutoFocusDialogExample()
-                   | new NonDismissableDialogExample();
+                   | new ClosedByDialogExample();
     }
 }
 
@@ -196,7 +196,7 @@ public class AutoFocusDialogExample : ViewBase
     }
 }
 
-public class NonDismissableDialogExample : ViewBase
+public class ClosedByDialogExample : ViewBase
 {
     public override object? Build()
     {
@@ -207,7 +207,7 @@ public class NonDismissableDialogExample : ViewBase
                    Layout.Vertical().Gap(3)
                    | Layout.Horizontal()
                        | Icons.Lock
-                       | Text.H3("Non-Dismissable Dialog")
+                       | Text.H3("ClosedBy Dialog")
                    | Text.P("Cannot be closed by clicking outside or pressing ESC. The X button asks for confirmation before closing.")
                    | new Button("Open", _ => isOpen.Set(true)).Primary()
                )
@@ -227,9 +227,7 @@ public class NonDismissableDialogExample : ViewBase
                                client.Toast("Changes saved.");
                            })
                        )
-                   ).Dismissable(
-                       false,
-                       confirmationMessage: "Your unsaved changes will be lost. Are you sure you want to close?")
+                   ).ClosedBy("Your unsaved changes will be lost. Are you sure you want to close?")
                    : null);
     }
 }

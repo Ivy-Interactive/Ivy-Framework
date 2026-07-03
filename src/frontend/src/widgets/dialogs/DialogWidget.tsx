@@ -19,7 +19,7 @@ interface DialogWidgetProps {
   children?: React.ReactNode;
   width?: string;
   events?: string[];
-  dismissable?: boolean;
+  closedBy?: string;
   confirmationMessage?: string;
 }
 
@@ -30,14 +30,15 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
   children,
   width,
   events = EMPTY_EVENTS,
-  dismissable = true,
+  closedBy = "Any",
   confirmationMessage,
 }) => {
   const eventHandler = useEventHandler();
   const isVisible = true;
   const [confirmingClose, setConfirmingClose] = useState(false);
 
-  const requiresCloseConfirmation = dismissable === false && Boolean(confirmationMessage);
+  const closedByNormalized = (closedBy || "any").toLowerCase();
+  const requiresCloseConfirmation = Boolean(confirmationMessage);
 
   const widthStyles = getWidth(width);
   const styles = {
@@ -64,8 +65,12 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
         style={styles}
         className={cn(isVisible && "alert-animate-enter")}
         aria-describedby={undefined}
-        onInteractOutside={dismissable === false ? (e) => e.preventDefault() : undefined}
-        onEscapeKeyDown={dismissable === false ? (e) => e.preventDefault() : undefined}
+        onInteractOutside={
+          closedByNormalized === "closerequest" || closedByNormalized === "none"
+            ? (e) => e.preventDefault()
+            : undefined
+        }
+        onEscapeKeyDown={closedByNormalized === "none" ? (e) => e.preventDefault() : undefined}
         onOpenAutoFocus={(e) => {
           const container = e.currentTarget as HTMLElement | null;
           const target = container?.querySelector<HTMLElement>("[autofocus]");

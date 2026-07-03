@@ -54,7 +54,7 @@ afterEach(() => {
 });
 
 describe("DialogWidget", () => {
-  it("fires OnClose immediately when the X button is clicked on a dismissable dialog", () => {
+  it("fires OnClose immediately when the X button is clicked with default closedBy and no confirmation message", () => {
     mount(
       <DialogWidget id="test-dialog" events={["OnClose"]}>
         <DialogHeaderWidget id="header" title="Title" />
@@ -66,9 +66,9 @@ describe("DialogWidget", () => {
     expect(eventHandler).toHaveBeenCalledWith("OnClose", "test-dialog", []);
   });
 
-  it("fires OnClose immediately when non-dismissable but no confirmation text is set", () => {
+  it("fires OnClose immediately when closedBy='None' but no confirmation text is set", () => {
     mount(
-      <DialogWidget id="test-dialog" events={["OnClose"]} dismissable={false}>
+      <DialogWidget id="test-dialog" events={["OnClose"]} closedBy="None">
         <DialogHeaderWidget id="header" title="Title" />
       </DialogWidget>,
     );
@@ -78,12 +78,12 @@ describe("DialogWidget", () => {
     expect(eventHandler).toHaveBeenCalledWith("OnClose", "test-dialog", []);
   });
 
-  it("shows a confirmation before closing a non-dismissable dialog with a confirmation message", () => {
+  it("shows a confirmation before closing a dialog with a confirmation message", () => {
     mount(
       <DialogWidget
         id="test-dialog"
         events={["OnClose"]}
-        dismissable={false}
+        closedBy="None"
         confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
@@ -102,7 +102,7 @@ describe("DialogWidget", () => {
       <DialogWidget
         id="test-dialog"
         events={["OnClose"]}
-        dismissable={false}
+        closedBy="None"
         confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
@@ -122,7 +122,7 @@ describe("DialogWidget", () => {
       <DialogWidget
         id="test-dialog"
         events={["OnClose"]}
-        dismissable={false}
+        closedBy="None"
         confirmationMessage="Your changes will be lost."
       >
         <DialogHeaderWidget id="header" title="Title" />
