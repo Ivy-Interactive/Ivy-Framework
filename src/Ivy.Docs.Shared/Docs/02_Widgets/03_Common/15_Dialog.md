@@ -114,6 +114,11 @@ public class FormDialogExample : ViewBase
 }
 ```
 
+## Dismissal Behavior
+
+By default, dialogs cannot be closed by clicking the backdrop (outside the dialog). This prevents users from accidentally losing unsaved changes. Closing is only allowed via the ESC key, platform-specific back gestures, or explicit cancel/close buttons.
+
+
 ## Dialog Component Properties
 
 ### DialogHeader
