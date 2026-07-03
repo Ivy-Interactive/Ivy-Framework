@@ -171,7 +171,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (!isReadOnlyRef.current && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnInput", id, [data]);
-        } catch {}
+        } catch { }
       }
     },
     [id],
@@ -182,7 +182,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (eventsRef.current.includes("OnResize") && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnResize", id, [{ cols: size.cols, rows: size.rows }]);
-        } catch {}
+        } catch { }
       }
     },
     [id],
@@ -518,6 +518,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     if (!stream?.id || !subscribeToStream) return;
 
+    const decoder = new TextDecoder("utf-8");
+
     const unsubscribe = subscribeToStream(stream.id, (data) => {
       if (terminalRef.current && typeof data === "string") {
         try {
@@ -527,7 +529,7 @@ export const Terminal: React.FC<TerminalProps> = ({
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          const text = new TextDecoder("utf-8").decode(bytes);
+          const text = decoder.decode(bytes, { stream: true });
           // Debug: log first chunk to verify encoding
           if (bytes.length > 0 && bytes.length < 100) {
             console.log("[Terminal] base64 decoded:", {
