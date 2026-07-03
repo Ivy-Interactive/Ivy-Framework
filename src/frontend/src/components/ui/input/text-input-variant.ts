@@ -17,11 +17,13 @@ export function normalizeInputDensity(density?: Densities | string | null): Inpu
 
 /**
  * Ivy.Button in affix: outer cell owns spacing (`px-3` or tighter for icon-only).
- * Text buttons: strip `sm` px. Icon-only (`icon-sm` / `icon`): shrink hit box — the
- * `size-7`/`size-9` target is larger than the glyph, which reads as extra padding.
+ * Text buttons: `rounded-sm` + `px-2` so the button chrome sits inset from the
+ * field's rounded corner instead of clipping square against it. Icon-only
+ * (`icon-sm` / `icon`): shrink hit box — the `size-7`/`size-9` target is larger
+ * than the glyph, which reads as extra padding.
  */
 export const affixEmbeddedButtonClasses =
-  "[&_button:not([data-invalid-icon])]:!px-0 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded-none [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
+  "[&_button:not([data-invalid-icon])]:!px-2 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded-sm [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
 
 /** Tighter affix cell padding when the slot only contains an icon-sized Ivy button (not trailing invalid). */
 export const affixIconOnlyCellPaddingClasses =
@@ -71,8 +73,8 @@ export const textInputAffixCellVariant = cva(
   {
     variants: {
       side: {
-        prefix: "rounded-none",
-        suffix: "rounded-none",
+        prefix: "rounded-none first:rounded-l-field",
+        suffix: "rounded-none last:rounded-r-field",
       },
       density: {
         Small: "",
@@ -83,10 +85,10 @@ export const textInputAffixCellVariant = cva(
     compoundVariants: [
       // Outer pl tracks standalone field px-*; inner pr/pl is the prefix↔content seam.
       { side: "prefix", density: "Small", class: "pl-2 pr-0 text-xs" },
-      { side: "prefix", density: "Medium", class: "pl-3 pr-0.5 text-sm" },
+      { side: "prefix", density: "Medium", class: "pl-2 pr-0 text-sm" },
       { side: "prefix", density: "Large", class: "pl-4 pr-1 text-base" },
       { side: "suffix", density: "Small", class: "pl-0 pr-2 text-xs" },
-      { side: "suffix", density: "Medium", class: "pl-0.5 pr-3 text-sm" },
+      { side: "suffix", density: "Medium", class: "pl-0 pr-2 text-sm" },
       { side: "suffix", density: "Large", class: "pl-1 pr-4 text-base" },
     ],
     defaultVariants: {

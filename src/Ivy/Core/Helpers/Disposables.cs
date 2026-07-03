@@ -26,10 +26,14 @@ public class Disposables(params IEnumerable<IDisposable> disposables) : IDisposa
 
     public void Dispose()
     {
-        foreach (var disposable in _disposables)
+        // Snapshot the list first: a disposable's Dispose() may re-enter and
+        // modify _disposables (e.g. via Add or a nested Dispose), which would
+        // otherwise invalidate the enumerator.
+        var snapshot = _disposables.ToArray();
+        _disposables.Clear();
+        foreach (var disposable in snapshot)
         {
             disposable.Dispose();
         }
-        _disposables.Clear();
     }
 }

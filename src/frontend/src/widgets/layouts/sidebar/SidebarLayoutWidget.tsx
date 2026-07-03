@@ -456,9 +456,11 @@ const CollapsibleMenuItem: React.FC<{
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-secondary text-accent-foreground",
-                isPenHovered && "bg-secondary text-accent-foreground",
+                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left",
+                isActive
+                  ? "bg-secondary text-accent-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground",
+                isPenHovered && "bg-accent text-accent-foreground",
               )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
@@ -513,9 +515,11 @@ const CollapsibleMenuItem: React.FC<{
       >
         <button
           className={cn(
-            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
-            isActive && "bg-secondary text-accent-foreground",
-            isPenHovered && "bg-secondary text-accent-foreground",
+            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left",
+            isActive
+              ? "bg-secondary text-accent-foreground"
+              : "hover:bg-accent hover:text-accent-foreground",
+            isPenHovered && "bg-accent text-accent-foreground",
           )}
           onClick={() => onItemClick(item)}
           onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
@@ -552,10 +556,12 @@ const MenuItemButton: React.FC<{
   return (
     <button
       className={cn(
-        "flex w-full items-center gap-2 rounded-selector p-2 hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
+        "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left",
         level === 1 ? "text-body" : "text-body",
-        isActive && "bg-secondary text-accent-foreground",
-        isPenHovered && "bg-secondary text-accent-foreground",
+        isActive
+          ? "bg-secondary text-accent-foreground"
+          : "hover:bg-accent hover:text-accent-foreground",
+        isPenHovered && "bg-accent text-accent-foreground",
       )}
       onClick={onClick}
       onMouseDown={onMouseDown}
@@ -872,10 +878,12 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           <button
             {...(flatIdx >= 0 && { "data-sidebar-result-index": flatIdx })}
             className={cn(
-              "flex w-full rounded-selector p-2 text-sm hover:bg-secondary/50 cursor-pointer min-h-8 text-left",
+              "flex w-full rounded-selector p-2 text-sm cursor-pointer min-h-8 text-left",
               showPath && item.path ? "flex-col items-start gap-1" : "items-center gap-2",
-              isHovered && !isActivePage && "bg-secondary/30",
-              isActivePage && "bg-secondary text-accent-foreground hover:bg-secondary",
+              isActivePage
+                ? "bg-secondary text-accent-foreground"
+                : "hover:bg-accent hover:text-accent-foreground",
+              isHovered && !isActivePage && "bg-accent",
             )}
             tabIndex={-1}
             onClick={() => {

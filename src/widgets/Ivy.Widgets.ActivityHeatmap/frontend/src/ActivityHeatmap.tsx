@@ -234,11 +234,11 @@ export function ActivityHeatmap({
 
   return (
     <div className="ivy-activity-heatmap-container">
-      <div className="overflow-x-auto h-100 bg-card ivy-activity-heatmap-scroll"
+      <div className="overflow-x-auto h-100 ivy-activity-heatmap-scroll"
         ref={scrollXContainer}>
         <div className={`inline-flex flex-col gap-[${cellGapSize}px] font-sans h-100`}>
           {showMonthLabels && (
-            <div className="sticky top-0 flex gap-1 pb-2 text-[#57606a] w-full bg-card">
+            <div className="sticky top-0 flex gap-1 pb-2 text-[#57606a] w-full">
               {showDayLabels && <div style={{ width: `${labelWidth}px` }} />}
               {columns.map((_, ci) => (
                 <div
@@ -257,7 +257,7 @@ export function ActivityHeatmap({
             style={{ gap: `${cellGapSize}px` }}
           >
             {showDayLabels && (
-              <div className="flex flex-col justify-end sticky left-0 top-0 bottom-0 bg-card">
+              <div className="flex flex-col justify-end sticky left-0 top-0 bottom-0">
                 <div
                   className="grid text-secondary-foreground opacity-50 *:pr-2 *:text-right"
                   style={{
