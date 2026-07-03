@@ -15,4 +15,4 @@ if ($BuildFrontend) {
 }
 
 Write-Host "Starting Ivy Docs..."
-dotnet run --project (Join-Path $scriptDir "Ivy.Docs\Ivy.Docs.csproj")
+dotnet run --project (Join-Path $scriptDir "Ivy.Docs\Ivy.Docs.csproj") --find-available-port --browse
