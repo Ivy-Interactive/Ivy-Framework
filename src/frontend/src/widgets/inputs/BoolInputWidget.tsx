@@ -86,25 +86,27 @@ const InputLabel: React.FC<{
   label?: string;
   description?: string;
   density?: Densities;
-  onClick?: () => void;
   disabled?: boolean;
-}> = React.memo(({ id, label, description, density = Densities.Medium, onClick, disabled }) => {
+}> = React.memo(({ id, label, description, density = Densities.Medium, disabled }) => {
   if (!label && !description) return null;
   const d = normalizeInputDensity(density);
 
-  const cursorClass = onClick ? (disabled ? "cursor-not-allowed" : "cursor-pointer") : undefined;
-
+  // Native htmlFor association toggles the control — do not re-add a JS click handler here.
   return (
-    <div onClick={onClick} className={cn("min-w-0 flex-1", cursorClass)}>
+    <Label
+      htmlFor={id}
+      className={cn(
+        "min-w-0 flex-1 self-stretch flex flex-col justify-center",
+        disabled ? "cursor-not-allowed" : "cursor-pointer",
+      )}
+    >
       {label && (
-        <Label htmlFor={id} className={cn("block truncate", labelSizeVariant({ density: d }))}>
-          {label}
-        </Label>
+        <span className={cn("block truncate", labelSizeVariant({ density: d }))}>{label}</span>
       )}
       {description && (
-        <p className={cn("block", descriptionSizeVariant({ density: d }))}>{description}</p>
+        <span className={cn("block", descriptionSizeVariant({ density: d }))}>{description}</span>
       )}
-    </div>
+    </Label>
   );
 });
 
@@ -148,19 +150,6 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: CheckboxVariantProps) => {
       const d = normalizeInputDensity(density);
-      // Toggle cycle for label clicks: null → true → false → null (if nullable)
-      const handleLabelClick = () => {
-        if (disabled || loading) return;
-        if (nullable) {
-          const isTrue = value === true || (value as any) === 1;
-          const isNull = value === null || value === undefined;
-          if (isNull) onCheckedChange(true);
-          else if (isTrue) onCheckedChange(false);
-          else onCheckedChange(null);
-        } else {
-          onCheckedChange(!value);
-        }
-      };
 
       const checkboxElement = (
         <div className="relative flex shrink-0">
@@ -201,7 +190,6 @@ const VariantComponents = {
             label={label}
             description={description}
             density={density}
-            onClick={handleLabelClick}
             disabled={disabled || loading}
           />
         </div>
@@ -226,10 +214,6 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: SwitchVariantProps) => {
       const d = normalizeInputDensity(density);
-      const handleLabelClick = () => {
-        if (disabled || loading) return;
-        onCheckedChange(!value);
-      };
 
       const switchElement = (
         <div className="relative flex shrink-0">
@@ -270,7 +254,6 @@ const VariantComponents = {
             label={label}
             description={description}
             density={density}
-            onClick={handleLabelClick}
             disabled={disabled || loading}
           />
         </div>
@@ -295,10 +278,6 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: ToggleVariantProps) => {
       const d = normalizeInputDensity(density);
-      const handleLabelClick = () => {
-        if (disabled || loading) return;
-        onPressedChange(!value);
-      };
 
       const toggleElement = (
         <div className="relative flex shrink-0">
@@ -341,7 +320,6 @@ const VariantComponents = {
             label={label}
             description={description}
             density={density}
-            onClick={handleLabelClick}
             disabled={disabled || loading}
           />
         </div>
