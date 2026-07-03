@@ -28,17 +28,22 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
     ...(width && widthStyles.width && !widthStyles.maxWidth ? { maxWidth: widthStyles.width } : {}),
   };
 
+  const emitClose = () => {
+    if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+  };
+
   return (
     <Dialog
       open={true}
       onOpenChange={() => {
-        if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+        emitClose();
       }}
     >
       <DialogContent
         style={styles}
         className={cn(isVisible && "alert-animate-enter")}
         aria-describedby={undefined}
+        onInteractOutside={(e) => e.preventDefault()}
         onOpenAutoFocus={(e) => {
           const container = e.currentTarget as HTMLElement | null;
           const target = container?.querySelector<HTMLElement>("[autofocus]");
