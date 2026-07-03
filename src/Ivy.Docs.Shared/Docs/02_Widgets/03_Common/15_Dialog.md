@@ -114,44 +114,10 @@ public class FormDialogExample : ViewBase
 }
 ```
 
-## Restricting Close Actions (ClosedBy)
+## Dismissal Behavior
 
-By default, dialogs can be closed by clicking the backdrop (outside the dialog), pressing the ESC key, or clicking the close button (X).
+By default, dialogs cannot be closed by clicking the backdrop (outside the dialog). This prevents users from accidentally losing unsaved changes. Closing is only allowed via the ESC key, platform-specific back gestures, or explicit cancel/close buttons.
 
-Use the `.ClosedBy(...)` extension method to customize which actions are allowed to close the dialog:
-
-- `DialogClosedBy.Any` (default): Backdrop click, Escape key, and close button (X) all close the dialog.
-- `DialogClosedBy.CloseRequest`: Backdrop click is blocked. Escape key and close button (X) close the dialog.
-- `DialogClosedBy.None`: Backdrop click and Escape key are both blocked. Only the close button (X) closes the dialog.
-
-You can also specify an optional `confirmationMessage`. If set, any allowed close action (including the close button) will prompt the user with a confirmation dialog before closing.
-
-### Restricting to Close Button Only with Confirmation
-
-Pass a custom confirmation message directly to `.ClosedBy(string message)` to block backdrop and Escape closes, and require confirmation when the close button is clicked:
-
-```csharp demo-below
-public class ConfirmCloseDialogExample : ViewBase
-{
-    public override object? Build()
-    {
-        var isOpen = UseState(false);
-        var client = UseService<IClientProvider>();
-
-        return Layout.Vertical(
-            new Button("Open", _ => isOpen.Set(true)),
-            isOpen.Value
-                ? new Dialog(
-                    _ => isOpen.Set(false),
-                    new DialogHeader("Unsaved Changes"),
-                    new DialogBody(Text.P("Closing with the X button will ask you to confirm.")),
-                    new DialogFooter(new Button("Save", _ => isOpen.Set(false)))
-                  ).ClosedBy("Your unsaved changes will be lost.")
-                : null
-        );
-    }
-}
-```
 
 ## Dialog Component Properties
 

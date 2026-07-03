@@ -12,8 +12,7 @@ public class DialogApp : SampleBase
                    | new CreateDialogExample()
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()
-                   | new AutoFocusDialogExample()
-                   | new ClosedByDialogExample();
+                   | new AutoFocusDialogExample();
     }
 }
 
@@ -196,38 +195,3 @@ public class AutoFocusDialogExample : ViewBase
     }
 }
 
-public class ClosedByDialogExample : ViewBase
-{
-    public override object? Build()
-    {
-        var isOpen = UseState(false);
-        var client = UseService<IClientProvider>();
-        return Layout.Vertical().Gap(2)
-               | new Card(
-                   Layout.Vertical().Gap(3)
-                   | Layout.Horizontal()
-                       | Icons.Lock
-                       | Text.H3("ClosedBy Dialog")
-                   | Text.P("Cannot be closed by clicking outside or pressing ESC. The X button asks for confirmation before closing.")
-                   | new Button("Open", _ => isOpen.Set(true)).Primary()
-               )
-               | (isOpen.Value
-                   ? new Dialog(
-                       _ =>
-                       {
-                           isOpen.Set(false);
-                           client.Toast("Changes discarded.");
-                       },
-                       new DialogHeader("Unsaved Changes"),
-                       new DialogBody(Text.P("This dialog prevents accidental dismissal. Clicking outside or pressing ESC does nothing, and closing with the X button asks you to confirm.")),
-                       new DialogFooter(
-                           new Button("Save", _ =>
-                           {
-                               isOpen.Set(false);
-                               client.Toast("Changes saved.");
-                           })
-                       )
-                   ).ClosedBy("Your unsaved changes will be lost. Are you sure you want to close?")
-                   : null);
-    }
-}
