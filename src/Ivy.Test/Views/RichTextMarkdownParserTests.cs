@@ -151,6 +151,22 @@ public class RichTextMarkdownParserTests
     }
 
     [Fact]
+    public void Should_Parse_InlineMath()
+    {
+        var runs = ParseAll("Result: $$E = mc^2$$ end\n");
+        var math = runs.First(r => r.Math != null);
+        Assert.Equal("E = mc^2", math.Content);
+    }
+
+    [Fact]
+    public void Should_Treat_SingleDollar_As_Literal()
+    {
+        var runs = ParseAll("bash expands any $ (e.g. $env:PORT, or vars like $IsMacOS) so $ survives\n");
+        Assert.DoesNotContain(runs, r => r.Math != null);
+        Assert.Contains(runs, r => r.Content.Contains("$env:PORT"));
+    }
+
+    [Fact]
     public void Should_Parse_Strikethrough()
     {
         var runs = ParseAll("~~struck~~\n");
