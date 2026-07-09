@@ -6,7 +6,6 @@
     overflow-y: auto;
     position: relative;
     display: flex;
-    background-color: var(--card);
 }
 
 .ivy-activity-heatmap-scroll {

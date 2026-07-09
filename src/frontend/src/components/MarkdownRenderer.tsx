@@ -269,7 +269,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const typography = useTypography();
   const contentFeatures = useMemo(
     () => ({
-      hasMath: hasContentFeature(content, /(\$|\\\(|\\\[|\\begin\{)/),
+      hasMath: hasContentFeature(content, /(\$\$|\\\(|\\\[|\\begin\{)/),
       hasCodeBlocks: hasContentFeature(content, /```/),
       hasMermaid: hasContentFeature(content, /```mermaid/),
       hasGraphviz: hasContentFeature(content, /```(graphviz|dot)/),
@@ -279,7 +279,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const plugins = useMemo(() => {
     const remarkPlugins = [remarkGfm, remarkGemoji, remarkCustomEmojiPlugin];
-    if (contentFeatures.hasMath) remarkPlugins.push(remarkMath as typeof remarkGfm);
+    if (contentFeatures.hasMath)
+      remarkPlugins.push([
+        remarkMath,
+        { singleDollarTextMath: false },
+      ] as unknown as typeof remarkGfm);
 
     const rehypePlugins = [rehypeRaw, rehypeSlug];
     if (contentFeatures.hasMath) rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);

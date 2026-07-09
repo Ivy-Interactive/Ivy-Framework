@@ -93,7 +93,7 @@ public class CodeBlocksMarkdownView : ViewBase
 
 ### Math
 
-Mathematical expressions can be rendered using KaTeX, supporting both inline math with single dollar signs and block math with double dollar signs. This feature is perfect for technical documentation and educational content.
+Mathematical expressions can be rendered using KaTeX. Both inline and block math use double dollar signs (`$$...$$`); a single `$` is always treated as literal text so prose containing dollar signs (shell variables, prices) renders correctly. This feature is perfect for technical documentation and educational content.
 
 ```csharp demo-tabs
 public class MathMarkdownView : ViewBase
@@ -102,7 +102,7 @@ public class MathMarkdownView : ViewBase
     {
         var markdownContent = 
             """
-            Inline: $E = mc^2$
+            Inline: $$E = mc^2$$
             
             $$
             \int_a^b f(x) dx = F(b) - F(a)
@@ -359,7 +359,7 @@ public class ComprehensiveMarkdownView : ViewBase
             }
             ```
             
-            Inline equation: $f(x) = x^2 + 2x + 1$
+            Inline equation: $$f(x) = x^2 + 2x + 1$$
             
             | Language | Type       | Performance |
             |----------|------------|-------------|

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Rustino.NET;
 
@@ -246,6 +247,31 @@ public class DesktopWindow(Server server)
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
+        // Force HTTPS/TLS on Windows and macOS if not explicitly set
+        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+        if (string.IsNullOrEmpty(ivyTlsEnv) && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()))
+        {
+            Environment.SetEnvironmentVariable("IVY_TLS", "true");
+            ivyTlsEnv = "true";
+        }
+
+        // Configure Kestrel HTTPS defaults using UseWebApplicationBuilder
+        server.UseWebApplicationBuilder(builder =>
+        {
+            var currentIvyTls = Environment.GetEnvironmentVariable("IVY_TLS");
+            var useTls = !string.IsNullOrEmpty(currentIvyTls) && currentIvyTls.ToLowerInvariant() is "1" or "true" or "yes" or "on";
+            if (useTls)
+            {
+                builder.WebHost.ConfigureKestrel(options =>
+                {
+                    options.ConfigureHttpsDefaults(httpsOptions =>
+                    {
+                        httpsOptions.ServerCertificate = CertificateHelper.GetOrCreateCertificate();
+                    });
+                });
+            }
+        });
+
         server.Services.AddSingleton(this);
 
         var cts = new CancellationTokenSource();
@@ -255,10 +281,9 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
         var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
             ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-            : OperatingSystem.IsWindows(); // Default to true on Windows, false on other platforms
+            : OperatingSystem.IsWindows() || OperatingSystem.IsMacOS(); // Default to true on Windows and macOS
         var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Show splash while the server starts

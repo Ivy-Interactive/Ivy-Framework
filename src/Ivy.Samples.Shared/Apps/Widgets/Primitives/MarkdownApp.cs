@@ -333,13 +333,13 @@ public class MathTab : ViewBase
                        
                        ## Inline Math
                        
-                       The famous equation: $E = mc^2$
-                       
-                       Another example: The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
-                       
-                       Pythagorean theorem: $a^2 + b^2 = c^2$
-                       
-                       Euler's identity: $e^{i\pi} + 1 = 0$
+                       The famous equation: $$E = mc^2$$
+
+                       Another example: The quadratic formula is $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+
+                       Pythagorean theorem: $$a^2 + b^2 = c^2$$
+
+                       Euler's identity: $$e^{i\pi} + 1 = 0$$
                        
                        ## Block Math
                        
