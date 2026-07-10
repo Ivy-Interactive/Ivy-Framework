@@ -42,6 +42,13 @@ public class DesktopWindow(Server server)
     private int _splashWidth = 400;
     private int _splashHeight = 300;
     private string? _appId;
+    private string? _aboutName;
+    private string? _aboutVersion;
+    private string? _aboutCopyright;
+    private string? _aboutWebsite;
+    private string? _aboutLicense;
+    private readonly List<string> _aboutAuthors = new();
+    private string? _aboutComments;
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
@@ -65,6 +72,13 @@ public class DesktopWindow(Server server)
     public DesktopWindow Menu(DesktopMenu menu) { _menu = menu; return this; }
     public DesktopWindow OnReady(Action<DesktopWindow> callback) { _onReady = callback; return this; }
     public DesktopWindow AppId(string appId) { _appId = appId; return this; }
+    public DesktopWindow AboutName(string name) { _aboutName = name; return this; }
+    public DesktopWindow AboutVersion(string version) { _aboutVersion = version; return this; }
+    public DesktopWindow AboutCopyright(string copyright) { _aboutCopyright = copyright; return this; }
+    public DesktopWindow AboutWebsite(string website) { _aboutWebsite = website; return this; }
+    public DesktopWindow AboutLicense(string license) { _aboutLicense = license; return this; }
+    public DesktopWindow AboutAuthor(string author) { _aboutAuthors.Add(author); return this; }
+    public DesktopWindow AboutComments(string comments) { _aboutComments = comments; return this; }
 
     public DesktopWindow Splash(string imagePath, int width = 400, int height = 300)
     {
@@ -365,6 +379,13 @@ public class DesktopWindow(Server server)
         foreach (var script in _initScripts) window.AddInitScript(script);
 
         if (_appId != null) window.SetApplicationId(_appId);
+        if (_aboutName != null) window.SetAboutName(_aboutName);
+        if (_aboutVersion != null) window.SetAboutVersion(_aboutVersion);
+        if (_aboutCopyright != null) window.SetAboutCopyright(_aboutCopyright);
+        if (_aboutWebsite != null) window.SetAboutWebsite(_aboutWebsite);
+        if (_aboutLicense != null) window.SetAboutLicense(_aboutLicense);
+        foreach (var author in _aboutAuthors) window.AddAboutAuthor(author);
+        if (_aboutComments != null) window.SetAboutComments(_aboutComments);
 
         if (_iconFilePath != null)
         {
