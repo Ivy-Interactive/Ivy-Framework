@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -96,9 +97,9 @@ public static class WidgetSerializer
 
     private static readonly ConcurrentDictionary<Type, SerializationTypeMetadata> MetadataCache = new();
 
-    private sealed record PropInfo(PropertyInfo Property, PropAttribute Attribute, string CamelCaseName);
+    private sealed record PropInfo(PropertyInfo Property, PropAttribute Attribute, string CamelCaseName, Func<IWidget, object?> Getter);
 
-    private sealed record EventInfo(PropertyInfo Property);
+    private sealed record EventInfo(PropertyInfo Property, Func<IWidget, object?> Getter);
 
     private sealed record SerializationTypeMetadata(
         string TypeName,
@@ -106,6 +107,15 @@ public static class WidgetSerializer
         EventInfo[] EventProperties,
         IWidget? DefaultInstance
     );
+
+    private static Func<IWidget, object?> CreateGetter(Type type, PropertyInfo property)
+    {
+        var param = Expression.Parameter(typeof(IWidget), "w");
+        var cast = Expression.Convert(param, type);
+        var prop = Expression.Property(cast, property);
+        var convertProp = Expression.Convert(prop, typeof(object));
+        return Expression.Lambda<Func<IWidget, object?>>(convertProp, param).Compile();
+    }
 
     private static SerializationTypeMetadata GetMetadata(Type type)
     {
@@ -116,12 +126,12 @@ public static class WidgetSerializer
             var propProperties = allProperties
                 .Select(p => (Property: p, Attribute: p.GetCustomAttribute<PropAttribute>()))
                 .Where(x => x.Attribute != null)
-                .Select(x => new PropInfo(x.Property, x.Attribute!, Utils.PascalCaseToCamelCase(x.Property.Name)))
+                .Select(x => new PropInfo(x.Property, x.Attribute!, Utils.PascalCaseToCamelCase(x.Property.Name), CreateGetter(t, x.Property)))
                 .ToArray();
 
             var eventProperties = allProperties
                 .Where(p => p.GetCustomAttribute<EventAttribute>() != null)
-                .Select(p => new EventInfo(p))
+                .Select(p => new EventInfo(p, CreateGetter(t, p)))
                 .ToArray();
 
             IWidget? defaultInstance = null;
@@ -185,12 +195,12 @@ public static class WidgetSerializer
         var props = new JsonObject();
         foreach (var propInfo in metadata.PropProperties)
         {
-            var value = GetPropertyValue(widget, propInfo.Property, propInfo.Attribute);
+            var value = GetPropertyValue(widget, propInfo);
 
             // Skip properties that match their default values (unless AlwaysSerialize is set)
             if (!propInfo.Attribute.AlwaysSerialize && metadata.DefaultInstance != null)
             {
-                var defaultValue = GetPropertyValue(metadata.DefaultInstance, propInfo.Property, propInfo.Attribute);
+                var defaultValue = GetPropertyValue(metadata.DefaultInstance, propInfo);
                 if (ValuesAreEqual(value, defaultValue))
                     continue;
             }
@@ -208,7 +218,7 @@ public static class WidgetSerializer
             var eventsArray = new JsonArray();
             foreach (var eventInfo in metadata.EventProperties)
             {
-                if (eventInfo.Property.GetValue(widget) != null)
+                if (eventInfo.Getter(widget) != null)
                     eventsArray.Add(JsonValue.Create(eventInfo.Property.Name));
             }
             json["events"] = eventsArray;
@@ -242,10 +252,12 @@ public static class WidgetSerializer
         return json;
     }
 
-    private static object? GetPropertyValue(IWidget widget, PropertyInfo property, PropAttribute attribute)
+    private static object? GetPropertyValue(IWidget widget, PropInfo propInfo)
     {
+        var attribute = propInfo.Attribute;
         if (attribute.IsAttached)
         {
+            var property = propInfo.Property;
             if (!property.PropertyType.IsArray)
                 throw new InvalidOperationException("Attached properties must be arrays.");
 
@@ -264,6 +276,6 @@ public static class WidgetSerializer
             return attachedValues;
         }
 
-        return property.GetValue(widget);
+        return propInfo.Getter(widget);
     }
 }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Rustino.NET;
 
@@ -41,6 +42,13 @@ public class DesktopWindow(Server server)
     private int _splashWidth = 400;
     private int _splashHeight = 300;
     private string? _appId;
+    private string? _aboutName;
+    private string? _aboutVersion;
+    private string? _aboutCopyright;
+    private string? _aboutWebsite;
+    private string? _aboutLicense;
+    private readonly List<string> _aboutAuthors = new();
+    private string? _aboutComments;
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
@@ -64,6 +72,13 @@ public class DesktopWindow(Server server)
     public DesktopWindow Menu(DesktopMenu menu) { _menu = menu; return this; }
     public DesktopWindow OnReady(Action<DesktopWindow> callback) { _onReady = callback; return this; }
     public DesktopWindow AppId(string appId) { _appId = appId; return this; }
+    public DesktopWindow AboutName(string name) { _aboutName = name; return this; }
+    public DesktopWindow AboutVersion(string version) { _aboutVersion = version; return this; }
+    public DesktopWindow AboutCopyright(string copyright) { _aboutCopyright = copyright; return this; }
+    public DesktopWindow AboutWebsite(string website) { _aboutWebsite = website; return this; }
+    public DesktopWindow AboutLicense(string license) { _aboutLicense = license; return this; }
+    public DesktopWindow AboutAuthor(string author) { _aboutAuthors.Add(author); return this; }
+    public DesktopWindow AboutComments(string comments) { _aboutComments = comments; return this; }
 
     public DesktopWindow Splash(string imagePath, int width = 400, int height = 300)
     {
@@ -246,6 +261,31 @@ public class DesktopWindow(Server server)
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
+        // Force HTTPS/TLS on Windows and macOS if not explicitly set
+        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+        if (string.IsNullOrEmpty(ivyTlsEnv) && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()))
+        {
+            Environment.SetEnvironmentVariable("IVY_TLS", "true");
+            ivyTlsEnv = "true";
+        }
+
+        // Configure Kestrel HTTPS defaults using UseWebApplicationBuilder
+        server.UseWebApplicationBuilder(builder =>
+        {
+            var currentIvyTls = Environment.GetEnvironmentVariable("IVY_TLS");
+            var useTls = !string.IsNullOrEmpty(currentIvyTls) && currentIvyTls.ToLowerInvariant() is "1" or "true" or "yes" or "on";
+            if (useTls)
+            {
+                builder.WebHost.ConfigureKestrel(options =>
+                {
+                    options.ConfigureHttpsDefaults(httpsOptions =>
+                    {
+                        httpsOptions.ServerCertificate = CertificateHelper.GetOrCreateCertificate();
+                    });
+                });
+            }
+        });
+
         server.Services.AddSingleton(this);
 
         var cts = new CancellationTokenSource();
@@ -255,10 +295,9 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
         var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
             ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-            : true; // Default to true if not overridden
+            : OperatingSystem.IsWindows() || OperatingSystem.IsMacOS(); // Default to true on Windows and macOS
         var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Show splash while the server starts
@@ -340,6 +379,13 @@ public class DesktopWindow(Server server)
         foreach (var script in _initScripts) window.AddInitScript(script);
 
         if (_appId != null) window.SetApplicationId(_appId);
+        if (_aboutName != null) window.SetAboutName(_aboutName);
+        if (_aboutVersion != null) window.SetAboutVersion(_aboutVersion);
+        if (_aboutCopyright != null) window.SetAboutCopyright(_aboutCopyright);
+        if (_aboutWebsite != null) window.SetAboutWebsite(_aboutWebsite);
+        if (_aboutLicense != null) window.SetAboutLicense(_aboutLicense);
+        foreach (var author in _aboutAuthors) window.AddAboutAuthor(author);
+        if (_aboutComments != null) window.SetAboutComments(_aboutComments);
 
         if (_iconFilePath != null)
         {

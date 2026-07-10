@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
+using Ivy.Core;
 using Ivy.Views.Builders;
 
 // ReSharper disable once CheckNamespace
@@ -87,7 +88,8 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             {
                 item.IsRemoved = true;
             }
-            else if (!TypeHelper.IsSimpleType(field.Type) && field.Type != typeof(string) && field.Type.IsClass)
+            else if (!TypeHelper.IsSimpleType(field.Type) && field.Type != typeof(string) && field.Type.IsClass
+                     && !typeof(IView).IsAssignableFrom(field.Type))
             {
                 item.Builder = new NavigationPropertyBuilder<TModel>();
             }

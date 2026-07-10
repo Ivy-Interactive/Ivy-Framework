@@ -57,19 +57,17 @@ function News({ articles }: { articles: NewsArticle[] }) {
     }
   }, [articles, dismissedNews]);
 
-  const [hasDismissedNews, setHasDismissedNews] = React.useState(false);
   const [showCompleted, setShowCompleted] = React.useState(false);
 
-  const cards =
-    dismissedNews === null ? [] : articles.filter(({ id }) => !dismissedNews.includes(id));
+  const cards = articles.filter(({ id }) => !dismissedNews.includes(id));
   const cardCount = cards.length;
 
-  const [prevCardCount, setPrevCardCount] = React.useState(cardCount);
+  const [prevCardCount, setPrevCardCount] = React.useState<number | null>(null);
   if (cardCount !== prevCardCount) {
-    setPrevCardCount(cardCount);
-    if (cardCount > 0) {
+    if (prevCardCount !== null && prevCardCount > 0 && cardCount === 0) {
       setShowCompleted(true);
     }
+    setPrevCardCount(cardCount);
   }
 
   React.useEffect(() => {
@@ -78,10 +76,9 @@ function News({ articles }: { articles: NewsArticle[] }) {
     return () => clearTimeout(timeout);
   }, [cardCount]);
 
-  if (dismissedNews === null) return null;
-  if (cards.length === 0 && showCompleted) return null;
+  if (cardCount === 0 && !showCompleted) return null;
 
-  return cards.length > 0 || hasDismissedNews ? (
+  return (
     <div className="group overflow-hidden px-2" data-active={cardCount !== 0}>
       <div className="relative size-full">
         {[...cards].reverse().map(({ id, href, title, summary, image }, idx) => (
@@ -114,12 +111,9 @@ function News({ articles }: { articles: NewsArticle[] }) {
               hideContent={cardCount - idx > 2}
               active={idx === cardCount - 1}
               onDismiss={() => {
-                if (dismissedNews) {
-                  const updated = [id, ...dismissedNews.filter((d) => d !== id)].slice(0, 50);
-                  setDismissedNews(updated);
-                  setHasDismissedNews(true);
-                  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-                }
+                const updated = [id, ...dismissedNews.filter((d) => d !== id)].slice(0, 50);
+                setDismissedNews(updated);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
               }}
             />
           </div>
@@ -140,7 +134,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
         )}
       </div>
     </div>
-  ) : null;
+  );
 }
 
 function NewsCard({

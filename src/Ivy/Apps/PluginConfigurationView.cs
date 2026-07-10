@@ -47,7 +47,9 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
     {
         return field.Type switch
         {
-            ConfigFieldType.Boolean => state.ToSelectInput(["true", "false"], placeholder: "Select..."),
+            ConfigFieldType.Boolean => new BoolInput(
+                value: string.Equals(state.Value, "true", StringComparison.OrdinalIgnoreCase),
+                onChange: e => { state.Set(e.Value ? "true" : "false"); }),
             ConfigFieldType.Secret => state.ToTextInput(placeholder: field.Description ?? field.Key, variant: TextInputVariant.Password),
             _ => state.ToTextInput(placeholder: field.Description ?? field.Key),
         };

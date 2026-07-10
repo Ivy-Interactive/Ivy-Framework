@@ -95,6 +95,42 @@ public static class UsePtyExtensions
         return new PtyHandle(stream, HandleInput, HandleResize, Kill, closed.Value, exitCode.Value);
     }
 
+    // CommandLineToArgvW-compatible argument quoting (the same algorithm as .NET's
+    // PasteArguments and PowerShell 7 "Standard" native-argument passing): embedded quotes
+    // become \" and runs of backslashes preceding a quote are doubled. This round-trips
+    // through every standard Windows argv parser, unlike Porta's "" -doubling default.
+    private static string EscapeWindowsArgument(string arg)
+    {
+        if (arg.Length > 0 && arg.IndexOfAny([' ', '\t', '\n', '\v', '"']) < 0)
+            return arg;
+
+        var sb = new StringBuilder();
+        sb.Append('"');
+        for (var i = 0; i < arg.Length;)
+        {
+            var backslashes = 0;
+            while (i < arg.Length && arg[i] == '\\') { backslashes++; i++; }
+            if (i == arg.Length)
+            {
+                // Backslashes that precede the closing quote must be doubled so the quote
+                // we append below is not itself escaped.
+                sb.Append('\\', backslashes * 2);
+            }
+            else if (arg[i] == '"')
+            {
+                sb.Append('\\', backslashes * 2 + 1).Append('"');
+                i++;
+            }
+            else
+            {
+                sb.Append('\\', backslashes).Append(arg[i]);
+                i++;
+            }
+        }
+        sb.Append('"');
+        return sb.ToString();
+    }
+
     private static void KillPty(IPtyConnection? pty)
     {
         if (pty == null) return;
@@ -149,6 +185,15 @@ public static class UsePtyExtensions
             }
         }
 
+        // Porta.Pty's default Windows arg formatting (WindowsArguments.Format) escapes embedded
+        // quotes by DOUBLING them (" -> "") and wraps each arg in quotes. CommandLineToArgvW
+        // consumers — Node, Rust, Go: i.e. every CLI we spawn (claude.exe, codex, …) — do not
+        // decode that convention and silently truncate an argument at its first embedded quote.
+        // So on Windows we pre-escape each arg with the standard backslash convention and hand
+        // Porta a single verbatim command line. On Unix, Porta passes the array straight to
+        // execvp(), so the array is forwarded untouched.
+        var args = commandLine[1..];
+        var verbatim = OperatingSystem.IsWindows();
         var ptyOptions = new global::Porta.Pty.PtyOptions
         {
             Name = "xterm-256color",
@@ -156,7 +201,10 @@ public static class UsePtyExtensions
             Rows = options.Rows,
             Cwd = cwd,
             App = app,
-            CommandLine = commandLine[1..],
+            CommandLine = verbatim && args.Length > 0
+                ? [string.Join(" ", args.Select(EscapeWindowsArgument))]
+                : args,
+            VerbatimCommandLine = verbatim,
             Environment = env
         };
 

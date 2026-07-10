@@ -239,8 +239,9 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
       style={styles}
       className={cn(
         strikeThrough && "line-through",
-        noWrap && "whitespace-nowrap",
+        noWrap ? "whitespace-nowrap" : variant === "Literal" && "whitespace-normal",
         bold && "font-semibold",
+        variant === "Literal" && !bold && "font-normal",
         italic && "italic",
         muted && "text-muted-foreground",
         density && scaleClasses[density],

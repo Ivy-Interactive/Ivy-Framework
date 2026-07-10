@@ -194,3 +194,4 @@ public class AutoFocusDialogExample : ViewBase
                    : null);
     }
 }
+
