@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
@@ -292,10 +293,9 @@ public class PluginLoader : IPluginManager
         // Referenced plugins first (explicit references take priority)
         var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
         var referencedPaths = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, _pluginsDirectory, _logger);
-        foreach (var directory in referencedPaths)
+        foreach (var directory in referencedPaths.Where(Directory.Exists))
         {
-            if (Directory.Exists(directory))
-                directories.Add(directory);
+            directories.Add(directory);
         }
 
         // Then subdirectories of the plugins directory
