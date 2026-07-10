@@ -168,6 +168,8 @@ export function _resetForTesting(): void {
     sweepTimerId = null;
   }
   removeListener();
+  // Reinstall listener to match module-load state (for backspace prevention)
+  installListener();
 }
 
 /** For testing only — returns the current registry size */
