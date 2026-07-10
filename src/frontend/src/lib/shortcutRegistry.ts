@@ -62,6 +62,11 @@ function handleKeyDown(event: KeyboardEvent) {
   const isInputField =
     target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
 
+  // Prevent browser back-navigation on Backspace outside text inputs
+  if (event.key === "Backspace" && !isInputField) {
+    event.preventDefault();
+  }
+
   for (const registration of registry.values()) {
     const { shortcut, handler, isActive, skipInInputs, id } = registration;
 
@@ -174,3 +179,6 @@ export function _getRegistrySize(): number {
 export function _isListenerInstalled(): boolean {
   return listenerInstalled;
 }
+
+// Install the listener at module load to ensure Backspace prevention is always active
+installListener();
