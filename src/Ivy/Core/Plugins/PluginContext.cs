@@ -34,8 +34,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-    private readonly List<Action<WebApplication>> _appActions = [];
-    private readonly AggregatePluginServiceProvider _aggregateProvider = new();
+private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
     private readonly Dictionary<string, string> _slugToPluginId = new();
@@ -101,27 +100,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
 
 
-    public void UseWebApplication(Action<WebApplication> configure)
-    {
-        _lock.EnterWriteLock();
-        try
-        {
-            _appActions.Add(configure);
-            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-                state.AppActions.Add(configure);
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
-    }
-
-    public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure)
-    {
-        configure(Builder);
-    }
-
-    public void UseEndpoints(string slug, Action<IEndpointRouteBuilder> configure)
+public void UseEndpoints(string slug, Action<IEndpointRouteBuilder> configure)
     {
         ValidateSlug(slug);
 
@@ -241,9 +220,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
                 _slugToPluginId.Remove(state.EndpointSlug);
             }
 
-            foreach (var a in state.AppActions)
-                _appActions.Remove(a);
-
             foreach (var f in state.AppFactories)
                 AppRepository.RemoveFactory(f);
 
@@ -321,14 +297,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         // Register the dynamic endpoint data source for plugin routes
         _endpointDataSource ??= new DynamicPluginEndpointDataSource();
         ((IEndpointRouteBuilder)app).DataSources.Add(_endpointDataSource);
-
-        List<Action<WebApplication>> actions;
-        _lock.EnterReadLock();
-        try { actions = _appActions.ToList(); }
-        finally { _lock.ExitReadLock(); }
-
-        foreach (var action in actions)
-            action(app);
 
         // Plugin icon route — serves files referenced by PluginIcon.File()
         app.MapGet("/ivy/plugin-icons/{pluginId}/{**filePath}", (string pluginId, string filePath) =>

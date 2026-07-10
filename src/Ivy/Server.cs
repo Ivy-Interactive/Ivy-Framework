@@ -771,8 +771,6 @@ public class Server
             });
         }
 
-        // Plugin Configure runs before Build so UseWebApplicationBuilder actions
-        // apply directly to the builder. UseWebApplication actions are deferred to Apply.
         PluginContextBase? pluginContext = null;
         if (_pluginLoader != null)
         {
