@@ -34,7 +34,8 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-private readonly AggregatePluginServiceProvider _aggregateProvider = new();
+
+    private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
     private readonly Dictionary<string, string> _slugToPluginId = new();
@@ -98,9 +99,7 @@ private readonly AggregatePluginServiceProvider _aggregateProvider = new();
             state.AppFactories.Add(factory);
     }
 
-
-
-public void UseEndpoints(string slug, Action<IEndpointRouteBuilder> configure)
+    public void UseEndpoints(string slug, Action<IEndpointRouteBuilder> configure)
     {
         ValidateSlug(slug);
 

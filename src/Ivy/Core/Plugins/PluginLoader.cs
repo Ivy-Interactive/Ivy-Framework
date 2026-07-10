@@ -270,14 +270,14 @@ public class PluginLoader : IPluginManager
                     {
                         LoadPlugin(directory);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
                     {
                         _logger.LogError(ex, "Error loading deferred plugin from {Directory}", directory);
                     }
                 }
                 _logger.LogInformation("Background plugin loading complete. {Count} plugin(s) loaded.", Plugins.Count);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
             {
                 _logger.LogError(ex, "Error during background plugin loading");
             }
@@ -492,7 +492,7 @@ public class PluginLoader : IPluginManager
                     _pluginContext.ClearPluginConfig();
                     _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
                 {
                     _pluginContext.ClearCurrentPlugin();
                     _pluginContext.ClearPluginConfig();
@@ -531,7 +531,7 @@ public class PluginLoader : IPluginManager
                 _pluginContext!.RefreshApps(appIds);
         }
 
-        done:
+    done:
         // Fire event outside the lock to avoid deadlocks — subscribers may call
         // GetActivePluginIds() which needs a read lock.
         if (loadedPluginId is not null)
