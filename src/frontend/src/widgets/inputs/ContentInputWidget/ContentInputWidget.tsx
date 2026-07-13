@@ -18,9 +18,9 @@ import { useShortcut } from "@/lib/useShortcut";
 const toolbarVariant = cva("flex items-center gap-1", {
   variants: {
     density: {
-      Small: "px-1.5 pb-1",
-      Medium: "px-2 pb-1.5",
-      Large: "px-3 pb-2",
+      Small: "px-1.5 py-1",
+      Medium: "px-2 py-1.5",
+      Large: "px-3 py-2",
     },
   },
   defaultVariants: { density: "Medium" },
