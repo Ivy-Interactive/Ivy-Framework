@@ -105,13 +105,13 @@
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
           Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
           Outputs="../frontend/node_modules/.modules.yaml">
-    <Exec Command="npx vp install -- --config.confirmModulesPurge=false" WorkingDirectory="../frontend" EnvironmentVariables="CI=$(CI)" />
+    <Exec Command="vp install -- --config.confirmModulesPurge=false" WorkingDirectory="../frontend" EnvironmentVariables="CI=$(CI)" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
           Inputs="@(FrontendSourceFiles)"
           Outputs="../frontend/dist/.build-stamp">
-    <Exec Command="npx vp run build" WorkingDirectory="../frontend" EnvironmentVariables="CI=$(CI)" />
+    <Exec Command="vp run build" WorkingDirectory="../frontend" EnvironmentVariables="CI=$(CI)" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
