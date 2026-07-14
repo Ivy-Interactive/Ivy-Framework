@@ -197,8 +197,8 @@ describe("shortcutRegistry", () => {
     document.body.removeChild(input);
   });
 
-  it("should not install global listener when registry is empty", () => {
-    expect(_isListenerInstalled()).toBe(false);
+  it("should install global listener at module load even when registry is empty", () => {
+    expect(_isListenerInstalled()).toBe(true);
     expect(_getRegistrySize()).toBe(0);
   });
 
@@ -359,6 +359,67 @@ describe("getRegisteredShortcuts", () => {
     const inactive = shortcuts.find((s) => s.id === "btn-inactive");
     expect(active?.isActive).toBe(true);
     expect(inactive?.isActive).toBe(false);
+  });
+});
+
+describe("backspace navigation prevention", () => {
+  beforeEach(() => {
+    _resetForTesting();
+  });
+
+  it("prevents browser back-navigation on Backspace outside text inputs", () => {
+    const event = new KeyboardEvent("keydown", {
+      key: "Backspace",
+      code: "Backspace",
+      bubbles: true,
+      cancelable: true,
+    });
+    const preventDefaultSpy = vi.spyOn(event, "preventDefault");
+    window.dispatchEvent(event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it("allows Backspace in input fields", () => {
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Backspace",
+      code: "Backspace",
+      bubbles: true,
+      cancelable: true,
+    });
+    const preventDefaultSpy = vi.spyOn(event, "preventDefault");
+    input.dispatchEvent(event);
+
+    expect(preventDefaultSpy).not.toHaveBeenCalled();
+    document.body.removeChild(input);
+  });
+
+  it("registered Backspace shortcuts still fire", () => {
+    const handler = vi.fn();
+    registerShortcut(
+      makeRegistration({
+        id: "btn-backspace",
+        shortcut: makeShortcut("Backspace"),
+        handler,
+        skipInInputs: true,
+      }),
+    );
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Backspace",
+      code: "Backspace",
+      bubbles: true,
+      cancelable: true,
+    });
+    const preventDefaultSpy = vi.spyOn(event, "preventDefault");
+    window.dispatchEvent(event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });
 
