@@ -3,9 +3,10 @@ namespace Ivy;
 
 /// <summary>
 /// A fixed column definition for a Kanban board. When provided, columns render
-/// in the given order even when they contain no cards.
+/// in the given order even when they contain no cards. <paramref name="Icon"/> is
+/// an optional Lucide icon name shown in the column header (e.g. "Feather").
 /// </summary>
-public record KanbanColumnDef(object Id, string? Name = null, int? Order = null);
+public record KanbanColumnDef(object Id, string? Name = null, int? Order = null, string? Icon = null);
 
 /// <summary>
 /// A visual board for managing tasks and workflows.

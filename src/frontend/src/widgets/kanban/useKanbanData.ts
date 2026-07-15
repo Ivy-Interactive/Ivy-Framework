@@ -63,6 +63,7 @@ function normalizeProvidedColumns(columns: ProvidedColumn[]): Column[] {
     name: column.name ?? String(column.id),
     color: column.color ?? "",
     order: column.order ?? index,
+    icon: column.icon,
   }));
 }
 

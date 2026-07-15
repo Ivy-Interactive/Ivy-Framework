@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
 import { Circle, MoreHorizontal } from "lucide-react";
+import Icon from "@/components/Icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export interface Column {
   id: string;
   name: string;
   color: string;
+  icon?: string;
 }
 
 interface DropTarget {
@@ -144,12 +146,21 @@ interface KanbanColumnProps {
   id: string;
   name?: string;
   color?: string;
+  icon?: string;
   width?: string;
   children: ReactNode;
   className?: string;
 }
 
-export function KanbanColumn({ id, name, color, width, children, className }: KanbanColumnProps) {
+export function KanbanColumn({
+  id,
+  name,
+  color,
+  icon,
+  width,
+  children,
+  className,
+}: KanbanColumnProps) {
   const {
     onCardMove,
     data,
@@ -225,12 +236,14 @@ export function KanbanColumn({ id, name, color, width, children, className }: Ka
       onDrop={handleDrop}
     >
       <div className="flex items-center gap-2 px-4 pb-1">
-        {color ? (
+        {icon ? (
+          <Icon name={icon} className="size-4 text-foreground" />
+        ) : color ? (
           <span className="size-4 rounded-full border-[1.5px]" style={{ borderColor: color }} />
         ) : (
           <Circle className="size-4 text-muted-foreground/60" strokeWidth={1.5} />
         )}
-        <h3 className="font-medium text-sm text-foreground/80 truncate">{name || id}</h3>
+        <h3 className="font-semibold text-sm text-foreground truncate">{name || id}</h3>
         {showCounts && (
           <span className="text-muted-foreground/70 text-sm font-normal">{columnTaskCount}</span>
         )}

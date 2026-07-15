@@ -6,6 +6,7 @@ export interface Column {
   name: string;
   color: string;
   order: number;
+  icon?: string;
 }
 
 /** Column definition as serialized from the backend Kanban.Columns prop. */
@@ -14,6 +15,7 @@ export interface ProvidedColumn {
   name?: string;
   color?: string;
   order?: number;
+  icon?: string;
 }
 
 export interface TaskWithWidgetId extends Task {

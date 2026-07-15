@@ -20,6 +20,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private Func<TGroupKey, string>? _columnHeaderSelector;
+    private Func<TGroupKey, string?>? _columnIconSelector;
     private object? _empty;
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
@@ -109,6 +110,16 @@ public class KanbanBuilder<TModel, TGroupKey>(
     public KanbanBuilder<TModel, TGroupKey> ColumnHeader(Func<TGroupKey, string> headerSelector)
     {
         _columnHeaderSelector = headerSelector;
+        return this;
+    }
+
+    /// <summary>
+    /// Maps a column group key to a Lucide icon name (e.g. "Feather") shown in the
+    /// column header. Only applies to fixed columns declared via <see cref="Columns"/>.
+    /// </summary>
+    public KanbanBuilder<TModel, TGroupKey> ColumnIcon(Func<TGroupKey, string?> iconSelector)
+    {
+        _columnIconSelector = iconSelector;
         return this;
     }
 
@@ -229,7 +240,8 @@ public class KanbanBuilder<TModel, TGroupKey>(
                 .Select((key, index) => new KanbanColumnDef(
                     key,
                     _columnHeaderSelector != null ? _columnHeaderSelector(key) : HumanizeGroupKey(key),
-                    index))
+                    index,
+                    _columnIconSelector?.Invoke(key)))
                 .ToArray()
         };
 
