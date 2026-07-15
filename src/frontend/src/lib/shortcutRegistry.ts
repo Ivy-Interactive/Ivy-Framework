@@ -113,12 +113,6 @@ function installListener() {
   listenerInstalled = true;
 }
 
-function removeListener() {
-  if (!listenerInstalled) return;
-  window.removeEventListener("keydown", handleKeyDown);
-  listenerInstalled = false;
-}
-
 export function registerShortcut(registration: ShortcutRegistration): void {
   registry.set(registration.id, registration);
   installListener();
@@ -142,7 +136,6 @@ export function unregisterShortcut(id: string): void {
   registry.delete(id);
   recentShortcuts.delete(id);
   if (registry.size === 0) {
-    removeListener();
     if (sweepTimerId !== null) {
       clearInterval(sweepTimerId);
       sweepTimerId = null;
@@ -167,7 +160,10 @@ export function _resetForTesting(): void {
     clearInterval(sweepTimerId);
     sweepTimerId = null;
   }
-  removeListener();
+  if (listenerInstalled) {
+    window.removeEventListener("keydown", handleKeyDown);
+    listenerInstalled = false;
+  }
   // Reinstall listener to match module-load state (for backspace prevention)
   installListener();
 }

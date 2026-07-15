@@ -67,7 +67,9 @@ describe("useShortcut", () => {
     root = createRoot(container);
 
     expect(_getRegistrySize()).toBe(0);
-    expect(_isListenerInstalled()).toBe(false);
+    // The keydown listener is permanent (installed at module load) so Backspace
+    // back-navigation prevention stays active even with no shortcuts registered.
+    expect(_isListenerInstalled()).toBe(true);
   });
 
   it("should not register when disabled", () => {
