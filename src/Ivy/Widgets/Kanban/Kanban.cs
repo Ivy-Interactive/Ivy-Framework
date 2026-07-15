@@ -2,6 +2,12 @@
 namespace Ivy;
 
 /// <summary>
+/// A fixed column definition for a Kanban board. When provided, columns render
+/// in the given order even when they contain no cards.
+/// </summary>
+public record KanbanColumnDef(object Id, string? Name = null, int? Order = null);
+
+/// <summary>
 /// A visual board for managing tasks and workflows.
 /// </summary>
 public record Kanban : WidgetBase<Kanban>
@@ -15,6 +21,8 @@ public record Kanban : WidgetBase<Kanban>
     [Prop] public bool ShowCounts { get; set; } = true;
 
     [Prop] public Size? ColumnWidth { get; set; }
+
+    [Prop] public KanbanColumnDef[]? Columns { get; set; }
 
     [Event] public EventHandler<Event<Kanban, (object? CardId, object? ToColumn, int? TargetIndex)>>? OnCardMove { get; set; }
 

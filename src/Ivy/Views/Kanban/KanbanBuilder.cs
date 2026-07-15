@@ -24,6 +24,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
     private Size? _columnWidth;
+    private TGroupKey[]? _staticColumns;
 
     public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
@@ -111,6 +112,17 @@ public class KanbanBuilder<TModel, TGroupKey>(
         return this;
     }
 
+    /// <summary>
+    /// Defines a fixed set of columns that always render, in the given order,
+    /// even when a column has no cards. Cards whose group key is not listed are
+    /// appended as extra columns after the fixed ones.
+    /// </summary>
+    public KanbanBuilder<TModel, TGroupKey> Columns(params TGroupKey[] columns)
+    {
+        _staticColumns = columns;
+        return this;
+    }
+
     private static string HumanizeGroupKey(TGroupKey key)
     {
         if (key is Enum enumValue)
@@ -121,7 +133,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
     public override object? Build()
     {
-        if (!records.Any())
+        if (!records.Any() && _staticColumns == null)
         {
             return _empty ?? new Fragment();
         }
@@ -212,7 +224,13 @@ public class KanbanBuilder<TModel, TGroupKey>(
             ShowCounts = true,
             Width = _width ?? Size.Full(),
             Height = _height ?? Size.Full(),
-            ColumnWidth = _columnWidth
+            ColumnWidth = _columnWidth,
+            Columns = _staticColumns?
+                .Select((key, index) => new KanbanColumnDef(
+                    key,
+                    _columnHeaderSelector != null ? _columnHeaderSelector(key) : HumanizeGroupKey(key),
+                    index))
+                .ToArray()
         };
 
         if (_onMove != null)

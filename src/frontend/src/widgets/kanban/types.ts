@@ -8,6 +8,14 @@ export interface Column {
   order: number;
 }
 
+/** Column definition as serialized from the backend Kanban.Columns prop. */
+export interface ProvidedColumn {
+  id: string | number;
+  name?: string;
+  color?: string;
+  order?: number;
+}
+
 export interface TaskWithWidgetId extends Task {
   widgetId: string;
 }
@@ -29,7 +37,7 @@ export interface ExtractedKanbanData {
 
 export interface KanbanWidgetProps {
   id: string;
-  columns?: Column[];
+  columns?: ProvidedColumn[];
   tasks?: Task[];
   events?: string[];
   width?: string;

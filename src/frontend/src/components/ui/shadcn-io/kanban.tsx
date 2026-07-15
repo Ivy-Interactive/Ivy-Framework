@@ -263,7 +263,10 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
   const showLineIndicator = isTargetColumn && isSameColumnDrag;
 
   return (
-    <ScrollArea className="flex-1 min-h-0">
+    // The viewport's content wrapper defaults to display:table, which sizes to its
+    // content and lets wide cards overflow the fixed column width; force it to block
+    // so cards are laid out at the column width and truncate internally instead.
+    <ScrollArea className="flex-1 min-h-0" viewportClassName="[&>div]:!block">
       <div className="flex flex-col gap-2 p-2 pt-3">
         {columnTasks.map((task, index) => {
           const isDraggedCard = task.id === draggedCardId;
