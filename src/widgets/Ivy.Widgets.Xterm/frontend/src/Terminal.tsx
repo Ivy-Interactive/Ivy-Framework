@@ -171,7 +171,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (!isReadOnlyRef.current && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnInput", id, [data]);
-        } catch {}
+        } catch { }
       }
     },
     [id],
@@ -182,7 +182,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (eventsRef.current.includes("OnResize") && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnResize", id, [{ cols: size.cols, rows: size.rows }]);
-        } catch {}
+        } catch { }
       }
     },
     [id],
@@ -343,8 +343,10 @@ export const Terminal: React.FC<TerminalProps> = ({
       term.loadAddon(clipboardAddon);
     }
 
-    // Manual paste handler for Shadow DOM compatibility
-    const handlePaste = (e: ClipboardEvent) => {
+    // Paste handler for browser paste events (right-click paste, etc.) on
+    // xterm's internal textarea. Defined here (outer scope) so the cleanup
+    // closure below can remove the exact same listener reference.
+    const handleTextareaPaste = (e: ClipboardEvent) => {
       if (!allowClipboardRef.current || term.options.disableStdin) return;
       e.preventDefault();
       const text = e.clipboardData?.getData("text");
@@ -352,25 +354,6 @@ export const Terminal: React.FC<TerminalProps> = ({
         term.paste(text);
       }
     };
-
-    // Keyboard-based paste handler (Ctrl+V / Cmd+V) using Clipboard API
-    const handleKeyDown = async (e: KeyboardEvent) => {
-      if (!allowClipboardRef.current || term.options.disableStdin) return;
-      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
-        e.preventDefault();
-        try {
-          const text = await navigator.clipboard.readText();
-          if (text) {
-            term.paste(text);
-          }
-        } catch {
-          // Clipboard API not available or permission denied, fall back to paste event
-        }
-      }
-    };
-
-    container.addEventListener("paste", handlePaste);
-    container.addEventListener("keydown", handleKeyDown);
 
     let disposed = false;
 
@@ -400,6 +383,33 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (disposed) return;
 
       term.open(container);
+
+      // Intercept Ctrl+V / Cmd+V before xterm consumes the key event. xterm.js
+      // captures keyboard input on its own internal hidden <textarea>, so
+      // container-level keydown listeners never fire — attachCustomKeyEventHandler
+      // runs before xterm processes the key, which is the standard approach for
+      // clipboard handling inside a Shadow DOM.
+      term.attachCustomKeyEventHandler((e: KeyboardEvent) => {
+        if (!allowClipboardRef.current || term.options.disableStdin) return true;
+        if (e.type === "keydown" && (e.ctrlKey || e.metaKey) && e.key === "v") {
+          e.preventDefault();
+          navigator.clipboard
+            .readText()
+            .then((text) => {
+              if (text) term.paste(text);
+            })
+            .catch(() => {
+              // Clipboard API unavailable — browser paste event will handle it
+            });
+          return false; // Prevent xterm from processing this key
+        }
+        // Allow Ctrl+C to copy selected text (xterm handles this natively with ClipboardAddon)
+        return true;
+      });
+
+      if (term.textarea) {
+        term.textarea.addEventListener("paste", handleTextareaPaste);
+      }
 
       // Canvas renderer draws box-drawing and block-element glyphs procedurally
       // (customGlyphs, on by default), so the Claude logo and other block art
@@ -477,8 +487,9 @@ export const Terminal: React.FC<TerminalProps> = ({
       disposed = true;
       terminalReadyRef.current = false;
       window.removeEventListener("resize", handleWindowResize);
-      container.removeEventListener("paste", handlePaste);
-      container.removeEventListener("keydown", handleKeyDown);
+      if (term.textarea) {
+        term.textarea.removeEventListener("paste", handleTextareaPaste);
+      }
       resizeObserver.disconnect();
 
       // Remove tooltip
@@ -507,6 +518,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     if (!stream?.id || !subscribeToStream) return;
 
+    const decoder = new TextDecoder("utf-8");
+
     const unsubscribe = subscribeToStream(stream.id, (data) => {
       if (terminalRef.current && typeof data === "string") {
         try {
@@ -516,7 +529,7 @@ export const Terminal: React.FC<TerminalProps> = ({
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          const text = new TextDecoder("utf-8").decode(bytes);
+          const text = decoder.decode(bytes, { stream: true });
           // Debug: log first chunk to verify encoding
           if (bytes.length > 0 && bytes.length < 100) {
             console.log("[Terminal] base64 decoded:", {

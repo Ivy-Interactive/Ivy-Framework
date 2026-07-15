@@ -62,6 +62,11 @@ function handleKeyDown(event: KeyboardEvent) {
   const isInputField =
     target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
 
+  // Prevent browser back-navigation on Backspace outside text inputs
+  if (event.key === "Backspace" && !isInputField) {
+    event.preventDefault();
+  }
+
   for (const registration of registry.values()) {
     const { shortcut, handler, isActive, skipInInputs, id } = registration;
 
@@ -108,12 +113,6 @@ function installListener() {
   listenerInstalled = true;
 }
 
-function removeListener() {
-  if (!listenerInstalled) return;
-  window.removeEventListener("keydown", handleKeyDown);
-  listenerInstalled = false;
-}
-
 export function registerShortcut(registration: ShortcutRegistration): void {
   registry.set(registration.id, registration);
   installListener();
@@ -137,7 +136,6 @@ export function unregisterShortcut(id: string): void {
   registry.delete(id);
   recentShortcuts.delete(id);
   if (registry.size === 0) {
-    removeListener();
     if (sweepTimerId !== null) {
       clearInterval(sweepTimerId);
       sweepTimerId = null;
@@ -162,7 +160,12 @@ export function _resetForTesting(): void {
     clearInterval(sweepTimerId);
     sweepTimerId = null;
   }
-  removeListener();
+  if (listenerInstalled) {
+    window.removeEventListener("keydown", handleKeyDown);
+    listenerInstalled = false;
+  }
+  // Reinstall listener to match module-load state (for backspace prevention)
+  installListener();
 }
 
 /** For testing only — returns the current registry size */
@@ -174,3 +177,6 @@ export function _getRegistrySize(): number {
 export function _isListenerInstalled(): boolean {
   return listenerInstalled;
 }
+
+// Install the listener at module load to ensure Backspace prevention is always active
+installListener();

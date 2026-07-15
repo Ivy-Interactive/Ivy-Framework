@@ -196,9 +196,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
               showBuiltinSearchIcon && searchInputPaddingVariant({ density }),
               props.invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
-              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
-              !trailingBesideSuffix && showShortcut && "pr-16",
-              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+              !trailingBesideSuffix && (props.invalid || showClear) && "!pr-8",
+              !trailingBesideSuffix && showShortcut && "!pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "!pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
             )}

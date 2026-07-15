@@ -684,7 +684,7 @@ public class Server
             var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
             var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
                 ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-                : !isContainer && !hasPortEnv && !_args.IsCliCommand; // default: TLS for local dev only
+                : !isContainer && !hasPortEnv && !_args.IsCliCommand && OperatingSystem.IsWindows(); // default: TLS for local dev only on Windows
             var scheme = useTls ? "https" : "http";
             builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
         }
@@ -909,38 +909,42 @@ public class Server
         };
 
 #if (DEBUG)
-        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        _ = Task.Factory.StartNew(() =>
+        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker.
+        // Disabled by default to prevent TTY suspension issues under dotnet run on macOS/Linux.
+        if (Environment.GetEnvironmentVariable("IVY_ENABLE_KEY_LISTENER") == "1")
         {
-            try
+            _ = Task.Factory.StartNew(() =>
             {
-                while (!cts.Token.IsCancellationRequested)
+                try
                 {
-                    if (Console.IsInputRedirected)
+                    while (!cts.Token.IsCancellationRequested)
                     {
-                        // Cannot read keys if input is redirected
-                        Thread.Sleep(1000); // Check again later or just exit? Exit is safer.
-                        break;
-                    }
+                        if (Console.IsInputRedirected)
+                        {
+                            // Cannot read keys if input is redirected
+                            Thread.Sleep(1000); // Check again later or just exit? Exit is safer.
+                            break;
+                        }
 
-                    var key = Console.ReadKey(intercept: true);
-                    if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
-                    {
-                        sessionStore.Dump();
+                        var key = Console.ReadKey(intercept: true);
+                        if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                        {
+                            sessionStore.Dump();
+                        }
                     }
                 }
-            }
-            catch (IOException ex)
-            {
-                // Console not available or detached
-                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Console not available
-                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
-            }
-        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                catch (IOException ex)
+                {
+                    // Console not available or detached
+                    Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // Console not available
+                    Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
+                }
+            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
 #endif
 
         // CLI-only commands (--describe, --describe-connection, --test-connection) never start

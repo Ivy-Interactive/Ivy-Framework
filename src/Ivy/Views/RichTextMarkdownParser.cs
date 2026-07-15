@@ -333,18 +333,19 @@ public class RichTextMarkdownParser
                 continue;
             }
 
-            // Inline math $...$
-            if (text[i] == '$')
+            // Inline math $$...$$ (a single $ is literal text, matching the Markdown widget's convention)
+            if (i + 1 < text.Length && text[i] == '$' && text[i + 1] == '$')
             {
                 FlushText(runs, sb);
-                i++;
+                i += 2;
                 var mathContent = new StringBuilder();
-                while (i < text.Length && text[i] != '$')
+                while (i < text.Length && !(i + 1 < text.Length && text[i] == '$' && text[i + 1] == '$'))
                 {
                     mathContent.Append(text[i]);
                     i++;
                 }
-                if (i < text.Length) i++; // skip closing $
+                if (i + 1 < text.Length) i += 2; // skip closing $$
+                else i = text.Length; // unterminated: consume to end of line
                 runs.Add(new TextRun(mathContent.ToString()) { Math = "inline" });
                 continue;
             }

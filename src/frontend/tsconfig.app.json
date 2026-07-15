@@ -21,8 +21,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "types": ["wicg-file-system-access"],
 
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

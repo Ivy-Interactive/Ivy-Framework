@@ -7,6 +7,7 @@ public enum LabelPosition
     Left
 }
 
+[Slot("Tools")]
 public record Field : WidgetBase<Field>
 {
     public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Density density = Ivy.Density.Medium) : base([input])
@@ -63,6 +64,13 @@ public static class FieldExtensions
     public static Field Required(this Field field) => field with { Required = true };
 
     public static Field LabelPosition(this Field field, LabelPosition position) => field with { LabelPosition = position };
+
+    /// <summary>
+    /// Adds an optional widget rendered in the field's tools slot. In <see cref="Ivy.LabelPosition.Top"/>
+    /// the tools are placed at the right of the label row; in <see cref="Ivy.LabelPosition.Left"/> they
+    /// are placed below the label.
+    /// </summary>
+    public static Field Tools(this Field field, object tools) => field with { Children = field.WithSlot("Tools", tools) };
 
     public static Field WithField(this IAnyInput input) => new Field(input);
 

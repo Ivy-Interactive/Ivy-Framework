@@ -26,6 +26,16 @@ type RefreshMessage = {
   externalWidgets?: ExternalWidgetInfo[] | null;
 };
 
+/**
+ * Backoff shared by SignalR's automatic reconnect and our own initial-connect retry, so the two
+ * cannot drift apart: immediate, then 2s, then every 10s forever.
+ */
+function getRetryDelayMs(previousRetryCount: number): number {
+  if (previousRetryCount === 0) return 0;
+  if (previousRetryCount === 1) return 2000;
+  return 10000;
+}
+
 /** `replaceState` with a path-only URL drops `#fragment`; keep it when the path matches. */
 function preserveHashIfSameDocument(pathAndQuery: string): string {
   if (pathAndQuery.includes("#")) return pathAndQuery;
@@ -365,6 +375,10 @@ export const useBackend = (
   // Use a ref that gets updated with the latest connection so we always have it in the callback
   const latestConnectionRef = useRef(connection);
   const isStoppingRef = useRef(false);
+  // SignalR's withAutomaticReconnect only covers an already-established connection, so the initial
+  // start() is retried by hand. See startConnection.
+  const initialRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initialRetryCountRef = useRef(0);
   useEffect(() => {
     latestConnectionRef.current = connection;
   }, [connection]);
@@ -761,12 +775,8 @@ export const useBackend = (
     }
 
     const retryPolicy = {
-      nextRetryDelayInMilliseconds: (retryContext: signalR.RetryContext) => {
-        if (retryContext.previousRetryCount === 0) return 0;
-        if (retryContext.previousRetryCount === 1) return 2000;
-        if (retryContext.previousRetryCount === 2) return 10000;
-        return 10000; // Infinity retry every 10 seconds
-      },
+      nextRetryDelayInMilliseconds: (retryContext: signalR.RetryContext) =>
+        getRetryDelayMs(retryContext.previousRetryCount),
     };
 
     const newConnection = new signalR.HubConnectionBuilder()
@@ -815,186 +825,199 @@ export const useBackend = (
   const startConnection = useCallback(() => {
     if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
       isStoppingRef.current = false;
-      connection
-        .start()
-        .then(() => {
-          setConnectionState("connected");
-          logger.info("✅ WebSocket connection established for:", {
-            appId: latestAppIdRef.current,
-            parentId,
-            connectionId: connection.connectionId,
-          });
 
-          connection.on("Refresh", (message) => {
-            logger.debug(`[${connection.connectionId}] Refresh`, message);
-            handleRefreshMessage(message);
-          });
+      const attemptStart = () => {
+        initialRetryTimerRef.current = null;
+        if (isStoppingRef.current) return;
+        if (connection.state !== signalR.HubConnectionState.Disconnected) return;
 
-          connection.on("Update", (message) => {
-            logger.debug(`[${connection.connectionId}] Update`, message);
-            handleUpdateMessage(message);
-          });
-
-          connection.on(
-            "Toast",
-            (message: { title?: string; description?: string; variant?: string | number }) => {
-              logger.debug(`[${connection.connectionId}] Toast`, message);
-
-              const { variant, ...rest } = message;
-              let variantStr = "default";
-
-              if (typeof variant === "string") {
-                variantStr = variant.toLowerCase();
-              } else if (typeof variant === "number") {
-                const variantMap = ["default", "destructive", "success", "warning", "info"];
-                variantStr = variantMap[variant] || "default";
-              }
-
-              toast({
-                ...rest,
-                variant: variantStr as "default" | "destructive" | "success" | "warning" | "info",
-              });
-            },
-          );
-
-          connection.on("Error", (message) => {
-            logger.debug(`[${connection.connectionId}] Error`, message);
-            handleError(message);
-          });
-
-          connection.on("SetAuthCookies", (message) => {
-            logger.debug(`[${connection.connectionId}] SetAuthCookies`);
-            handleSetAuthCookies(message);
-          });
-
-          connection.on("SetRootAppId", (message: { rootAppId: string }) => {
-            logger.debug(`[${connection.connectionId}] SetRootAppId`, {
-              rootAppId: message.rootAppId,
-            });
-            rootAppIdRef.current = message.rootAppId;
-          });
-
-          connection.on("SetTheme", (theme) => {
-            logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
-            handleSetTheme(theme);
-          });
-
-          connection.on("SetTitle", (title: string) => {
-            logger.debug(`[${connection.connectionId}] SetTitle`, { title });
-            document.title = title;
-          });
-
-          connection.on("CopyToClipboard", (text: string) => {
-            logger.debug(`[${connection.connectionId}] CopyToClipboard`);
-            copyToClipboard(text);
-          });
-
-          connection.on("OpenUrl", (url: string) => {
-            logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
-            // Validate URL to prevent open redirect vulnerabilities
-            const validatedUrl = validateLinkUrl(url);
-            if (validatedUrl !== "#") {
-              window.open(validatedUrl, "_blank", "noopener,noreferrer");
-            } else {
-              logger.warn("Invalid OpenUrl request rejected", { url });
-            }
-          });
-
-          connection.on("Redirect", (message) => {
-            logger.debug(`[${connection.connectionId}] Redirect`, message);
-            handleRedirect(message);
-          });
-
-          connection.on("ApplyTheme", (css: string) => {
-            logger.debug(`[${connection.connectionId}] ApplyTheme`);
-
-            // Remove existing custom theme style if any
-            const existingStyle = document.getElementById("ivy-custom-theme");
-            if (existingStyle) {
-              existingStyle.remove();
-            }
-
-            // Create and inject the new style element
-            const styleElement = document.createElement("style");
-            styleElement.id = "ivy-custom-theme";
-            styleElement.innerHTML = css
-              .replace('<style id="ivy-custom-theme">', "")
-              .replace("</style>", "");
-            document.head.appendChild(styleElement);
-          });
-
-          connection.on("HotReload", () => {
-            logger.debug(`[${connection.connectionId}] HotReload`);
-            handleHotReloadMessage();
-          });
-
-          connection.on("ReloadPage", () => {
-            logger.debug(`[${connection.connectionId}] ReloadPage`);
-            window.location.reload();
-          });
-
-          connection.on("SyncAuthFromCookies", () => {
-            logger.debug(`[${connection.connectionId}] SyncAuthFromCookies`);
-            refreshAuthFromCookies(connection.connectionId);
-          });
-
-          connection.on("HttpRequest", (message) => {
-            logger.debug(`[${connection.connectionId}] HttpRequest`, {
-              requestId: message.requestId,
-              method: message.method,
-              url: message.url,
-            });
-            handleHttpRequest(message);
-          });
-
-          connection.on("StreamData", (message: StreamDataMessage) => {
-            const handler = streamRegistryRef.current.get(message.streamId);
-            if (handler) {
-              handler(message.data);
-            } else {
-              // Buffer data until handler registers (mirrors backend WriteStream buffering)
-              let buffer = streamBufferRef.current.get(message.streamId);
-              if (!buffer) {
-                buffer = [];
-                streamBufferRef.current.set(message.streamId, buffer);
-              }
-              buffer.push(message.data);
-            }
-          });
-
-          connection.onreconnecting(() => {
-            if (isStoppingRef.current) return;
-            logger.warn(`[${connection.connectionId}] Reconnecting`);
-            setDisconnected(true);
-          });
-
-          connection.onreconnected(() => {
-            logger.info(`[${connection.connectionId}] Reconnected`);
+        connection
+          .start()
+          .then(() => {
+            initialRetryCountRef.current = 0;
+            setConnectionState("connected");
             setDisconnected(false);
-          });
-
-          connection.onclose(() => {
-            if (isStoppingRef.current) return;
-            logger.warn(`[${connection.connectionId}] Closed`);
-            setDisconnected(true);
-          });
-        })
-        .catch((e) => {
-          logger.error("SignalR connection failed:", e);
-          if (!isStoppingRef.current) {
-            toast({
-              title: "Connection Failed",
-              description:
-                "Could not establish connection to the backend. Please check your network or try refreshing.",
-              variant: "destructive",
+            logger.info("✅ WebSocket connection established for:", {
+              appId: latestAppIdRef.current,
+              parentId,
+              connectionId: connection.connectionId,
             });
-            setConnectionState("disconnected");
+
+            connection.on("Refresh", (message) => {
+              logger.debug(`[${connection.connectionId}] Refresh`, message);
+              handleRefreshMessage(message);
+            });
+
+            connection.on("Update", (message) => {
+              logger.debug(`[${connection.connectionId}] Update`, message);
+              handleUpdateMessage(message);
+            });
+
+            connection.on(
+              "Toast",
+              (message: { title?: string; description?: string; variant?: string | number }) => {
+                logger.debug(`[${connection.connectionId}] Toast`, message);
+
+                const { variant, ...rest } = message;
+                let variantStr = "default";
+
+                if (typeof variant === "string") {
+                  variantStr = variant.toLowerCase();
+                } else if (typeof variant === "number") {
+                  const variantMap = ["default", "destructive", "success", "warning", "info"];
+                  variantStr = variantMap[variant] || "default";
+                }
+
+                toast({
+                  ...rest,
+                  variant: variantStr as "default" | "destructive" | "success" | "warning" | "info",
+                });
+              },
+            );
+
+            connection.on("Error", (message) => {
+              logger.debug(`[${connection.connectionId}] Error`, message);
+              handleError(message);
+            });
+
+            connection.on("SetAuthCookies", (message) => {
+              logger.debug(`[${connection.connectionId}] SetAuthCookies`);
+              handleSetAuthCookies(message);
+            });
+
+            connection.on("SetRootAppId", (message: { rootAppId: string }) => {
+              logger.debug(`[${connection.connectionId}] SetRootAppId`, {
+                rootAppId: message.rootAppId,
+              });
+              rootAppIdRef.current = message.rootAppId;
+            });
+
+            connection.on("SetTheme", (theme) => {
+              logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
+              handleSetTheme(theme);
+            });
+
+            connection.on("SetTitle", (title: string) => {
+              logger.debug(`[${connection.connectionId}] SetTitle`, { title });
+              document.title = title;
+            });
+
+            connection.on("CopyToClipboard", (text: string) => {
+              logger.debug(`[${connection.connectionId}] CopyToClipboard`);
+              copyToClipboard(text);
+            });
+
+            connection.on("OpenUrl", (url: string) => {
+              logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
+              // Validate URL to prevent open redirect vulnerabilities
+              const validatedUrl = validateLinkUrl(url);
+              if (validatedUrl !== "#") {
+                window.open(validatedUrl, "_blank", "noopener,noreferrer");
+              } else {
+                logger.warn("Invalid OpenUrl request rejected", { url });
+              }
+            });
+
+            connection.on("Redirect", (message) => {
+              logger.debug(`[${connection.connectionId}] Redirect`, message);
+              handleRedirect(message);
+            });
+
+            connection.on("ApplyTheme", (css: string) => {
+              logger.debug(`[${connection.connectionId}] ApplyTheme`);
+
+              // Remove existing custom theme style if any
+              const existingStyle = document.getElementById("ivy-custom-theme");
+              if (existingStyle) {
+                existingStyle.remove();
+              }
+
+              // Create and inject the new style element
+              const styleElement = document.createElement("style");
+              styleElement.id = "ivy-custom-theme";
+              styleElement.innerHTML = css
+                .replace('<style id="ivy-custom-theme">', "")
+                .replace("</style>", "");
+              document.head.appendChild(styleElement);
+            });
+
+            connection.on("HotReload", () => {
+              logger.debug(`[${connection.connectionId}] HotReload`);
+              handleHotReloadMessage();
+            });
+
+            connection.on("ReloadPage", () => {
+              logger.debug(`[${connection.connectionId}] ReloadPage`);
+              window.location.reload();
+            });
+
+            connection.on("SyncAuthFromCookies", () => {
+              logger.debug(`[${connection.connectionId}] SyncAuthFromCookies`);
+              refreshAuthFromCookies(connection.connectionId);
+            });
+
+            connection.on("HttpRequest", (message) => {
+              logger.debug(`[${connection.connectionId}] HttpRequest`, {
+                requestId: message.requestId,
+                method: message.method,
+                url: message.url,
+              });
+              handleHttpRequest(message);
+            });
+
+            connection.on("StreamData", (message: StreamDataMessage) => {
+              const handler = streamRegistryRef.current.get(message.streamId);
+              if (handler) {
+                handler(message.data);
+              } else {
+                // Buffer data until handler registers (mirrors backend WriteStream buffering)
+                let buffer = streamBufferRef.current.get(message.streamId);
+                if (!buffer) {
+                  buffer = [];
+                  streamBufferRef.current.set(message.streamId, buffer);
+                }
+                buffer.push(message.data);
+              }
+            });
+
+            connection.onreconnecting(() => {
+              if (isStoppingRef.current) return;
+              logger.warn(`[${connection.connectionId}] Reconnecting`);
+              setDisconnected(true);
+            });
+
+            connection.onreconnected(() => {
+              logger.info(`[${connection.connectionId}] Reconnected`);
+              setDisconnected(false);
+            });
+
+            connection.onclose(() => {
+              if (isStoppingRef.current) return;
+              logger.warn(`[${connection.connectionId}] Closed`);
+              setDisconnected(true);
+            });
+          })
+          .catch((e) => {
+            logger.error("SignalR connection failed:", e);
+            if (isStoppingRef.current) return;
+            // Surface the reconnect overlay rather than a toast: the retry below is real, so the
+            // connection heals on its own once the backend is reachable again.
+            setConnectionState("reconnecting");
             setDisconnected(true);
-          }
-        });
+            const delay = getRetryDelayMs(initialRetryCountRef.current++);
+            initialRetryTimerRef.current = setTimeout(attemptStart, delay);
+          });
+      };
+
+      attemptStart();
 
       return () => {
         isStoppingRef.current = true;
+
+        if (initialRetryTimerRef.current !== null) {
+          clearTimeout(initialRetryTimerRef.current);
+          initialRetryTimerRef.current = null;
+        }
 
         connection.off("Refresh");
         connection.off("Update");
