@@ -174,7 +174,7 @@ function renderGroup(
       <ul key={`ul-${groupIndex}`} className={typography.ul}>
         {group.runs.map((item) => (
           <li
-            key={`li-${item.index}-${item.run.content.length}`}
+            key={`li-${item.index}-${(item.run.content || "").length}`}
             className={item.run.bulletItem && item.run.bulletItem > 1 ? "ml-4" : undefined}
           >
             {renderInlineContent(item.run, item.index, events, eventHandler, id)}
@@ -188,7 +188,7 @@ function renderGroup(
     return (
       <ol key={`ol-${groupIndex}`} className={typography.ol}>
         {group.runs.map((item) => (
-          <li key={`li-${item.index}-${item.run.content.length}`}>
+          <li key={`li-${item.index}-${(item.run.content || "").length}`}>
             {renderInlineContent(item.run, item.index, events, eventHandler, id)}
           </li>
         ))}
@@ -200,7 +200,7 @@ function renderGroup(
   return group.runs.map((item) => {
     const run = item.run;
     const index = item.index;
-    const key = `run-${index}-${run.content.length}`;
+    const key = `run-${index}-${(run.content || "").length}`;
     if (run.lineBreak) {
       return <br key={key} />;
     }
