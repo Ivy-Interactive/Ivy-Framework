@@ -134,7 +134,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn("inline-flex min-w-full h-full bg-background flex-row", className)}
+      className={cn("inline-flex min-w-full h-full bg-background flex-row gap-4", className)}
       style={{ minWidth: "fit-content", maxWidth: "100%" }}
     >
       {children}
@@ -222,15 +222,15 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        "bg-muted/40 rounded-xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
-        hasExplicitWidth ? "flex-none shrink-0" : "flex-none shrink-0 min-w-70",
+        "bg-muted/40 rounded-2xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
+        // Without an explicit width, columns share the full board width evenly,
+        // never shrinking below 280px (the board then scrolls horizontally) and
+        // never growing past 1600px.
+        hasExplicitWidth ? "flex-none shrink-0" : "flex-1 min-w-70 max-w-[100rem]",
         showDragOver && "bg-accent ring-2 ring-primary/20",
         className,
       )}
-      style={{
-        ...widthStyles,
-        ...(hasExplicitWidth ? {} : { width: "max-content" }),
-      }}
+      style={widthStyles}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -280,7 +280,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
     // content and lets wide cards overflow the fixed column width; force it to block
     // so cards are laid out at the column width and truncate internally instead.
     <ScrollArea className="flex-1 min-h-0" viewportClassName="[&>div]:!block">
-      <div className="flex flex-col gap-2 p-2 pt-3">
+      <div className="flex flex-col gap-2 p-3">
         {columnTasks.map((task, index) => {
           const isDraggedCard = task.id === draggedCardId;
           const shouldShift =

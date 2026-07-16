@@ -134,6 +134,60 @@ public class KanbanBuilder<TModel, TGroupKey>(
         return this;
     }
 
+    /// <summary>
+    /// Converts the raw ToColumn payload of a card-move event (a string, number, or
+    /// JsonElement/JsonNode from event deserialization) back into the board's group
+    /// key type. Enum keys round-trip as their serialized names, which
+    /// <see cref="Convert.ChangeType(object, Type)"/> cannot parse.
+    /// </summary>
+    private static bool TryConvertGroupKey(object toColumn, out TGroupKey key)
+    {
+        if (toColumn is TGroupKey typedKey)
+        {
+            key = typedKey;
+            return true;
+        }
+
+        // Unwrap JSON payloads to a plain string/number before converting.
+        var raw = toColumn switch
+        {
+            System.Text.Json.JsonElement je => je.ValueKind switch
+            {
+                System.Text.Json.JsonValueKind.String => je.GetString(),
+                System.Text.Json.JsonValueKind.Number => je.GetRawText(),
+                _ => je.ToString()
+            },
+            System.Text.Json.Nodes.JsonValue jv => jv.TryGetValue<string>(out var s) ? s : jv.ToString(),
+            System.Text.Json.Nodes.JsonNode jn => jn.ToString(),
+            _ => toColumn.ToString()
+        };
+
+        key = default!;
+        if (raw == null)
+            return false;
+
+        try
+        {
+            if (typeof(TGroupKey).IsEnum)
+            {
+                if (Enum.TryParse(typeof(TGroupKey), raw, ignoreCase: true, out var parsed) &&
+                    Enum.IsDefined(typeof(TGroupKey), parsed!))
+                {
+                    key = (TGroupKey)parsed!;
+                    return true;
+                }
+                return false;
+            }
+
+            key = (TGroupKey)Convert.ChangeType(raw, typeof(TGroupKey));
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static string HumanizeGroupKey(TGroupKey key)
     {
         if (key is Enum enumValue)
@@ -251,29 +305,13 @@ public class KanbanBuilder<TModel, TGroupKey>(
             {
                 OnCardMove = new(e =>
                 {
-                    if (e.Value.ToColumn == null)
+                    if (e.Value.ToColumn == null || !TryConvertGroupKey(e.Value.ToColumn, out var groupKey))
                         return ValueTask.CompletedTask;
 
-                    if (e.Value.ToColumn is TGroupKey groupKey)
-                    {
-                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                            e.EventName,
-                            e.Sender,
-                            (e.Value.CardId, groupKey, e.Value.TargetIndex)));
-                    }
-
-                    try
-                    {
-                        var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
-                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                                e.EventName,
-                                e.Sender,
-                            (e.Value.CardId, convertedKey, e.Value.TargetIndex)));
-                    }
-                    catch
-                    {
-                        return ValueTask.CompletedTask;
-                    }
+                    return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                        e.EventName,
+                        e.Sender,
+                        (e.Value.CardId, groupKey, e.Value.TargetIndex)));
                 })
             };
         }
