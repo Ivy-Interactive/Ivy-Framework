@@ -134,8 +134,8 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn("inline-flex min-w-full h-full bg-background flex-row gap-4", className)}
-      style={{ minWidth: "fit-content", maxWidth: "100%" }}
+      className={cn("flex w-full h-full bg-background flex-row gap-2", className)}
+      style={{ maxWidth: "100%" }}
     >
       {children}
     </div>
@@ -222,11 +222,11 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        "bg-muted/40 rounded-2xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
-        // Without an explicit width, columns share the full board width evenly,
-        // never shrinking below 280px (the board then scrolls horizontally) and
-        // never growing past 1600px.
-        hasExplicitWidth ? "flex-none shrink-0" : "flex-1 min-w-70 max-w-[100rem]",
+        "bg-muted rounded-2xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
+        // Without an explicit width, columns share the full board width evenly:
+        // they shrink to fit the viewport (min-w-0 → no horizontal overflow) and
+        // never grow past 1600px.
+        hasExplicitWidth ? "flex-none shrink-0" : "flex-1 min-w-0 max-w-[100rem]",
         showDragOver && "bg-accent ring-2 ring-primary/20",
         className,
       )}
