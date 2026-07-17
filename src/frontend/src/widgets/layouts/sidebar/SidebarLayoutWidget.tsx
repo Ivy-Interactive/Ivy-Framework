@@ -295,42 +295,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             width: isCollapsedToRail ? `${SIDEBAR_RAIL_WIDTH_PX}px` : effectiveSidebarWidth,
           }}
         >
-          {isCollapsedToRail
-            ? hasContent(slots?.SidebarHeaderCollapsed) && (
-                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 h-fit animate-in fade-in duration-300">
-                  {slots?.SidebarHeaderCollapsed}
-                </div>
-              )
-            : hasContent(slots?.SidebarHeader) && (
-                <div className="flex flex-col shrink-0 p-2 gap-y-4 h-fit">
-                  {slots?.SidebarHeader}
-                </div>
-              )}
-          {slots?.SidebarContent &&
-            (sidebarContentScroll === "None" ? (
-              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">{slots.SidebarContent}</div>
-            ) : (
-              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
-                <ScrollArea className="h-full w-full">
-                  <div className="p-2 gap-y-2">{slots.SidebarContent}</div>
-                </ScrollArea>
-              </div>
-            ))}
-          {isCollapsedToRail
-            ? hasContent(slots?.SidebarFooterCollapsed) && (
-                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300">
-                  {slots?.SidebarFooterCollapsed}
-                </div>
-              )
-            : hasContent(slots?.SidebarFooter) && (
-                <div className="flex flex-col shrink-0">
-                  <div className="flex flex-col p-2 gap-4 min-h-0">{slots?.SidebarFooter}</div>
-                </div>
-              )}
           {showToggleButton && isIconRail && (
             <div
               className={cn(
-                "flex shrink-0 p-2",
+                "flex shrink-0 px-2 pt-2",
                 isCollapsedToRail ? "justify-center" : "justify-end",
               )}
             >
@@ -354,6 +322,38 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
               </TooltipProvider>
             </div>
           )}
+          {isCollapsedToRail
+            ? hasContent(slots?.SidebarHeaderCollapsed) && (
+                <div className="flex flex-col items-center shrink-0 px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300">
+                  {slots?.SidebarHeaderCollapsed}
+                </div>
+              )
+            : hasContent(slots?.SidebarHeader) && (
+                <div className="flex flex-col shrink-0 px-2 pb-2 gap-y-4 h-fit">
+                  {slots?.SidebarHeader}
+                </div>
+              )}
+          {slots?.SidebarContent &&
+            (sidebarContentScroll === "None" ? (
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">{slots.SidebarContent}</div>
+            ) : (
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+                <ScrollArea className="h-full w-full">
+                  <div className="p-2 w-full">{slots.SidebarContent}</div>
+                </ScrollArea>
+              </div>
+            ))}
+          {isCollapsedToRail
+            ? hasContent(slots?.SidebarFooterCollapsed) && (
+                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300">
+                  {slots?.SidebarFooterCollapsed}
+                </div>
+              )
+            : hasContent(slots?.SidebarFooter) && (
+                <div className="flex flex-col shrink-0">
+                  <div className="flex flex-col p-2 gap-4 min-h-0">{slots?.SidebarFooter}</div>
+                </div>
+              )}
           {/* Resize Handle */}
           {resizable && isSidebarOpen && (
             <div
@@ -480,8 +480,18 @@ const CollapsedRailTooltip: React.FC<{
     children
   );
 
+// Collapse the label to zero width in the rail (not just opacity) so the button shrinks to icon
+// width; otherwise the still-laid-out labels keep every button label-wide and centering scatters.
 const menuLabelClasses = (collapsed: boolean) =>
-  cn("text-sm whitespace-nowrap transition-opacity duration-200", collapsed && "opacity-0");
+  cn(
+    "text-sm whitespace-nowrap overflow-hidden transition-[max-width,opacity] duration-200",
+    collapsed ? "max-w-0 opacity-0" : "max-w-[12rem] opacity-100",
+  );
+
+// In the rail, center the icon (matching the centered header/footer/toggle icons) and drop the
+// horizontal padding and label gap so it lines up with them instead of sitting a hair to the right.
+const menuButtonRailClasses = (collapsed: boolean) =>
+  collapsed ? "justify-center gap-0 px-0" : "";
 
 // Icon-less items would render as blank rows in the rail, so fall back to the label's initial.
 const MenuItemIcon: React.FC<{ item: MenuItem; collapsed: boolean }> = ({ item, collapsed }) =>
@@ -555,6 +565,7 @@ const CollapsibleMenuItem: React.FC<{
         ? "bg-secondary text-accent-foreground"
         : "hover:bg-accent hover:text-accent-foreground",
       isPenHovered && "bg-accent text-accent-foreground",
+      menuButtonRailClasses(collapsed),
     );
 
     // In the collapsed rail, a section icon expands the sidebar with the section opened
@@ -644,6 +655,7 @@ const CollapsibleMenuItem: React.FC<{
                 ? "bg-secondary text-accent-foreground"
                 : "hover:bg-accent hover:text-accent-foreground",
               isPenHovered && "bg-accent text-accent-foreground",
+              menuButtonRailClasses(collapsed),
             )}
             onClick={() => onItemClick(item)}
             onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
@@ -695,6 +707,7 @@ const MenuItemButton: React.FC<{
             ? "bg-secondary text-accent-foreground"
             : "hover:bg-accent hover:text-accent-foreground",
           isPenHovered && "bg-accent text-accent-foreground",
+          menuButtonRailClasses(collapsed),
         )}
         onClick={onClick}
         onMouseDown={onMouseDown}
