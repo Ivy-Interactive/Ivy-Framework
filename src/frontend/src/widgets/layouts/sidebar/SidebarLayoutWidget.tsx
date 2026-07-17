@@ -14,12 +14,19 @@ import { cn, getAppId } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { Separator } from "@/components/ui/separator";
 import { SidebarMenuBadge } from "@/components/ui/sidebar";
+import { SidebarLayoutContext, useSidebarLayout } from "./sidebar-layout-context";
+
+// 8px rail padding + 8px item padding + 16px icon + 8px + 8px, so menu icons keep
+// their x-position while the sidebar width animates.
+const SIDEBAR_RAIL_WIDTH_PX = 48;
 
 interface SidebarLayoutWidgetProps {
   slots?: {
     SidebarHeader?: React.ReactNode[];
     SidebarContent?: React.ReactNode[];
     SidebarFooter?: React.ReactNode[];
+    SidebarHeaderCollapsed?: React.ReactNode[];
+    SidebarFooterCollapsed?: React.ReactNode[];
     MainContent: React.ReactNode[];
   };
   showToggleButton?: boolean;
@@ -200,11 +207,24 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         ? `${currentWidth}px`
         : sidebarWidth;
 
+  // On desktop, the main app sidebar collapses to an icon rail instead of sliding offscreen.
+  const isIconRail = mainAppSidebar && !isMobileViewport;
+  const isCollapsedToRail = isIconRail && !isSidebarOpen;
+
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
     dispatchSidebar((prev) => ({ isSidebarOpen: !prev.isSidebarOpen }));
     dispatchSidebar({ isManuallyToggled: true });
   }, [dispatchSidebar]);
+
+  const sidebarContextValue = useMemo(
+    () => ({
+      collapsed: isCollapsedToRail,
+      expand: () => dispatchSidebar({ isSidebarOpen: true, isManuallyToggled: true }),
+      toggle: handleManualToggle,
+    }),
+    [isCollapsedToRail, handleManualToggle, dispatchSidebar],
+  );
 
   // Register keyboard shortcut for toggling sidebar (Ctrl+B)
   useShortcut("sidebar-layout-toggle", "CTRL+B", handleManualToggle, {
@@ -252,112 +272,161 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   }, [mainAppSidebar, isMobileViewport, dispatchSidebar]);
 
   return (
-    <div
-      ref={containerRef}
-      className="grid h-full w-full remove-parent-padding"
-      style={{
-        gridTemplateColumns: isSidebarOpen ? `${effectiveSidebarWidth} 1fr` : "0 1fr",
-        transition: isResizing ? "none" : "grid-template-columns 300ms ease-in-out",
-      }}
-    >
-      {/* Custom Sidebar with Slide Animation */}
+    <SidebarLayoutContext.Provider value={sidebarContextValue}>
       <div
-        ref={sidebarRef}
-        className={`flex h-full flex-col bg-card text-foreground border-r border-border relative overflow-hidden ${
-          isResizing ? "" : "transition-transform duration-300 ease-in-out"
-        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ width: effectiveSidebarWidth }}
+        ref={containerRef}
+        className="grid h-full w-full remove-parent-padding"
+        style={{
+          gridTemplateColumns: isSidebarOpen
+            ? `${effectiveSidebarWidth} 1fr`
+            : isIconRail
+              ? `${SIDEBAR_RAIL_WIDTH_PX}px 1fr`
+              : "0 1fr",
+          transition: isResizing ? "none" : "grid-template-columns 300ms ease-in-out",
+        }}
       >
-        {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 gap-y-4 h-fit">{slots?.SidebarHeader}</div>
-        )}
-        {slots?.SidebarContent &&
-          (sidebarContentScroll === "None" ? (
-            <div className="flex-1 min-h-0 min-w-0 overflow-hidden">{slots.SidebarContent}</div>
-          ) : (
-            <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
-              <ScrollArea className="h-full w-full">
-                <div className="p-2 gap-y-2">{slots.SidebarContent}</div>
-              </ScrollArea>
-            </div>
-          ))}
-        {hasContent(slots?.SidebarFooter) && (
-          <div className="flex flex-col shrink-0">
-            <div className="flex flex-col p-2 gap-4 min-h-0">{slots?.SidebarFooter}</div>
-          </div>
-        )}
-        {/* Resize Handle */}
-        {resizable && isSidebarOpen && (
-          <div
-            className={cn("absolute top-0 right-0 w-1 h-full cursor-ew-resize group")}
-            onMouseDown={handleResizeStart}
-            onTouchStart={handleResizeStart}
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize sidebar"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") {
-                dispatchSidebar((prev) => ({
-                  currentWidth: Math.max(minWidthPx, prev.currentWidth - 10),
-                }));
-              } else if (e.key === "ArrowRight") {
-                dispatchSidebar((prev) => ({
-                  currentWidth: Math.min(maxWidthPx, prev.currentWidth + 10),
-                }));
-              }
-            }}
-          >
+        {/* Custom Sidebar with Slide Animation */}
+        <div
+          ref={sidebarRef}
+          className={`flex h-full flex-col bg-card text-foreground border-r border-border relative overflow-hidden ${
+            isResizing ? "" : "transition-[width,transform] duration-300 ease-in-out"
+          } ${isSidebarOpen || isCollapsedToRail ? "translate-x-0" : "-translate-x-full"}`}
+          style={{
+            width: isCollapsedToRail ? `${SIDEBAR_RAIL_WIDTH_PX}px` : effectiveSidebarWidth,
+          }}
+        >
+          {isCollapsedToRail
+            ? hasContent(slots?.SidebarHeaderCollapsed) && (
+                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 h-fit animate-in fade-in duration-300">
+                  {slots?.SidebarHeaderCollapsed}
+                </div>
+              )
+            : hasContent(slots?.SidebarHeader) && (
+                <div className="flex flex-col shrink-0 p-2 gap-y-4 h-fit">
+                  {slots?.SidebarHeader}
+                </div>
+              )}
+          {slots?.SidebarContent &&
+            (sidebarContentScroll === "None" ? (
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">{slots.SidebarContent}</div>
+            ) : (
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+                <ScrollArea className="h-full w-full">
+                  <div className="p-2 gap-y-2">{slots.SidebarContent}</div>
+                </ScrollArea>
+              </div>
+            ))}
+          {isCollapsedToRail
+            ? hasContent(slots?.SidebarFooterCollapsed) && (
+                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300">
+                  {slots?.SidebarFooterCollapsed}
+                </div>
+              )
+            : hasContent(slots?.SidebarFooter) && (
+                <div className="flex flex-col shrink-0">
+                  <div className="flex flex-col p-2 gap-4 min-h-0">{slots?.SidebarFooter}</div>
+                </div>
+              )}
+          {showToggleButton && isIconRail && (
             <div
               className={cn(
-                "absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border",
-                "opacity-0 group-hover:opacity-100 transition-opacity",
-                isResizing && "opacity-100",
+                "flex shrink-0 p-2",
+                isCollapsedToRail ? "justify-center" : "justify-end",
               )}
-            />
-          </div>
-        )}
-      </div>
+            >
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleManualToggle}
+                      className="p-2 rounded-selector text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                      aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                    >
+                      {isSidebarOpen ? (
+                        <PanelLeftClose className="size-4" />
+                      ) : (
+                        <PanelLeftOpen className="size-4" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          )}
+          {/* Resize Handle */}
+          {resizable && isSidebarOpen && (
+            <div
+              className={cn("absolute top-0 right-0 w-1 h-full cursor-ew-resize group")}
+              onMouseDown={handleResizeStart}
+              onTouchStart={handleResizeStart}
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize sidebar"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft") {
+                  dispatchSidebar((prev) => ({
+                    currentWidth: Math.max(minWidthPx, prev.currentWidth - 10),
+                  }));
+                } else if (e.key === "ArrowRight") {
+                  dispatchSidebar((prev) => ({
+                    currentWidth: Math.min(maxWidthPx, prev.currentWidth + 10),
+                  }));
+                }
+              }}
+            >
+              <div
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border",
+                  "opacity-0 group-hover:opacity-100 transition-opacity",
+                  isResizing && "opacity-100",
+                )}
+              />
+            </div>
+          )}
+        </div>
 
-      {/* min-w-0 keeps the 1fr grid track from overflowing the viewport on narrow screens. */}
-      <div
-        className={cn(
-          `relative h-full overflow-auto min-w-0`,
-          !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
-        )}
-      >
-        {showToggleButton && mainAppSidebar && (
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleManualToggle}
-                  className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
-                  style={{ marginTop: "3px" }}
-                  aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-                >
-                  {isSidebarOpen ? (
-                    <PanelLeftClose className="size-4" />
-                  ) : (
-                    <PanelLeftOpen className="size-4" />
-                  )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        {/* On mobile, the content sliver beside the open drawer closes it instead of being interactive. */}
-        {mainAppSidebar && isMobileViewport && isSidebarOpen && (
-          <div
-            className="absolute inset-0 z-40 cursor-pointer"
-            onClick={() => dispatchSidebar({ isSidebarOpen: false })}
-            aria-label="Close sidebar"
-          />
-        )}
-        {slots?.MainContent}
+        {/* min-w-0 keeps the 1fr grid track from overflowing the viewport on narrow screens. */}
+        <div
+          className={cn(
+            `relative h-full overflow-auto min-w-0`,
+            !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
+          )}
+        >
+          {showToggleButton && mainAppSidebar && isMobileViewport && (
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleManualToggle}
+                    className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+                    style={{ marginTop: "3px" }}
+                    aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                  >
+                    {isSidebarOpen ? (
+                      <PanelLeftClose className="size-4" />
+                    ) : (
+                      <PanelLeftOpen className="size-4" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {/* On mobile, the content sliver beside the open drawer closes it instead of being interactive. */}
+          {mainAppSidebar && isMobileViewport && isSidebarOpen && (
+            <div
+              className="absolute inset-0 z-40 cursor-pointer"
+              onClick={() => dispatchSidebar({ isSidebarOpen: false })}
+              aria-label="Close sidebar"
+            />
+          )}
+          {slots?.MainContent}
+        </div>
       </div>
-    </div>
+    </SidebarLayoutContext.Provider>
   );
 };
 
@@ -395,6 +464,35 @@ const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
 // Animation duration for collapsible sections (in milliseconds)
 const COLLAPSIBLE_ANIMATION_DURATION = 300;
 
+const CollapsedRailTooltip: React.FC<{
+  label: string;
+  collapsed: boolean;
+  children: React.ReactElement;
+}> = ({ label, collapsed, children }) =>
+  collapsed ? (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side="right">{label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    children
+  );
+
+const menuLabelClasses = (collapsed: boolean) =>
+  cn("text-sm whitespace-nowrap transition-opacity duration-200", collapsed && "opacity-0");
+
+// Icon-less items would render as blank rows in the rail, so fall back to the label's initial.
+const MenuItemIcon: React.FC<{ item: MenuItem; collapsed: boolean }> = ({ item, collapsed }) =>
+  !item.icon && collapsed ? (
+    <span className="size-4 shrink-0 flex items-center justify-center text-xs font-medium">
+      {(item.label ?? "").charAt(0).toUpperCase()}
+    </span>
+  ) : (
+    <Icon name={item.icon} size={16} className="shrink-0" />
+  );
+
 const CollapsibleMenuItem: React.FC<{
   item: MenuItem;
   events: string[];
@@ -422,6 +520,7 @@ const CollapsibleMenuItem: React.FC<{
   const prevShouldBeOpenRef = useRef(shouldBeOpen);
   const [isPenHovered, setIsPenHovered] = useState(false);
   const itemRef = useRef<HTMLLIElement>(null);
+  const { collapsed, expand } = useSidebarLayout();
 
   // Sync local state with derived state
   if (shouldBeOpen !== prevShouldBeOpenRef.current) {
@@ -450,18 +549,41 @@ const CollapsibleMenuItem: React.FC<{
   const isActive = item.tag === activeTag;
 
   if (item.children && item.children.length > 0) {
+    const triggerClasses = cn(
+      "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden",
+      isActive
+        ? "bg-secondary text-accent-foreground"
+        : "hover:bg-accent hover:text-accent-foreground",
+      isPenHovered && "bg-accent text-accent-foreground",
+    );
+
+    // In the collapsed rail, a section icon expands the sidebar with the section opened
+    // instead of toggling a hidden submenu.
+    if (collapsed) {
+      return (
+        <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
+          <CollapsedRailTooltip label={item.label} collapsed>
+            <button
+              className={triggerClasses}
+              onClick={() => {
+                expand();
+                handleOpenChange(true);
+              }}
+            >
+              <MenuItemIcon item={item} collapsed={collapsed} />
+              <span className={menuLabelClasses(collapsed)}>{item.label}</span>
+            </button>
+          </CollapsedRailTooltip>
+        </li>
+      );
+    }
+
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
         <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
           <CollapsibleTrigger asChild>
             <button
-              className={cn(
-                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left",
-                isActive
-                  ? "bg-secondary text-accent-foreground"
-                  : "hover:bg-accent hover:text-accent-foreground",
-                isPenHovered && "bg-accent text-accent-foreground",
-              )}
+              className={triggerClasses}
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -481,9 +603,9 @@ const CollapsibleMenuItem: React.FC<{
                 }
               }}
             >
-              <Icon name={item.icon} size={16} />
-              <span className="text-sm">{item.label}</span>
-              <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-90" />
+              <MenuItemIcon item={item} collapsed={collapsed} />
+              <span className={menuLabelClasses(collapsed)}>{item.label}</span>
+              <ChevronRight className="ml-auto size-4 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -499,6 +621,7 @@ const CollapsibleMenuItem: React.FC<{
                   expandedSections,
                   onExpandChange,
                   pathKey,
+                  collapsed,
                 )}
             </ul>
           </CollapsibleContent>
@@ -513,31 +636,39 @@ const CollapsibleMenuItem: React.FC<{
         data-menu-item={item.tag || item.label}
         className="relative"
       >
-        <button
-          className={cn(
-            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left",
-            isActive
-              ? "bg-secondary text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground",
-            isPenHovered && "bg-accent text-accent-foreground",
-          )}
-          onClick={() => onItemClick(item)}
-          onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
-          onPointerEnter={(e) => {
-            if (e.pointerType === "pen") {
-              setIsPenHovered(true);
-            }
-          }}
-          onPointerLeave={(e) => {
-            if (e.pointerType === "pen") {
-              setIsPenHovered(false);
-            }
-          }}
-        >
-          <Icon name={item.icon} size={16} />
-          <span className="text-sm">{item.label}</span>
-          {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
-        </button>
+        <CollapsedRailTooltip label={item.label} collapsed={collapsed}>
+          <button
+            className={cn(
+              "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden",
+              isActive
+                ? "bg-secondary text-accent-foreground"
+                : "hover:bg-accent hover:text-accent-foreground",
+              isPenHovered && "bg-accent text-accent-foreground",
+            )}
+            onClick={() => onItemClick(item)}
+            onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+            onPointerEnter={(e) => {
+              if (e.pointerType === "pen") {
+                setIsPenHovered(true);
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType === "pen") {
+                setIsPenHovered(false);
+              }
+            }}
+          >
+            <MenuItemIcon item={item} collapsed={collapsed} />
+            <span className={menuLabelClasses(collapsed)}>{item.label}</span>
+            {item.badge && (
+              <SidebarMenuBadge
+                className={cn("transition-opacity duration-200", collapsed && "opacity-0")}
+              >
+                {item.badge}
+              </SidebarMenuBadge>
+            )}
+          </button>
+        </CollapsedRailTooltip>
       </li>
     );
   }
@@ -552,34 +683,43 @@ const MenuItemButton: React.FC<{
   onMouseDown: (e: React.MouseEvent) => void;
 }> = ({ item, isActive, level, onClick, onMouseDown }) => {
   const [isPenHovered, setIsPenHovered] = useState(false);
+  const { collapsed } = useSidebarLayout();
 
   return (
-    <button
-      className={cn(
-        "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left",
-        level === 1 ? "text-body" : "text-body",
-        isActive
-          ? "bg-secondary text-accent-foreground"
-          : "hover:bg-accent hover:text-accent-foreground",
-        isPenHovered && "bg-accent text-accent-foreground",
-      )}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onPointerEnter={(e) => {
-        if (e.pointerType === "pen") {
-          setIsPenHovered(true);
-        }
-      }}
-      onPointerLeave={(e) => {
-        if (e.pointerType === "pen") {
-          setIsPenHovered(false);
-        }
-      }}
-    >
-      <Icon name={item.icon} size={16} />
-      <span className="text-sm">{item.label}</span>
-      {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
-    </button>
+    <CollapsedRailTooltip label={item.label} collapsed={collapsed}>
+      <button
+        className={cn(
+          "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left overflow-hidden",
+          level === 1 ? "text-body" : "text-body",
+          isActive
+            ? "bg-secondary text-accent-foreground"
+            : "hover:bg-accent hover:text-accent-foreground",
+          isPenHovered && "bg-accent text-accent-foreground",
+        )}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        onPointerEnter={(e) => {
+          if (e.pointerType === "pen") {
+            setIsPenHovered(true);
+          }
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "pen") {
+            setIsPenHovered(false);
+          }
+        }}
+      >
+        <MenuItemIcon item={item} collapsed={collapsed} />
+        <span className={menuLabelClasses(collapsed)}>{item.label}</span>
+        {item.badge && (
+          <SidebarMenuBadge
+            className={cn("transition-opacity duration-200", collapsed && "opacity-0")}
+          >
+            {item.badge}
+          </SidebarMenuBadge>
+        )}
+      </button>
+    </CollapsedRailTooltip>
   );
 };
 
@@ -593,6 +733,7 @@ const renderMenuItems = (
   expandedSections: Set<string> = new Set(),
   onExpandChange: (pathKey: string, expanded: boolean) => void = () => {},
   parentPathKey: string = "",
+  collapsed: boolean = false,
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -612,8 +753,19 @@ const renderMenuItems = (
     if ("children" in item) {
       if (level === 0) {
         return (
-          <div key={itemPathKey} className="flex flex-col gap-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-card p-2 text-small-label text-muted-foreground mb-0">
+          <div
+            key={itemPathKey}
+            className={cn(
+              "flex flex-col gap-y-1 first:mt-0 transition-all duration-300",
+              collapsed ? "mt-2" : "mt-6",
+            )}
+          >
+            <h4
+              className={cn(
+                "sticky top-0 z-10 bg-card text-small-label text-muted-foreground mb-0 overflow-hidden whitespace-nowrap transition-all duration-300",
+                collapsed ? "h-0 p-0 opacity-0" : "h-8 p-2 opacity-100",
+              )}
+            >
               {item.label}
             </h4>
             <ul className="flex flex-col gap-y-0.5">
@@ -628,6 +780,7 @@ const renderMenuItems = (
                   expandedSections,
                   onExpandChange,
                   itemPathKey,
+                  collapsed,
                 )}
             </ul>
           </div>
@@ -691,6 +844,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
+  const { collapsed } = useSidebarLayout();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const prevSearchActiveRef = React.useRef(searchActive);
 
@@ -979,7 +1133,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       style={{ outline: "none" }}
       data-sidebar-menu-widget
     >
-      {searchActive ? (
+      {searchActive && !collapsed ? (
         flatItems.length > 0 ? (
           renderMenuItemsWithHighlight(items)
         ) : (
@@ -997,6 +1151,8 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           activeTag,
           expandedSections,
           handleExpandChange,
+          "",
+          collapsed,
         )
       )}
     </div>
