@@ -16,9 +16,9 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarMenuBadge } from "@/components/ui/sidebar";
 import { SidebarLayoutContext, useSidebarLayout } from "./sidebar-layout-context";
 
-// 8px rail padding + 8px item padding + 16px icon + 8px + 8px, so menu icons keep
-// their x-position while the sidebar width animates.
-const SIDEBAR_RAIL_WIDTH_PX = 48;
+// Wide enough for a menu item's full icon box (container padding + button padding + 16px icon)
+// so icons keep their x-position while the sidebar width animates.
+const SIDEBAR_RAIL_WIDTH_PX = 54;
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -323,7 +323,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
               the top-right corner, aligned with the top of the header title instead of pushing it
               down. The header slot lives in a separate DOM subtree, so we overlay rather than nest. */}
           {showToggleButton && isIconRail && isCollapsedToRail && (
-            <div className="flex justify-center shrink-0 px-2 pt-2">
+            <div className="flex justify-center shrink-0 px-2 pt-2 pb-2">
               <SidebarToggleButton isSidebarOpen={isSidebarOpen} onToggle={handleManualToggle} />
             </div>
           )}
