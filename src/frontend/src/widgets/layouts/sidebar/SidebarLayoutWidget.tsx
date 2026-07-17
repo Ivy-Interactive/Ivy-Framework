@@ -788,7 +788,7 @@ const renderMenuItems = (
             <h4
               className={cn(
                 "sticky top-0 z-10 bg-card text-small-label text-muted-foreground mb-0 overflow-hidden whitespace-nowrap transition-all duration-300",
-                collapsed ? "h-0 p-0 opacity-0" : "h-8 p-2 opacity-100",
+                collapsed ? "h-0 w-0 p-0 opacity-0" : "h-8 p-2 opacity-100",
               )}
             >
               {item.label}
