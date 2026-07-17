@@ -88,6 +88,30 @@ const hasContent = (slot?: React.ReactNode[]): boolean => {
   });
 };
 
+const SidebarToggleButton: React.FC<{ isSidebarOpen: boolean; onToggle: () => void }> = ({
+  isSidebarOpen,
+  onToggle,
+}) => (
+  <TooltipProvider delayDuration={300}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-selector text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer"
+          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {isSidebarOpen ? (
+            <PanelLeftClose className="size-4" />
+          ) : (
+            <PanelLeftOpen className="size-4" />
+          )}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
 export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   slots,
   showToggleButton = true,
@@ -295,44 +319,32 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             width: isCollapsedToRail ? `${SIDEBAR_RAIL_WIDTH_PX}px` : effectiveSidebarWidth,
           }}
         >
-          {showToggleButton && isIconRail && (
-            <div
-              className={cn(
-                "flex shrink-0 px-2 pt-2",
-                isCollapsedToRail ? "justify-center" : "justify-end",
-              )}
-            >
-              <TooltipProvider delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleManualToggle}
-                      className="p-2 rounded-selector text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer"
-                      aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-                    >
-                      {isSidebarOpen ? (
-                        <PanelLeftClose className="size-4" />
-                      ) : (
-                        <PanelLeftOpen className="size-4" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+          {/* In the rail the toggle is its own centered row at the top; when expanded it sits in
+              the top-right corner, aligned with the top of the header title instead of pushing it
+              down. The header slot lives in a separate DOM subtree, so we overlay rather than nest. */}
+          {showToggleButton && isIconRail && isCollapsedToRail && (
+            <div className="flex justify-center shrink-0 px-2 pt-2">
+              <SidebarToggleButton isSidebarOpen={isSidebarOpen} onToggle={handleManualToggle} />
             </div>
           )}
-          {isCollapsedToRail
-            ? hasContent(slots?.SidebarHeaderCollapsed) && (
-                <div className="flex flex-col items-center shrink-0 px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300">
-                  {slots?.SidebarHeaderCollapsed}
-                </div>
-              )
-            : hasContent(slots?.SidebarHeader) && (
-                <div className="flex flex-col shrink-0 px-2 pb-2 gap-y-4 h-fit">
-                  {slots?.SidebarHeader}
-                </div>
-              )}
+          <div className="relative shrink-0">
+            {showToggleButton && isIconRail && !isCollapsedToRail && (
+              <div className="absolute top-2 right-2 z-10">
+                <SidebarToggleButton isSidebarOpen={isSidebarOpen} onToggle={handleManualToggle} />
+              </div>
+            )}
+            {isCollapsedToRail
+              ? hasContent(slots?.SidebarHeaderCollapsed) && (
+                  <div className="flex flex-col items-center px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300">
+                    {slots?.SidebarHeaderCollapsed}
+                  </div>
+                )
+              : hasContent(slots?.SidebarHeader) && (
+                  <div className="flex flex-col px-2 pb-2 gap-y-4 h-fit">
+                    {slots?.SidebarHeader}
+                  </div>
+                )}
+          </div>
           {slots?.SidebarContent &&
             (sidebarContentScroll === "None" ? (
               <div className="flex-1 min-h-0 min-w-0 overflow-hidden">{slots.SidebarContent}</div>
