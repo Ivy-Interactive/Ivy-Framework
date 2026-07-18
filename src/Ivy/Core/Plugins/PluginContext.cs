@@ -297,44 +297,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         _endpointDataSource ??= new DynamicPluginEndpointDataSource();
         ((IEndpointRouteBuilder)app).DataSources.Add(_endpointDataSource);
 
-        // Plugin icon route — serves files referenced by PluginIcon.File()
-        app.MapGet("/ivy/plugin-icons/{pluginId}/{**filePath}", (string pluginId, string filePath) =>
-        {
-            _lock.EnterReadLock();
-            try
-            {
-                if (!_pluginStates.TryGetValue(pluginId, out var state))
-                    return Results.NotFound();
-
-                if (string.IsNullOrEmpty(filePath) || Path.IsPathRooted(filePath))
-                    return Results.NotFound();
-
-                var pluginDir = Path.GetFullPath(state.Directory);
-                var fullPath = Path.GetFullPath(Path.Join(pluginDir, filePath));
-
-                if (!fullPath.StartsWith(pluginDir + Path.DirectorySeparatorChar))
-                    return Results.NotFound();
-
-                if (!File.Exists(fullPath))
-                    return Results.NotFound();
-
-                var contentType = Path.GetExtension(fullPath).ToLowerInvariant() switch
-                {
-                    ".svg" => "image/svg+xml",
-                    ".png" => "image/png",
-                    ".jpg" or ".jpeg" => "image/jpeg",
-                    ".gif" => "image/gif",
-                    ".webp" => "image/webp",
-                    ".ico" => "image/x-icon",
-                    _ => "application/octet-stream"
-                };
-                return Results.File(fullPath, contentType);
-            }
-            finally
-            {
-                _lock.ExitReadLock();
-            }
-        });
     }
 }
 

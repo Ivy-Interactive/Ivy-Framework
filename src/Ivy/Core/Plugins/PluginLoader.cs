@@ -1148,8 +1148,6 @@ public class PluginLoader : IPluginManager
                 return;
             }
 
-            ValidatePluginIcon(manifest, directory);
-
             // Reject duplicates — if a plugin with this ID was already discovered, skip it.
             var existingIndex = candidates.FindIndex(c => c.Instance.Manifest.Id == manifest.Id);
             if (existingIndex >= 0)
@@ -1200,27 +1198,6 @@ public class PluginLoader : IPluginManager
         }
     }
 
-    private void ValidatePluginIcon(PluginManifest manifest, string directory)
-    {
-        if (manifest.Icon is { Kind: PluginIconKind.File } icon)
-        {
-            if (string.IsNullOrWhiteSpace(icon.Value) || Path.IsPathRooted(icon.Value))
-            {
-                _logger.LogWarning(
-                    "Plugin '{Id}' has an invalid icon path '{Path}' (must be relative).",
-                    manifest.Id, icon.Value);
-                return;
-            }
-
-            var fullPath = Path.GetFullPath(Path.Join(directory, icon.Value));
-            if (!File.Exists(fullPath))
-            {
-                _logger.LogWarning(
-                    "Plugin '{Id}' references icon file '{Path}' which does not exist in '{Directory}'.",
-                    manifest.Id, icon.Value, directory);
-            }
-        }
-    }
 
     internal List<string> ValidatePluginConfiguration(
         PluginConfigurationSchema schema,
