@@ -20,7 +20,7 @@
     "happy-dom": "20.8.9",
     "postcss": "8.5.10",
     "tailwindcss": "3.4.19",
-    "typescript": "5.9.3",
+    "typescript": "7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
     "vite-plus": "0.2.1",
     "vitest": "4.1.9",

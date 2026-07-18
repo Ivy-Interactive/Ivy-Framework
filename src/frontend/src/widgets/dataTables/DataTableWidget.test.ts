@@ -9,6 +9,14 @@ import * as path from "path";
 describe("DataTableWidget - container style for height modes", () => {
   const source = fs.readFileSync(path.resolve(__dirname, "./DataTableWidget.tsx"), "utf-8");
 
+  // Isolate the `if (height === "Full") { ... }` branch so assertions about the
+  // Full-height container don't accidentally match the explicit-height `else` branch.
+  const fullBranch = (() => {
+    const start = source.indexOf('if (height === "Full")');
+    const elseIndex = source.indexOf("} else {", start);
+    return start >= 0 && elseIndex > start ? source.slice(start, elseIndex) : "";
+  })();
+
   it('should set display flex on outer container when height is "Full"', () => {
     expect(source).toContain('containerStyle.display = "flex"');
     expect(source).toContain('containerStyle.flexDirection = "column"');
@@ -28,8 +36,15 @@ describe("DataTableWidget - container style for height modes", () => {
     expect(source).toContain("containerStyle.minHeight = minHeight");
   });
 
-  it("should set maxHeight to 100% so tables shrink with the viewport", () => {
-    expect(source).toContain('containerStyle.maxHeight = "100%"');
+  it('should not clamp the "Full" height branch with a percentage maxHeight', () => {
+    // Regression guard for issue #1695 / PR #4485: a percentage max-height
+    // collapses the table to its min-height inside the scrolling app host.
+    // flexGrow fills the flex parent, so the Full branch must not set maxHeight.
+    expect(fullBranch).not.toBe("");
+    expect(fullBranch).not.toContain('containerStyle.maxHeight = "100%"');
+    // The fill behaviour and responsive lower bound must remain in place.
+    expect(fullBranch).toContain("containerStyle.flexGrow = 1");
+    expect(fullBranch).toContain("containerStyle.minHeight = minHeight");
   });
 
   it("should apply getHeight for explicit pixel heights", () => {

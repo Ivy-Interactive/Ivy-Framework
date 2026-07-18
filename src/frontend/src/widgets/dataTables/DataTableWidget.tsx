@@ -110,7 +110,8 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
     containerStyle.flexGrow = 1;
     containerStyle.flexShrink = 1;
     containerStyle.minHeight = minHeight;
-    containerStyle.maxHeight = "100%";
+    // no maxHeight — flexGrow fills the flex parent; a percentage max-height
+    // collapses the table inside the scrolling app host (issue #1695 / PR #4485).
   } else {
     containerStyle.display = "flex";
     containerStyle.flexDirection = "column";
