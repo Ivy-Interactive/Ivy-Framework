@@ -1,8 +1,10 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Ivy.Core.Apps;
+using Ivy.Core.Plugins.Routing;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
@@ -31,10 +33,13 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         ReservedPaths = reservedPaths;
         Builder = builder;
     }
-    private readonly List<Action<WebApplication>> _appActions = [];
+
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
+    private readonly Dictionary<string, string> _slugToPluginId = new();
+    private DynamicPluginEndpointDataSource? _endpointDataSource;
+    private WebApplication? _app;
     private string? _currentPluginId;
     protected string? CurrentPluginId => _currentPluginId;
 
@@ -93,26 +98,58 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             state.AppFactories.Add(factory);
     }
 
-
-
-    public void UseWebApplication(Action<WebApplication> configure)
+    public void UseEndpoints(string slug, Action<IEndpointRouteBuilder> configure)
     {
+        ValidateSlug(slug);
+
+        var pluginId = _currentPluginId
+            ?? throw new InvalidOperationException("UseEndpoints can only be called during plugin configuration.");
+
         _lock.EnterWriteLock();
         try
         {
-            _appActions.Add(configure);
-            if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-                state.AppActions.Add(configure);
+            if (_slugToPluginId.TryGetValue(slug, out var existingId) && existingId != pluginId)
+                throw new InvalidOperationException($"Endpoint slug '{slug}' is already claimed by plugin '{existingId}'.");
+            _slugToPluginId[slug] = pluginId;
+
+            if (_pluginStates.TryGetValue(pluginId, out var state))
+                state.EndpointSlug = slug;
         }
         finally
         {
             _lock.ExitWriteLock();
         }
+
+        if (_endpointDataSource is null || _app is null)
+            throw new InvalidOperationException("UseEndpoints cannot be called before the application is built.");
+
+        var pluginDir = _pluginStates.TryGetValue(pluginId, out var ps) ? ps.Directory : null;
+        var builder = new PluginEndpointRouteBuilder(_app.Services, _app);
+
+        // Use ASP.NET's MapGroup for correct prefix handling across all endpoint types
+        var group = builder.MapGroup($"/ivy/plugins/{slug}");
+
+        // Wrap the group to provide plugin directory for MapStaticAssets
+        IEndpointRouteBuilder target = pluginDir is not null
+            ? new PluginEndpointRouteBuilderWithDirectory(group, pluginDir)
+            : group;
+
+        configure(target);
+
+        var endpoints = builder.CollectEndpoints();
+        _endpointDataSource.AddEndpoints(slug, endpoints);
     }
 
-    public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure)
+    private static readonly Regex SlugPattern = new(@"^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$", RegexOptions.Compiled);
+
+    private static void ValidateSlug(string slug)
     {
-        configure(Builder);
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new ArgumentException("Endpoint slug cannot be empty.", nameof(slug));
+        if (!SlugPattern.IsMatch(slug))
+            throw new ArgumentException(
+                $"Endpoint slug '{slug}' is invalid. Must be lowercase alphanumeric with optional hyphens, not starting or ending with a hyphen.",
+                nameof(slug));
     }
 
     public void BuildServiceProvider()
@@ -174,8 +211,12 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             // Collect app IDs before removing factories so we can reload affected sessions
             affectedAppIds = GetAppIdsFromFactories(state.AppFactories);
 
-            foreach (var a in state.AppActions)
-                _appActions.Remove(a);
+            // Remove dynamic endpoints
+            if (state.EndpointSlug is not null)
+            {
+                _endpointDataSource?.RemoveEndpoints(state.EndpointSlug);
+                _slugToPluginId.Remove(state.EndpointSlug);
+            }
 
             foreach (var f in state.AppFactories)
                 AppRepository.RemoveFactory(f);
@@ -242,53 +283,19 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
     internal IReadOnlyDictionary<string, PluginState> PluginStates => _pluginStates;
 
+    internal void SetEndpointDataSource(DynamicPluginEndpointDataSource dataSource)
+    {
+        _endpointDataSource = dataSource;
+    }
+
     public void Apply(WebApplication app)
     {
-        List<Action<WebApplication>> actions;
-        _lock.EnterReadLock();
-        try { actions = _appActions.ToList(); }
-        finally { _lock.ExitReadLock(); }
+        _app = app;
 
-        foreach (var action in actions)
-            action(app);
+        // Register the dynamic endpoint data source for plugin routes
+        _endpointDataSource ??= new DynamicPluginEndpointDataSource();
+        ((IEndpointRouteBuilder)app).DataSources.Add(_endpointDataSource);
 
-        app.MapGet("/ivy/plugins/{pluginId}/assets/{**filePath}", (string pluginId, string filePath) =>
-        {
-            _lock.EnterReadLock();
-            try
-            {
-                if (!_pluginStates.TryGetValue(pluginId, out var state))
-                    return Results.NotFound();
-
-                if (string.IsNullOrEmpty(filePath) || Path.IsPathRooted(filePath))
-                    return Results.NotFound();
-
-                var pluginDir = Path.GetFullPath(state.Directory);
-                var fullPath = Path.GetFullPath(Path.Join(pluginDir, filePath));
-
-                if (!fullPath.StartsWith(pluginDir + Path.DirectorySeparatorChar))
-                    return Results.NotFound();
-
-                if (!File.Exists(fullPath))
-                    return Results.NotFound();
-
-                var contentType = Path.GetExtension(fullPath).ToLowerInvariant() switch
-                {
-                    ".svg" => "image/svg+xml",
-                    ".png" => "image/png",
-                    ".jpg" or ".jpeg" => "image/jpeg",
-                    ".gif" => "image/gif",
-                    ".webp" => "image/webp",
-                    ".ico" => "image/x-icon",
-                    _ => "application/octet-stream"
-                };
-                return Results.File(fullPath, contentType);
-            }
-            finally
-            {
-                _lock.ExitReadLock();
-            }
-        });
     }
 }
 

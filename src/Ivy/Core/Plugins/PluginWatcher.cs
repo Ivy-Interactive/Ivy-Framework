@@ -108,11 +108,16 @@ internal class PluginWatcher : IDisposable
                 try
                 {
                     _pluginManager.UnloadPlugin(pluginId);
+                    loader.ForgetPlugin(pluginId);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to unload plugin {PluginId}", pluginId);
                 }
+            }
+            else
+            {
+                loader.RemoveFailedPlugin(e.FullPath);
             }
         }
     }

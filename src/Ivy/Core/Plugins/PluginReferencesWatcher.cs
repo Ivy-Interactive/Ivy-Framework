@@ -123,11 +123,16 @@ internal class PluginReferencesWatcher : IDisposable
                     try
                     {
                         _pluginManager.UnloadPlugin(pluginId);
+                        loader.ForgetPlugin(pluginId);
                     }
                     catch (InvalidOperationException ex)
                     {
                         _logger.LogError(ex, "Failed to unload plugin {PluginId}", pluginId);
                     }
+                }
+                else
+                {
+                    loader.RemoveFailedPlugin(dir);
                 }
             }
         }
