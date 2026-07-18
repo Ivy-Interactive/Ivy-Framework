@@ -202,12 +202,21 @@ describe("shortcutRegistry", () => {
     expect(_getRegistrySize()).toBe(0);
   });
 
-  it("should install listener on first registration and remove on last unregister", () => {
-    registerShortcut(makeRegistration({ id: "btn-lazy" }));
+  it("keeps listener installed after all shortcuts are unregistered", () => {
+    registerShortcut(makeRegistration({ id: "temp" }));
+    unregisterShortcut("temp");
     expect(_isListenerInstalled()).toBe(true);
 
-    unregisterShortcut("btn-lazy");
-    expect(_isListenerInstalled()).toBe(false);
+    // Backspace still prevented
+    const event = new KeyboardEvent("keydown", {
+      key: "Backspace",
+      code: "Backspace",
+      bubbles: true,
+      cancelable: true,
+    });
+    const spy = vi.spyOn(event, "preventDefault");
+    window.dispatchEvent(event);
+    expect(spy).toHaveBeenCalled();
   });
 
   it("should match shift modifier correctly", () => {

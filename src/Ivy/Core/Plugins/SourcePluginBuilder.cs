@@ -26,8 +26,7 @@ internal class SourcePluginBuilder : IDisposable
     public static bool IsSourcePlugin(string directory)
     {
         return Directory.Exists(directory) &&
-               Directory.EnumerateFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly).Any() &&
-               Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories).Any();
+               Directory.EnumerateFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly).Any();
     }
 
     public static bool IsSourceFile(string filePath)

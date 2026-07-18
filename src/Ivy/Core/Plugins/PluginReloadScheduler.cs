@@ -44,8 +44,8 @@ internal class PluginReloadScheduler : IDisposable
                 _logger.LogInformation("Loading plugin from: {Directory}", pluginDirectory);
                 try
                 {
-                    _pluginManager.LoadPlugin(pluginDirectory);
-                    _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
+                    if (_pluginManager.LoadPlugin(pluginDirectory))
+                        _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
                 }
                 catch (InvalidOperationException ex)
                 {

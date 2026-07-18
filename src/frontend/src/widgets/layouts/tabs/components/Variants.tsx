@@ -370,6 +370,9 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
             return (
               <div
                 key={id}
+                role="tabpanel"
+                aria-labelledby={`tab-${id}`}
+                aria-hidden={activeTabId !== id}
                 className={cn(
                   "overflow-auto",
                   activeTabId === id

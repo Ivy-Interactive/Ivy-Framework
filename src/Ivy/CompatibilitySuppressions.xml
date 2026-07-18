@@ -122,6 +122,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.UseWebApplication(System.Action{Microsoft.AspNetCore.Builder.WebApplication})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Core.Plugins.PluginContextBase.UseWebApplicationBuilder(System.Action{Microsoft.AspNetCore.Builder.WebApplicationBuilder})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Core.Plugins.PluginLoader.SetConfiguration(Microsoft.Extensions.Configuration.IConfiguration)</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
@@ -150,7 +164,28 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.IIvyExtendedPluginContext.UseWebApplication(System.Action{Microsoft.AspNetCore.Builder.WebApplication})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.IIvyExtendedPluginContext.UseWebApplicationBuilder(System.Action{Microsoft.AspNetCore.Builder.WebApplicationBuilder})</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Server.UsePlugins(System.String,System.Version,System.Func{Ivy.Server,Microsoft.AspNetCore.Builder.WebApplicationBuilder,Ivy.Core.Plugins.PluginContextBase},System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Boolean)</Target>
+    <Left>lib/net10.0/Ivy.dll</Left>
+    <Right>lib/net10.0/Ivy.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Ivy.Plugins.IIvyExtendedPluginContext.UseEndpoints(System.String,System.Action{Microsoft.AspNetCore.Routing.IEndpointRouteBuilder})</Target>
     <Left>lib/net10.0/Ivy.dll</Left>
     <Right>lib/net10.0/Ivy.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
