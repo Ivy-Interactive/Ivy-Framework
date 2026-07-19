@@ -12,6 +12,7 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
 
     public override object? Build()
     {
+        var pluginManager = UseService<IPluginManager>();
         var config = configFactory.Create(pluginId);
         var fields = schema.Fields;
         var states = fields.Select(f =>
@@ -40,6 +41,7 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
                             config.RemoveValue(fields[i].Key);
                     }
                     config.Save();
+                    pluginManager.ReconfigurePlugin(pluginId);
                     statusMessage.Set("Configuration saved.");
                     return ValueTask.CompletedTask;
                 }, icon: Icons.Save)
