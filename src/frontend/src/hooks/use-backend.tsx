@@ -946,6 +946,11 @@ export const useBackend = (
               handleHotReloadMessage();
             });
 
+            connection.on("ExternalWidgetsUpdated", (registry: ExternalWidgetInfo[]) => {
+              logger.debug(`[${connection.connectionId}] ExternalWidgetsUpdated`);
+              setExternalWidgetRegistry(registry);
+            });
+
             connection.on("ReloadPage", () => {
               logger.debug(`[${connection.connectionId}] ReloadPage`);
               window.location.reload();

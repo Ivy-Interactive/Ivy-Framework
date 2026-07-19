@@ -1016,6 +1016,28 @@ public class Server
             };
         }
 
+        // Push updated external widget registry to connected root clients when a plugin loads/reloads
+        if (_pluginLoader != null)
+        {
+            var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
+
+            void BroadcastExternalWidgets(string _)
+            {
+                var registry = ExternalWidgetRegistry.Instance.GetRegistryForFrontend();
+                var rootConnectionIds = sessionStore.Sessions.Values
+                    .Where(s => s.ParentId == null)
+                    .Select(s => s.ConnectionId)
+                    .ToList();
+                foreach (var connectionId in rootConnectionIds)
+                {
+                    hubContext.Clients.Client(connectionId).SendAsync("ExternalWidgetsUpdated", registry);
+                }
+            }
+
+            _pluginLoader.PluginLoaded += BroadcastExternalWidgets;
+            _pluginLoader.PluginReloaded += BroadcastExternalWidgets;
+        }
+
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             var url = app.Urls.FirstOrDefault() ?? "unknown";
