@@ -5,6 +5,11 @@ namespace Ivy.Apps;
 
 public class PluginConfigurationView(string pluginId, PluginConfigurationSchema schema, IIvyPluginConfigFactory configFactory) : ViewBase
 {
+    /// <summary>
+    /// Extra content rendered inline with the Save button row.
+    /// </summary>
+    public object? ExtraActions { get; init; }
+
     public override object? Build()
     {
         var config = configFactory.Create(pluginId);
@@ -37,7 +42,8 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
                     config.Save();
                     statusMessage.Set("Configuration saved.");
                     return ValueTask.CompletedTask;
-                }, icon: Icons.Save))
+                }, icon: Icons.Save)
+                | ExtraActions)
             | (statusMessage.Value is not null
                 ? new Badge(statusMessage.Value, BadgeVariant.Success)
                 : null);
