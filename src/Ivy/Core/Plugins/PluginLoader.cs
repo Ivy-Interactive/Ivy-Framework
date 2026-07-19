@@ -475,7 +475,7 @@ public class PluginLoader : IPluginManager
                     _logger.LogInformation("Loaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
                     loadedPluginId = manifest.Id;
 
-                    return true;
+                    goto done;
                 }
             }
 
@@ -618,7 +618,7 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
-        PluginStatus newStatus;
+        PluginStatus newStatus = PluginStatus.Unconfigured;
 
         // Call shutdown hook on old plugin before swapping (blocks up to 5s)
         _lock.EnterReadLock();
@@ -651,6 +651,7 @@ public class PluginLoader : IPluginManager
             var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
+            var configIncomplete = false;
             if (newPlugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
@@ -663,35 +664,37 @@ public class PluginLoader : IPluginManager
                         manifest.Id, string.Join(", ", errors));
                     newPlugin.Status = PluginStatus.Unconfigured;
                     newStatus = PluginStatus.Unconfigured;
+                    configIncomplete = true;
 
                     _knownPlugins[manifest.Id] = directory;
                     _plugins.Add(newPlugin);
                     _failedPlugins.Remove(directory);
 
                     _logger.LogInformation("Reloaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
-
-                    return true;
                 }
             }
 
-            if (_pluginContext is not null)
+            if (!configIncomplete)
             {
-                _pluginContext.SetCurrentPlugin(manifest.Id, directory);
-                _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
-                newPlugin.Instance.Configure(_pluginContext);
-                _pluginContext.ClearCurrentPlugin();
-                _pluginContext.ClearPluginConfig();
-                _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                if (_pluginContext is not null)
+                {
+                    _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                    _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
+                    newPlugin.Instance.Configure(_pluginContext);
+                    _pluginContext.ClearCurrentPlugin();
+                    _pluginContext.ClearPluginConfig();
+                    _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                }
+
+                newPlugin.Status = PluginStatus.Active;
+                newStatus = PluginStatus.Active;
+                _knownPlugins[manifest.Id] = directory;
+                _plugins.Add(newPlugin);
+                _failedPlugins.Remove(directory);
+
+                ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
+                _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
             }
-
-            newPlugin.Status = PluginStatus.Active;
-            newStatus = PluginStatus.Active;
-            _knownPlugins[manifest.Id] = directory;
-            _plugins.Add(newPlugin);
-            _failedPlugins.Remove(directory);
-
-            ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
-            _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
         }
         finally
         {
