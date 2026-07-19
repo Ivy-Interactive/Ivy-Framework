@@ -495,6 +495,7 @@ public class PluginLoader : IPluginManager
                 {
                     _pluginContext.ClearCurrentPlugin();
                     _pluginContext.ClearPluginConfig();
+                    _pluginContext.RemovePluginContributions(manifest.Id);
                     plugin.LoadContext.Unload();
                     DeleteShadowDirectory(plugin.ShadowDirectory);
                     RecordFailure(pluginPath, ex, fireEvent: false);
@@ -676,24 +677,42 @@ public class PluginLoader : IPluginManager
 
             if (!configIncomplete)
             {
+                var configureFailed = false;
                 if (_pluginContext is not null)
                 {
-                    _pluginContext.SetCurrentPlugin(manifest.Id, directory);
-                    _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
-                    newPlugin.Instance.Configure(_pluginContext);
-                    _pluginContext.ClearCurrentPlugin();
-                    _pluginContext.ClearPluginConfig();
-                    _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                    try
+                    {
+                        _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                        _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
+                        newPlugin.Instance.Configure(_pluginContext);
+                        _pluginContext.ClearCurrentPlugin();
+                        _pluginContext.ClearPluginConfig();
+                        _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                    }
+                    catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
+                    {
+                        _pluginContext.ClearCurrentPlugin();
+                        _pluginContext.ClearPluginConfig();
+                        _pluginContext.RemovePluginContributions(manifest.Id);
+                        newPlugin.LoadContext.Unload();
+                        DeleteShadowDirectory(newPlugin.ShadowDirectory);
+                        RecordFailure(directory, ex, fireEvent: false);
+                        configureFailed = true;
+                        _logger.LogError(ex, "Exception during reload configure for plugin '{Id}'", manifest.Id);
+                    }
                 }
 
-                newPlugin.Status = PluginStatus.Active;
-                newStatus = PluginStatus.Active;
-                _knownPlugins[manifest.Id] = directory;
-                _plugins.Add(newPlugin);
-                _failedPlugins.Remove(directory);
+                if (!configureFailed)
+                {
+                    newPlugin.Status = PluginStatus.Active;
+                    newStatus = PluginStatus.Active;
+                    _knownPlugins[manifest.Id] = directory;
+                    _plugins.Add(newPlugin);
+                    _failedPlugins.Remove(directory);
 
-                ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
-                _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+                    ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
+                    _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+                }
             }
         }
         finally
