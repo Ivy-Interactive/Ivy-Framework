@@ -277,7 +277,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
             }}
           />
         )}
-        <SheetHeader className={cn("p-4 pb-0", !title && !description && "sr-only")}>
+        <SheetHeader className={cn("p-4 pb-0 text-left", !title && !description && "sr-only")}>
           <SheetTitle className={cn("pr-10", !title && "sr-only")}>{title || "Sheet"}</SheetTitle>
           <SheetDescription className={cn(!description && "sr-only")}>
             {description || "Sheet content"}
