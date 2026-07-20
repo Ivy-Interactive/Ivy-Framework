@@ -3,6 +3,8 @@ namespace Ivy.Plugins;
 public record PluginCandidate(
     string Id,
     string Directory,
+    string? Title = null,
+    PluginIcon? Icon = null,
     string? FailureReason = null,
     DateTime? FailedAt = null);
 

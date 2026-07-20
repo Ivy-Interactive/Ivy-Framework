@@ -17,6 +17,7 @@ public class PluginLoader : IPluginManager
     private readonly IReadOnlySet<string> _sharedAssemblyNames;
     private readonly List<LoadedPlugin> _plugins = [];
     private readonly Dictionary<string, string> _knownPlugins = new(); // id -> directory
+    private readonly Dictionary<string, (string? Title, PluginIcon? Icon)> _knownPluginMeta = new(); // id -> metadata
     private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
     private readonly ConcurrentDictionary<string, object> _reloadLocks = new();
@@ -469,6 +470,7 @@ public class PluginLoader : IPluginManager
                     loadedStatus = PluginStatus.Unconfigured;
 
                     _knownPlugins[manifest.Id] = pluginPath;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
                     _plugins.Add(plugin);
                     _failedPlugins.Remove(pluginPath);
 
@@ -506,6 +508,7 @@ public class PluginLoader : IPluginManager
 
             plugin.Status = PluginStatus.Active;
             _knownPlugins[manifest.Id] = pluginPath;
+            _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
             _plugins.Add(plugin);
 
             // Clear from failed plugins if it was there
@@ -668,6 +671,7 @@ public class PluginLoader : IPluginManager
                     configIncomplete = true;
 
                     _knownPlugins[manifest.Id] = directory;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
                     _plugins.Add(newPlugin);
                     _failedPlugins.Remove(directory);
 
@@ -707,6 +711,7 @@ public class PluginLoader : IPluginManager
                     newPlugin.Status = PluginStatus.Active;
                     newStatus = PluginStatus.Active;
                     _knownPlugins[manifest.Id] = directory;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
                     _plugins.Add(newPlugin);
                     _failedPlugins.Remove(directory);
 
@@ -950,7 +955,8 @@ public class PluginLoader : IPluginManager
             {
                 if (!loadedIds.Contains(id))
                 {
-                    result.Add(new PluginCandidate(id, directory));
+                    var meta = _knownPluginMeta.GetValueOrDefault(id);
+                    result.Add(new PluginCandidate(id, directory, Title: meta.Title, Icon: meta.Icon));
                 }
             }
 
@@ -959,7 +965,8 @@ public class PluginLoader : IPluginManager
             {
                 // Extract ID from directory name or use directory name as fallback
                 var id = Path.GetFileName(directory);
-                result.Add(new PluginCandidate(id, directory, reason, failedAt));
+                var meta = _knownPluginMeta.GetValueOrDefault(id);
+                result.Add(new PluginCandidate(id, directory, Title: meta.Title, Icon: meta.Icon, FailureReason: reason, FailedAt: failedAt));
             }
 
             return result;
@@ -989,6 +996,7 @@ public class PluginLoader : IPluginManager
         try
         {
             _knownPlugins.Remove(pluginId);
+            _knownPluginMeta.Remove(pluginId);
         }
         finally
         {
@@ -1183,6 +1191,7 @@ public class PluginLoader : IPluginManager
             }
 
             _knownPlugins[manifest.Id] = directory;
+            _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
             candidates.Add(loaded.Value);
         }
         catch (IOException ex)
