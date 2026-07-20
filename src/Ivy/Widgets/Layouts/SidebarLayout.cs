@@ -17,7 +17,12 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
 {
     public static Size DefaultWidth => Size.Rem(16);
 
-    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null, object? sidebarHeaderCollapsed = null, object? sidebarFooterCollapsed = null)
+    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
+    : this(mainContent, sidebarContent, sidebarHeader, sidebarFooter, width, null, null)
+    {
+    }
+
+    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter, Size? width, object? sidebarHeaderCollapsed, object? sidebarFooterCollapsed)
     : base(BuildSlots(mainContent, sidebarContent, sidebarHeader, sidebarFooter, sidebarHeaderCollapsed, sidebarFooterCollapsed))
     {
         Width = (width ?? DefaultWidth).ToResponsive();
