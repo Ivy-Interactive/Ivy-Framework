@@ -1,5 +1,6 @@
 import { useEventHandler } from "@/components/event-handler";
 import React, { useRef, useState } from "react";
+import { X } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -17,8 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MenuItem } from "@/types/widgets";
 import Icon from "@/components/Icon";
-import { camelCase } from "@/lib/utils";
-import { getColor } from "@/lib/styles";
+import { camelCase, cn } from "@/lib/utils";
+import { getColor, getWidth } from "@/lib/styles";
 import { ShortcutKeys } from "@/components/Kbd";
 import { Densities } from "@/types/density";
 
@@ -32,6 +33,7 @@ interface DropDownMenuWidgetProps {
   alignOffset?: number;
   stayOpen?: boolean;
   density?: Densities;
+  width?: string;
   events?: string[];
   slots?: {
     Trigger?: React.ReactNode[];
@@ -91,7 +93,12 @@ const DropDownMenuItemGroup = ({
         >
           {item.icon && <Icon name={item.icon} size={iconSize} style={colorStyle} />}
           {item.label}
-          {item.checked && <span className="ml-auto">✓</span>}
+          {item.checked &&
+            (stayOpen ? (
+              <X className="ml-auto size-4 shrink-0 text-muted-foreground" />
+            ) : (
+              <span className="ml-auto">✓</span>
+            ))}
           {item.shortcut && (
             <DropdownMenuShortcut>
               <ShortcutKeys shortcut={item.shortcut} />
@@ -182,6 +189,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   alignOffset = 0,
   stayOpen = false,
   density = Densities.Medium,
+  width,
   events = EMPTY_EVENTS,
 }) => {
   const eventHandler = useEventHandler();
@@ -191,6 +199,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   const iconSize = density === Densities.Small ? 12 : density === Densities.Large ? 16 : 14;
   const contentMarginClass =
     density === Densities.Small ? "m-1" : density === Densities.Large ? "m-3" : "m-2";
+  const widthStyles = getWidth(width);
 
   if (!slots?.Trigger) {
     return <div className="text-red-500">Error: DropDownMenu requires Trigger slot.</div>;
@@ -214,25 +223,29 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger ref={triggerRef} asChild>
-        <div style={{ maxWidth: "100%", minWidth: 0 }}>{slots.Trigger}</div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        onClick={(e) => e.stopPropagation()}
-        align={camelCase(align) as "center" | "end" | "start" | undefined}
-        side={camelCase(side) as "top" | "right" | "bottom" | "left" | undefined}
-        className={contentMarginClass}
-        alignOffset={alignOffset}
-      >
-        {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
-        <DropDownMenuItemGroup
-          items={items}
-          onItemClick={onItemClick}
-          iconSize={iconSize}
-          stayOpen={stayOpen}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div style={widthStyles} className={cn(width && "min-w-0")}>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger ref={triggerRef} asChild>
+          <div style={{ maxWidth: "100%", minWidth: 0, width: width ? "100%" : undefined }}>
+            {slots.Trigger}
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          onClick={(e) => e.stopPropagation()}
+          align={camelCase(align) as "center" | "end" | "start" | undefined}
+          side={camelCase(side) as "top" | "right" | "bottom" | "left" | undefined}
+          className={contentMarginClass}
+          alignOffset={alignOffset}
+        >
+          {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
+          <DropDownMenuItemGroup
+            items={items}
+            onItemClick={onItemClick}
+            iconSize={iconSize}
+            stayOpen={stayOpen}
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
