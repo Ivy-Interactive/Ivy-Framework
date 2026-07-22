@@ -90,14 +90,19 @@ public class ExternalWidgetController : ControllerBase
     {
         // Convert path separators to dots for embedded resource naming
         var resourcePath = relativePath.Replace('/', '.').Replace('\\', '.');
+        var filename = System.IO.Path.GetFileName(relativePath);
 
         // Try different naming conventions
-        var candidates = new[]
+        var candidates = new List<string>
         {
             $"{basePath}.{resourcePath}",
             $"{basePath.Replace('-', '_')}.{resourcePath}",
             $"{assembly.GetName().Name}.{resourcePath}",
-            resourcePath
+            resourcePath,
+            $"{basePath}.{filename}",
+            $"{basePath.Replace('-', '_')}.{filename}",
+            $"{assembly.GetName().Name}.{filename}",
+            filename
         };
 
         foreach (var candidate in candidates)

@@ -11,22 +11,31 @@ namespace Ivy;
 [Slot("SidebarContent")]
 [Slot("SidebarHeader")]
 [Slot("SidebarFooter")]
+[Slot("SidebarHeaderCollapsed")]
+[Slot("SidebarFooterCollapsed")]
 public record SidebarLayout : WidgetBase<SidebarLayout>
 {
     public static Size DefaultWidth => Size.Rem(16);
 
     public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
-    : base(BuildSlots(mainContent, sidebarContent, sidebarHeader, sidebarFooter))
+    : this(mainContent, sidebarContent, sidebarHeader, sidebarFooter, width, null, null)
+    {
+    }
+
+    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter, Size? width, object? sidebarHeaderCollapsed, object? sidebarFooterCollapsed)
+    : base(BuildSlots(mainContent, sidebarContent, sidebarHeader, sidebarFooter, sidebarHeaderCollapsed, sidebarFooterCollapsed))
     {
         Width = (width ?? DefaultWidth).ToResponsive();
     }
 
-    private static Slot[] BuildSlots(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter) =>
+    private static Slot[] BuildSlots(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter, object? sidebarHeaderCollapsed, object? sidebarFooterCollapsed) =>
     [
         new Slot("MainContent", mainContent),
         new Slot("SidebarContent", sidebarContent),
         sidebarHeader != null ? new Slot("SidebarHeader", sidebarHeader) : new Slot("SidebarHeader"),
-        sidebarFooter != null ? new Slot("SidebarFooter", sidebarFooter) : new Slot("SidebarFooter")
+        sidebarFooter != null ? new Slot("SidebarFooter", sidebarFooter) : new Slot("SidebarFooter"),
+        sidebarHeaderCollapsed != null ? new Slot("SidebarHeaderCollapsed", sidebarHeaderCollapsed) : new Slot("SidebarHeaderCollapsed"),
+        sidebarFooterCollapsed != null ? new Slot("SidebarFooterCollapsed", sidebarFooterCollapsed) : new Slot("SidebarFooterCollapsed")
     ];
 
     internal SidebarLayout() { }

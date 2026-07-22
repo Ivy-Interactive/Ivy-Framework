@@ -350,11 +350,17 @@ public class ExternalWidgetRegistry
                 var altScriptResourceName = $"{assemblyName}.{attr.ScriptPath.Replace('/', '.')}";
                 if (assembly.GetManifestResourceInfo(altScriptResourceName) == null)
                 {
-                    Console.WriteLine($"[ExternalWidgetRegistry] Warning: Script resource '{scriptResourceName}' not found for {typeName}");
-                    Console.WriteLine($"[ExternalWidgetRegistry] Available resources in {assemblyName}:");
-                    foreach (var name in assembly.GetManifestResourceNames())
+                    var filename = System.IO.Path.GetFileName(attr.ScriptPath);
+                    var fallbackResourceName = $"{assemblyName}.{filename}";
+                    var fallbackAltResourceName = $"{resourceBasePath}.{filename}";
+                    if (assembly.GetManifestResourceInfo(fallbackResourceName) == null && assembly.GetManifestResourceInfo(fallbackAltResourceName) == null)
                     {
-                        Console.WriteLine($"  - {name}");
+                        Console.WriteLine($"[ExternalWidgetRegistry] Warning: Script resource '{scriptResourceName}' not found for {typeName}");
+                        Console.WriteLine($"[ExternalWidgetRegistry] Available resources in {assemblyName}:");
+                        foreach (var name in assembly.GetManifestResourceNames())
+                        {
+                            Console.WriteLine($"  - {name}");
+                        }
                     }
                 }
             }
