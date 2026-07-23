@@ -10,6 +10,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.PluginCandidate.#ctor(System.String,System.String,System.String,System.Nullable{System.DateTime})</Target>
+    <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
+    <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.PluginCandidate.Deconstruct(System.String@,System.String@,System.String@,System.Nullable{System.DateTime}@)</Target>
+    <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
+    <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Plugins.PluginConfigurationSchema.#ctor</Target>
     <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
     <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>

@@ -38,10 +38,13 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
     private readonly Dictionary<string, string> _slugToPluginId = new();
+    private readonly List<PendingEndpointRegistration> _pendingEndpoints = new();
     private DynamicPluginEndpointDataSource? _endpointDataSource;
     private WebApplication? _app;
     private string? _currentPluginId;
     protected string? CurrentPluginId => _currentPluginId;
+
+    private record PendingEndpointRegistration(string PluginId, string Slug, Action<IEndpointRouteBuilder> Configure);
 
     public IServiceCollection Services
     {
@@ -120,11 +123,23 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             _lock.ExitWriteLock();
         }
 
+        // If the application hasn't been built yet, queue the registration for replay in Apply()
         if (_endpointDataSource is null || _app is null)
-            throw new InvalidOperationException("UseEndpoints cannot be called before the application is built.");
+        {
+            lock (_pendingEndpoints)
+            {
+                _pendingEndpoints.Add(new PendingEndpointRegistration(pluginId, slug, configure));
+            }
+            return;
+        }
 
+        ApplyEndpointRegistration(pluginId, slug, configure);
+    }
+
+    private void ApplyEndpointRegistration(string pluginId, string slug, Action<IEndpointRouteBuilder> configure)
+    {
         var pluginDir = _pluginStates.TryGetValue(pluginId, out var ps) ? ps.Directory : null;
-        var builder = new PluginEndpointRouteBuilder(_app.Services, _app);
+        var builder = new PluginEndpointRouteBuilder(_app!.Services, _app);
 
         // Use ASP.NET's MapGroup for correct prefix handling across all endpoint types
         var group = builder.MapGroup($"/ivy/plugins/{slug}");
@@ -137,7 +152,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         configure(target);
 
         var endpoints = builder.CollectEndpoints();
-        _endpointDataSource.AddEndpoints(slug, endpoints);
+        _endpointDataSource!.AddEndpoints(slug, endpoints);
     }
 
     private static readonly Regex SlugPattern = new(@"^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$", RegexOptions.Compiled);
@@ -230,6 +245,12 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
             _lock.ExitWriteLock();
         }
 
+        // Remove any pending endpoint registrations that haven't been applied yet
+        lock (_pendingEndpoints)
+        {
+            _pendingEndpoints.RemoveAll(p => p.PluginId == pluginId);
+        }
+
         // Reload the app repository so removed apps are reflected in the UI
         ReloadApps();
 
@@ -296,6 +317,24 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         _endpointDataSource ??= new DynamicPluginEndpointDataSource();
         ((IEndpointRouteBuilder)app).DataSources.Add(_endpointDataSource);
 
+        // Replay any endpoint registrations that were queued before the app was built
+        List<PendingEndpointRegistration> pending;
+        lock (_pendingEndpoints)
+        {
+            pending = [.. _pendingEndpoints];
+            _pendingEndpoints.Clear();
+        }
+
+        foreach (var registration in pending)
+        {
+            // Only apply if the plugin is still active (not unloaded in the meantime)
+            _lock.EnterReadLock();
+            var stillActive = _pluginStates.ContainsKey(registration.PluginId);
+            _lock.ExitReadLock();
+
+            if (stillActive)
+                ApplyEndpointRegistration(registration.PluginId, registration.Slug, registration.Configure);
+        }
     }
 }
 

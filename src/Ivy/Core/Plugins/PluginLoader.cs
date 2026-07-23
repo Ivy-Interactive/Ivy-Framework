@@ -17,6 +17,7 @@ public class PluginLoader : IPluginManager
     private readonly IReadOnlySet<string> _sharedAssemblyNames;
     private readonly List<LoadedPlugin> _plugins = [];
     private readonly Dictionary<string, string> _knownPlugins = new(); // id -> directory
+    private readonly Dictionary<string, (string? Title, PluginIcon? Icon)> _knownPluginMeta = new(); // id -> metadata
     private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
     private readonly ConcurrentDictionary<string, object> _reloadLocks = new();
@@ -469,13 +470,14 @@ public class PluginLoader : IPluginManager
                     loadedStatus = PluginStatus.Unconfigured;
 
                     _knownPlugins[manifest.Id] = pluginPath;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
                     _plugins.Add(plugin);
                     _failedPlugins.Remove(pluginPath);
 
                     _logger.LogInformation("Loaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
                     loadedPluginId = manifest.Id;
 
-                    return true;
+                    goto done;
                 }
             }
 
@@ -495,6 +497,7 @@ public class PluginLoader : IPluginManager
                 {
                     _pluginContext.ClearCurrentPlugin();
                     _pluginContext.ClearPluginConfig();
+                    _pluginContext.RemovePluginContributions(manifest.Id);
                     plugin.LoadContext.Unload();
                     DeleteShadowDirectory(plugin.ShadowDirectory);
                     RecordFailure(pluginPath, ex, fireEvent: false);
@@ -505,6 +508,7 @@ public class PluginLoader : IPluginManager
 
             plugin.Status = PluginStatus.Active;
             _knownPlugins[manifest.Id] = pluginPath;
+            _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
             _plugins.Add(plugin);
 
             // Clear from failed plugins if it was there
@@ -618,7 +622,7 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
-        PluginStatus newStatus;
+        PluginStatus newStatus = PluginStatus.Unconfigured;
 
         // Call shutdown hook on old plugin before swapping (blocks up to 5s)
         _lock.EnterReadLock();
@@ -651,6 +655,7 @@ public class PluginLoader : IPluginManager
             var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory, loaded.Value.ShadowDirectory);
 
             // Validate configuration
+            var configIncomplete = false;
             if (newPlugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
@@ -663,35 +668,57 @@ public class PluginLoader : IPluginManager
                         manifest.Id, string.Join(", ", errors));
                     newPlugin.Status = PluginStatus.Unconfigured;
                     newStatus = PluginStatus.Unconfigured;
+                    configIncomplete = true;
 
                     _knownPlugins[manifest.Id] = directory;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
                     _plugins.Add(newPlugin);
                     _failedPlugins.Remove(directory);
 
                     _logger.LogInformation("Reloaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
-
-                    return true;
                 }
             }
 
-            if (_pluginContext is not null)
+            if (!configIncomplete)
             {
-                _pluginContext.SetCurrentPlugin(manifest.Id, directory);
-                _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
-                newPlugin.Instance.Configure(_pluginContext);
-                _pluginContext.ClearCurrentPlugin();
-                _pluginContext.ClearPluginConfig();
-                _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                var configureFailed = false;
+                if (_pluginContext is not null)
+                {
+                    try
+                    {
+                        _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                        _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
+                        newPlugin.Instance.Configure(_pluginContext);
+                        _pluginContext.ClearCurrentPlugin();
+                        _pluginContext.ClearPluginConfig();
+                        _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                    }
+                    catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
+                    {
+                        _pluginContext.ClearCurrentPlugin();
+                        _pluginContext.ClearPluginConfig();
+                        _pluginContext.RemovePluginContributions(manifest.Id);
+                        newPlugin.LoadContext.Unload();
+                        DeleteShadowDirectory(newPlugin.ShadowDirectory);
+                        RecordFailure(directory, ex, fireEvent: false);
+                        configureFailed = true;
+                        _logger.LogError(ex, "Exception during reload configure for plugin '{Id}'", manifest.Id);
+                    }
+                }
+
+                if (!configureFailed)
+                {
+                    newPlugin.Status = PluginStatus.Active;
+                    newStatus = PluginStatus.Active;
+                    _knownPlugins[manifest.Id] = directory;
+                    _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
+                    _plugins.Add(newPlugin);
+                    _failedPlugins.Remove(directory);
+
+                    ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
+                    _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+                }
             }
-
-            newPlugin.Status = PluginStatus.Active;
-            newStatus = PluginStatus.Active;
-            _knownPlugins[manifest.Id] = directory;
-            _plugins.Add(newPlugin);
-            _failedPlugins.Remove(directory);
-
-            ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
-            _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
         }
         finally
         {
@@ -928,7 +955,8 @@ public class PluginLoader : IPluginManager
             {
                 if (!loadedIds.Contains(id))
                 {
-                    result.Add(new PluginCandidate(id, directory));
+                    var meta = _knownPluginMeta.GetValueOrDefault(id);
+                    result.Add(new PluginCandidate(id, directory, Title: meta.Title, Icon: meta.Icon));
                 }
             }
 
@@ -937,7 +965,8 @@ public class PluginLoader : IPluginManager
             {
                 // Extract ID from directory name or use directory name as fallback
                 var id = Path.GetFileName(directory);
-                result.Add(new PluginCandidate(id, directory, reason, failedAt));
+                var meta = _knownPluginMeta.GetValueOrDefault(id);
+                result.Add(new PluginCandidate(id, directory, Title: meta.Title, Icon: meta.Icon, FailureReason: reason, FailedAt: failedAt));
             }
 
             return result;
@@ -967,6 +996,7 @@ public class PluginLoader : IPluginManager
         try
         {
             _knownPlugins.Remove(pluginId);
+            _knownPluginMeta.Remove(pluginId);
         }
         finally
         {
@@ -1161,6 +1191,7 @@ public class PluginLoader : IPluginManager
             }
 
             _knownPlugins[manifest.Id] = directory;
+            _knownPluginMeta[manifest.Id] = (manifest.Title, manifest.Icon);
             candidates.Add(loaded.Value);
         }
         catch (IOException ex)
