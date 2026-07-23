@@ -118,6 +118,13 @@ public class PluginLoader : IPluginManager
         string directory, IServiceProvider serviceProvider, out string? failureReason)
     {
         failureReason = null;
+
+        if (!System.IO.Directory.Exists(directory))
+        {
+            failureReason = "Plugin directory not found";
+            return null;
+        }
+
         var sep = Path.DirectorySeparatorChar;
         var dllFiles = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{sep}obj{sep}"))
