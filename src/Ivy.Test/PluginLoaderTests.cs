@@ -504,7 +504,6 @@ public class PluginLoaderTests
         {
             Id = Id,
             Title = "Test Plugin",
-            Version = new Version(1, 0)
         };
 
         public Ivy.Plugins.PluginConfigurationSchema? ConfigurationSchema => null;
@@ -645,7 +644,6 @@ public class PluginLoaderTests
         {
             Id = "Ivy.Plugin.TypedTest",
             Title = "Typed Test",
-            Version = new Version(1, 0)
         };
 
         public Ivy.Plugins.PluginConfigurationSchema? ConfigurationSchema => null;
