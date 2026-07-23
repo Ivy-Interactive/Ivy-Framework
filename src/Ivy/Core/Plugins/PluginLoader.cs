@@ -109,7 +109,7 @@ public class PluginLoader : IPluginManager
 
         foreach (var plugin in _plugins)
         {
-            _logger.LogInformation("Loaded plugin: {Id} v{Version}", plugin.Instance.Manifest.Id, plugin.Instance.Manifest.Version);
+            _logger.LogInformation("Loaded plugin: {Id}", plugin.Instance.Manifest.Id);
             ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
         }
     }
@@ -474,7 +474,7 @@ public class PluginLoader : IPluginManager
                     _plugins.Add(plugin);
                     _failedPlugins.Remove(pluginPath);
 
-                    _logger.LogInformation("Loaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
+                    _logger.LogInformation("Loaded plugin (unconfigured): {Id}", manifest.Id);
                     loadedPluginId = manifest.Id;
 
                     goto done;
@@ -515,7 +515,7 @@ public class PluginLoader : IPluginManager
             _failedPlugins.Remove(pluginPath);
 
             ExternalWidgetRegistry.Instance.RegisterAssembly(plugin.Assembly);
-            _logger.LogInformation("Loaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+            _logger.LogInformation("Loaded plugin: {Id}", manifest.Id);
 
             loadedPluginId = manifest.Id;
         }
@@ -675,7 +675,7 @@ public class PluginLoader : IPluginManager
                     _plugins.Add(newPlugin);
                     _failedPlugins.Remove(directory);
 
-                    _logger.LogInformation("Reloaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
+                    _logger.LogInformation("Reloaded plugin (unconfigured): {Id}", manifest.Id);
                 }
             }
 
@@ -716,7 +716,7 @@ public class PluginLoader : IPluginManager
                     _failedPlugins.Remove(directory);
 
                     ExternalWidgetRegistry.Instance.RegisterAssembly(newPlugin.Assembly);
-                    _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+                    _logger.LogInformation("Reloaded plugin: {Id}", manifest.Id);
                 }
             }
         }
