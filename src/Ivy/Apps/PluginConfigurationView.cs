@@ -5,8 +5,14 @@ namespace Ivy.Apps;
 
 public class PluginConfigurationView(string pluginId, PluginConfigurationSchema schema, IIvyPluginConfigFactory configFactory) : ViewBase
 {
+    /// <summary>
+    /// Extra content rendered inline with the Save button row.
+    /// </summary>
+    public object? ExtraActions { get; init; }
+
     public override object? Build()
     {
+        var pluginManager = UseService<IPluginManager>();
         var config = configFactory.Create(pluginId);
         var fields = schema.Fields;
         var states = fields.Select(f =>
@@ -35,9 +41,11 @@ public class PluginConfigurationView(string pluginId, PluginConfigurationSchema 
                             config.RemoveValue(fields[i].Key);
                     }
                     config.Save();
+                    pluginManager.ReconfigurePlugin(pluginId);
                     statusMessage.Set("Configuration saved.");
                     return ValueTask.CompletedTask;
-                }, icon: Icons.Save))
+                }, icon: Icons.Save)
+                | ExtraActions)
             | (statusMessage.Value is not null
                 ? new Badge(statusMessage.Value, BadgeVariant.Success)
                 : null);
