@@ -236,7 +236,21 @@ public class PluginLoader : IPluginManager
         }
 
         var (pluginType, pluginAssembly) = found[0];
-        var instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
+        IIvyPlugin instance;
+        try
+        {
+            instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
+        }
+        catch (Exception ex) when (ex is MissingMethodException or TypeLoadException or TypeInitializationException or MissingFieldException)
+        {
+            _logger.LogError(ex,
+                "Plugin type {Type} in '{Directory}' is incompatible with the current host. " +
+                "It may have been built against a different version of the plugin abstractions.",
+                pluginType.FullName, directory);
+            failureReason = $"Incompatible plugin type {pluginType.Name}: {ex.Message}";
+            DeleteShadowDirectory(shadowDir);
+            return null;
+        }
         return (instance, pluginAssembly, loadContext, directory, shadowDir);
     }
 
@@ -273,7 +287,7 @@ public class PluginLoader : IPluginManager
                     }
                     catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
                     {
-                        _logger.LogError(ex, "Error loading deferred plugin from {Directory}", directory);
+                        RecordFailure(directory, ex);
                     }
                 }
                 _logger.LogInformation("Background plugin loading complete. {Count} plugin(s) loaded.", Plugins.Count);
@@ -1207,6 +1221,14 @@ public class PluginLoader : IPluginManager
             RecordFailure(directory, ex);
         }
         catch (ReflectionTypeLoadException ex)
+        {
+            RecordFailure(directory, ex);
+        }
+        catch (MissingMethodException ex)
+        {
+            RecordFailure(directory, ex);
+        }
+        catch (TypeLoadException ex)
         {
             RecordFailure(directory, ex);
         }
