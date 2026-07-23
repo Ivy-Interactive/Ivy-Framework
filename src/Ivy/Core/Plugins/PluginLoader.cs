@@ -314,10 +314,7 @@ public class PluginLoader : IPluginManager
         // Referenced plugins first (explicit references take priority)
         var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
         var referencedPaths = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, _pluginsDirectory, _logger);
-        foreach (var directory in referencedPaths.Where(Directory.Exists))
-        {
-            directories.Add(directory);
-        }
+        directories.AddRange(referencedPaths);
 
         // Then subdirectories of the plugins directory
         foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
