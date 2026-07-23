@@ -66,6 +66,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.PluginManifest.get_Version</Target>
+    <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
+    <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Plugins.PluginManifest.set_ConfigSectionName(System.String)</Target>
     <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
     <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
@@ -81,6 +88,13 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Ivy.Plugins.PluginManifest.set_Name(System.String)</Target>
+    <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
+    <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Ivy.Plugins.PluginManifest.set_Version(System.Version)</Target>
     <Left>lib/net10.0/Ivy.Plugin.Abstractions.dll</Left>
     <Right>lib/net10.0/Ivy.Plugin.Abstractions.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

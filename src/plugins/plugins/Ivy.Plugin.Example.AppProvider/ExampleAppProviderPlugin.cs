@@ -17,7 +17,6 @@ public class ExampleAppProviderPlugin : IIvyPlugin<IIvyExtendedPluginContext>
     {
         Id = "Ivy.Plugin.Example.AppProvider",
         Title = "Example App Provider",
-        Version = new Version(1, 0, 0),
     };
 
     public PluginConfigurationSchema? ConfigurationSchema { get; } = new SchemaBuilder()

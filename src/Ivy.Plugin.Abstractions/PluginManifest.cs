@@ -11,7 +11,6 @@ public record PluginManifest
 {
     public required string Id { get; init; }
     public required string Title { get; init; }
-    public required Version Version { get; init; }
     public Version? MinimumHostVersion { get; init; }
     public PluginIcon? Icon { get; init; }
 }
