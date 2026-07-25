@@ -162,6 +162,12 @@
           "Microsoft.Extensions.Options": "10.0.9"
         }
       },
+      "Microsoft.OpenApi": {
+        "type": "Direct",
+        "requested": "[3.5.4, )",
+        "resolved": "3.5.4",
+        "contentHash": "Dhiio8mc5aLT8ujQfSP6iBdy4UDdkf3iGl1S7W2XtiAfsPZghkHydnAqivtdPvMB3JcgKVzwkLrq2BW5Lb5uxg=="
+      },
       "Newtonsoft.Json": {
         "type": "Direct",
         "requested": "[13.0.4, )",
