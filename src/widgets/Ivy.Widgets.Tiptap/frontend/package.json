@@ -36,7 +36,11 @@
       "markdown-it": ">=14.2.0",
       "rollup": ">=4.59.0",
       "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
-      "vitest": "4.1.9"
+      "vitest": "4.1.9",
+      "postcss": "8.5.18",
+      "ws": "8.21.0",
+      "@vitest/browser": "4.1.10",
+      "linkify-it": "5.0.2"
     }
   },
   "packageManager": "pnpm@10.33.0"

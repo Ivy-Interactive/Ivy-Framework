@@ -33,7 +33,10 @@
       "lodash": "4.18.1",
       "lodash-es": "4.18.1",
       "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
-      "vitest": "4.1.9"
+      "vitest": "4.1.9",
+      "postcss": "8.5.18",
+      "ws": "8.21.0",
+      "@vitest/browser": "4.1.10"
     }
   }
 }
