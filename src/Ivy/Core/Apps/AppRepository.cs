@@ -58,6 +58,10 @@ public class AppRepository : IAppRepository
     private readonly List<Func<AppDescriptor[]>> _factories = [];
     private readonly object _lock = new();
 
+    // Serializes Reload. Held across the whole rebuild, unlike _lock, which only guards the two
+    // fields that cannot live in a snapshot.
+    private readonly object _reloadLock = new();
+
     public IObservable<Unit> Reloaded => _reloaded;
     public IObservable<IReadOnlySet<string>> AppsRefreshRequested => _appsRefreshRequested;
 
@@ -68,10 +72,19 @@ public class AppRepository : IAppRepository
     }
 
     /// <summary>
-    /// An immutable view of the app tree. Never mutated once published: <see cref="Reload"/> builds a
-    /// replacement and swaps it in, so readers always observe a fully built repository instead of one
-    /// that is midway through a rebuild.
+    /// A view of the app tree. <see cref="Reload"/> builds a replacement and swaps it in, so readers
+    /// always observe a fully built repository instead of one that is midway through a rebuild.
     /// </summary>
+    /// <remarks>
+    /// Only the container is immutable: the group tree and the app dictionary are never touched again
+    /// once published. The <see cref="AppDescriptor"/> instances inside them are not. Factories
+    /// registered through <c>Server.AddApp(AppDescriptor)</c> or <c>IIvyPluginContext.AddApp</c> close
+    /// over a single descriptor and return that same instance from every reload, and the leaf-link pass
+    /// in <see cref="Reload"/> writes <see cref="AppDescriptor.Next"/> and
+    /// <see cref="AppDescriptor.Previous"/> on whatever instances the factories hand back. A later
+    /// reload can therefore change those two properties on descriptors that this snapshot — and any
+    /// live session holding an injected descriptor — still references.
+    /// </remarks>
     private sealed class Snapshot
     {
         public required AppRepositoryGroup Root { get; init; }
@@ -102,17 +115,35 @@ public class AppRepository : IAppRepository
 
     public void Reload(IReadOnlySet<string> reservedPaths)
     {
+        // Serialized end to end so that a reload which starts later also publishes later. Publishing in
+        // completion order instead would let a slow reload overwrite the result of one that started
+        // after it, republishing a tree that predates the factories the later reload picked up. At
+        // startup that silently drops the apps of every plugin the deferred loader brought in.
+        lock (_reloadLock)
+        {
+            ReloadCore(reservedPaths);
+        }
+
+        // Fired outside _reloadLock. The notification carries no payload and subscribers respond by
+        // re-reading the current snapshot, so a redundant or late notification is harmless — whereas
+        // holding the lock across subscriber callbacks would stall every other reload behind arbitrary
+        // view code.
+        _reloaded.OnNext(default);
+    }
+
+    private void ReloadCore(IReadOnlySet<string> reservedPaths)
+    {
         Func<AppDescriptor[]>[] factoriesSnapshot;
         lock (_lock)
         {
             factoriesSnapshot = _factories.ToArray();
         }
 
-        var root = new AppRepositoryGroup("Root");
+        //collect apps first, so each id resolves to exactly one descriptor before the tree is built.
+        //the last registration of an id wins, which is what lets a caller override a built-in app by
+        //registering their own (UseErrorNotFound over the default error app, for example).
         var apps = new Dictionary<string, AppDescriptor>();
-
-        //add apps to tree
-        var indexFixups = new List<(IAppRepositoryGroup, AppDescriptor)>();
+        var appIdsInRegistrationOrder = new List<string>();
         foreach (var appDescriptor in factoriesSnapshot.SelectMany(factory => factory()))
         {
             if (!ValidateAppId(appDescriptor.Id, reservedPaths))
@@ -125,7 +156,21 @@ public class AppRepository : IAppRepository
                 continue;
             }
 
+            if (!apps.ContainsKey(appDescriptor.Id))
+            {
+                appIdsInRegistrationOrder.Add(appDescriptor.Id);
+            }
+
             apps[appDescriptor.Id] = appDescriptor;
+        }
+
+        //add apps to tree — one node per id, so two factories yielding the same id cannot produce two
+        //menu items for it
+        var root = new AppRepositoryGroup("Root");
+        var indexFixups = new List<(IAppRepositoryGroup, AppDescriptor)>();
+        foreach (var appId in appIdsInRegistrationOrder)
+        {
+            var appDescriptor = apps[appId];
 
             if (appDescriptor.IsVisible || appDescriptor.IsIndex)
             {
@@ -208,8 +253,6 @@ public class AppRepository : IAppRepository
         // Publish the new state in a single reference assignment. Readers hold either the old snapshot
         // or the new one, never a partially populated tree.
         Volatile.Write(ref _snapshot, new Snapshot { Root = root, Apps = apps });
-
-        _reloaded.OnNext(default);
     }
 
     private List<IAppRepositoryNode> GetAllLeafNodes(IAppRepositoryGroup group)
