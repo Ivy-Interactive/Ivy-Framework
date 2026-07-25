@@ -56,6 +56,11 @@ public class AppRepository : IAppRepository
     private readonly Subject<Unit> _reloaded = new();
     private readonly Subject<IReadOnlySet<string>> _appsRefreshRequested = new();
     private readonly List<Func<AppDescriptor[]>> _factories = [];
+    private readonly object _lock = new();
+
+    // Serializes Reload. Held across the whole rebuild, unlike _lock, which only guards the two
+    // fields that cannot live in a snapshot.
+    private readonly object _reloadLock = new();
 
     public IObservable<Unit> Reloaded => _reloaded;
     public IObservable<IReadOnlySet<string>> AppsRefreshRequested => _appsRefreshRequested;
@@ -66,35 +71,110 @@ public class AppRepository : IAppRepository
             _appsRefreshRequested.OnNext(appIds);
     }
 
-    private IAppRepositoryNode? Root { get; set; }
+    /// <summary>
+    /// A view of the app tree. <see cref="Reload"/> builds a replacement and swaps it in, so readers
+    /// always observe a fully built repository instead of one that is midway through a rebuild.
+    /// </summary>
+    /// <remarks>
+    /// Only the container is immutable: the group tree and the app dictionary are never touched again
+    /// once published. The <see cref="AppDescriptor"/> instances inside them are not. Factories
+    /// registered through <c>Server.AddApp(AppDescriptor)</c> or <c>IIvyPluginContext.AddApp</c> close
+    /// over a single descriptor and return that same instance from every reload, and the leaf-link pass
+    /// in <see cref="Reload"/> writes <see cref="AppDescriptor.Next"/> and
+    /// <see cref="AppDescriptor.Previous"/> on whatever instances the factories hand back. A later
+    /// reload can therefore change those two properties on descriptors that this snapshot — and any
+    /// live session holding an injected descriptor — still references.
+    /// </remarks>
+    private sealed class Snapshot
+    {
+        public required AppRepositoryGroup Root { get; init; }
 
-    private Dictionary<string, AppDescriptor> Apps { get; } = new();
+        public required IReadOnlyDictionary<string, AppDescriptor> Apps { get; init; }
+    }
 
-    public IReadOnlySet<string> InvalidAppIds => _invalidAppIds;
+    private Snapshot _snapshot = new()
+    {
+        Root = new AppRepositoryGroup("Root"),
+        Apps = new Dictionary<string, AppDescriptor>(),
+    };
+
+    // Deliberately spans reloads and is reset explicitly via ClearInvalidAppIds, so it cannot live in
+    // the snapshot. Guarded by _lock instead.
+    public IReadOnlySet<string> InvalidAppIds
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _invalidAppIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+    }
 
     private HashSet<string> _invalidAppIds { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     public void Reload(IReadOnlySet<string> reservedPaths)
     {
-        Root = new AppRepositoryGroup("Root");
-        Apps.Clear();
+        // Serialized end to end so that a reload which starts later also publishes later. Publishing in
+        // completion order instead would let a slow reload overwrite the result of one that started
+        // after it, republishing a tree that predates the factories the later reload picked up. At
+        // startup that silently drops the apps of every plugin the deferred loader brought in.
+        lock (_reloadLock)
+        {
+            ReloadCore(reservedPaths);
+        }
 
-        //add apps to tree
-        var indexFixups = new List<(IAppRepositoryGroup, AppDescriptor)>();
-        foreach (var appDescriptor in _factories.SelectMany(factory => factory()))
+        // Fired outside _reloadLock. The notification carries no payload and subscribers respond by
+        // re-reading the current snapshot, so a redundant or late notification is harmless — whereas
+        // holding the lock across subscriber callbacks would stall every other reload behind arbitrary
+        // view code.
+        _reloaded.OnNext(default);
+    }
+
+    private void ReloadCore(IReadOnlySet<string> reservedPaths)
+    {
+        Func<AppDescriptor[]>[] factoriesSnapshot;
+        lock (_lock)
+        {
+            factoriesSnapshot = _factories.ToArray();
+        }
+
+        //collect apps first, so each id resolves to exactly one descriptor before the tree is built.
+        //the last registration of an id wins, which is what lets a caller override a built-in app by
+        //registering their own (UseErrorNotFound over the default error app, for example).
+        var apps = new Dictionary<string, AppDescriptor>();
+        var appIdsInRegistrationOrder = new List<string>();
+        foreach (var appDescriptor in factoriesSnapshot.SelectMany(factory => factory()))
         {
             if (!ValidateAppId(appDescriptor.Id, reservedPaths))
             {
-                _invalidAppIds.Add(appDescriptor.Id);
+                lock (_lock)
+                {
+                    _invalidAppIds.Add(appDescriptor.Id);
+                }
                 // Do not add invalid apps to repository
                 continue;
             }
 
-            Apps[appDescriptor.Id] = appDescriptor;
+            if (!apps.ContainsKey(appDescriptor.Id))
+            {
+                appIdsInRegistrationOrder.Add(appDescriptor.Id);
+            }
+
+            apps[appDescriptor.Id] = appDescriptor;
+        }
+
+        //add apps to tree — one node per id, so two factories yielding the same id cannot produce two
+        //menu items for it
+        var root = new AppRepositoryGroup("Root");
+        var indexFixups = new List<(IAppRepositoryGroup, AppDescriptor)>();
+        foreach (var appId in appIdsInRegistrationOrder)
+        {
+            var appDescriptor = apps[appId];
 
             if (appDescriptor.IsVisible || appDescriptor.IsIndex)
             {
-                var current = Root;
+                IAppRepositoryNode current = root;
                 foreach (var part in appDescriptor.Group)
                 {
                     if (current is not IAppRepositoryGroup group)
@@ -139,41 +219,40 @@ public class AppRepository : IAppRepository
         }
 
         //traverse the tree and on each leaf (nodes that are not groups) set link next and previous
-        if (Root is AppRepositoryGroup rootGroup)
+        // Get all leaf nodes in a flat list, maintaining their order
+        var leafNodes = GetAllLeafNodes(root);
+
+        // Set next and previous links for each leaf node
+        for (int i = 0; i < leafNodes.Count; i++)
         {
-            // Get all leaf nodes in a flat list, maintaining their order
-            var leafNodes = GetAllLeafNodes(rootGroup);
-
-            // Set next and previous links for each leaf node
-            for (int i = 0; i < leafNodes.Count; i++)
+            // Set previous link (except for first node)
+            if (i > 0)
             {
-                // Set previous link (except for first node)
-                if (i > 0)
-                {
-                    var previousNode = leafNodes[i - 1];
-                    var previousLink = new InternalLink(previousNode.Title, previousNode is AppDescriptor app ? app.Id : throw new InvalidOperationException("Previous node is not an app."));
-                    leafNodes[i].Previous = previousLink;
-                }
-                else
-                {
-                    leafNodes[i].Previous = null;
-                }
+                var previousNode = leafNodes[i - 1];
+                var previousLink = new InternalLink(previousNode.Title, previousNode is AppDescriptor app ? app.Id : throw new InvalidOperationException("Previous node is not an app."));
+                leafNodes[i].Previous = previousLink;
+            }
+            else
+            {
+                leafNodes[i].Previous = null;
+            }
 
-                // Set next link (except for last node)
-                if (i < leafNodes.Count - 1)
-                {
-                    var nextNode = leafNodes[i + 1];
-                    var nextLink = new InternalLink(nextNode.Title, nextNode is AppDescriptor app ? app.Id : throw new InvalidOperationException("Next node is not an app."));
-                    leafNodes[i].Next = nextLink;
-                }
-                else
-                {
-                    leafNodes[i].Next = null;
-                }
+            // Set next link (except for last node)
+            if (i < leafNodes.Count - 1)
+            {
+                var nextNode = leafNodes[i + 1];
+                var nextLink = new InternalLink(nextNode.Title, nextNode is AppDescriptor app ? app.Id : throw new InvalidOperationException("Next node is not an app."));
+                leafNodes[i].Next = nextLink;
+            }
+            else
+            {
+                leafNodes[i].Next = null;
             }
         }
 
-        _reloaded.OnNext(default);
+        // Publish the new state in a single reference assignment. Readers hold either the old snapshot
+        // or the new one, never a partially populated tree.
+        Volatile.Write(ref _snapshot, new Snapshot { Root = root, Apps = apps });
     }
 
     private List<IAppRepositoryNode> GetAllLeafNodes(IAppRepositoryGroup group)
@@ -199,55 +278,64 @@ public class AppRepository : IAppRepository
 
     public void AddFactory(Func<AppDescriptor[]> factory)
     {
-        _factories.Add(factory);
+        lock (_lock)
+        {
+            _factories.Add(factory);
+        }
     }
 
     public bool RemoveFactory(Func<AppDescriptor[]> factory)
     {
-        return _factories.Remove(factory);
+        lock (_lock)
+        {
+            return _factories.Remove(factory);
+        }
     }
 
     public AppDescriptor GetAppOrDefault(string? id)
     {
+        var apps = Volatile.Read(ref _snapshot).Apps;
+
         var app = id != null
-            ? Apps.GetValueOrDefault(id)
+            ? apps.GetValueOrDefault(id)
             : null;
 
         return app
-            ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
-            ?? Apps.GetValueOrDefault(AppIds.ErrorNotFound)
+            ?? apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+            ?? apps.GetValueOrDefault(AppIds.ErrorNotFound)
             ?? throw new InvalidOperationException("No serviceable apps are registered on this server.");
     }
 
     public AppDescriptor? GetApp(string id)
     {
-        return Apps.Values.FirstOrDefault(e => e.Id == id);
+        return Volatile.Read(ref _snapshot).Apps.Values.FirstOrDefault(e => e.Id == id);
     }
 
     public AppDescriptor? GetApp(Type type)
     {
-        return Apps.Values.FirstOrDefault(e => e.Type == type);
+        return Volatile.Read(ref _snapshot).Apps.Values.FirstOrDefault(e => e.Type == type);
     }
 
     public MenuItem[] GetMenuItems()
     {
-        if (Root is AppRepositoryGroup group)
-        {
-            return group.Children.OrderBy(e => e.Order).ThenBy(e => e.Title).Select(e => e.GetMenuItem()).ToArray();
-        }
-        return [];
+        var root = Volatile.Read(ref _snapshot).Root;
+        return root.Children.OrderBy(e => e.Order).ThenBy(e => e.Title).Select(e => e.GetMenuItem()).ToArray();
     }
 
     public IEnumerable<AppDescriptor> All()
     {
-        return Apps.Values;
+        return Volatile.Read(ref _snapshot).Apps.Values.ToArray();
     }
 
     private bool ValidateAppId(string appId, IReadOnlySet<string> reservedPaths)
     {
-        if (_invalidAppIds.Contains(appId))
+        lock (_lock)
         {
-            return false;
+            // Already reported on an earlier reload; don't log the same error again.
+            if (_invalidAppIds.Contains(appId))
+            {
+                return false;
+            }
         }
 
         switch (AppRoutingHelpers.ValidateAppId(appId, reservedPaths))
@@ -279,6 +367,9 @@ public class AppRepository : IAppRepository
 
     public void ClearInvalidAppIds()
     {
-        _invalidAppIds.Clear();
+        lock (_lock)
+        {
+            _invalidAppIds.Clear();
+        }
     }
 }
