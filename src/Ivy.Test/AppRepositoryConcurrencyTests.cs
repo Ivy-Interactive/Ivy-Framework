@@ -65,7 +65,9 @@ public class AppRepositoryConcurrencyTests(ITestOutputHelper output)
                     problem = $"{who}: {duplicates.Length} duplicated label(s) out of {labels.Count} leaves, e.g. {string.Join(", ", duplicates.Take(3))}";
                 }
             }
-            catch (Exception ex)
+            // Deliberately broad: a torn rebuild can surface as any of several exception types, and an
+            // unhandled exception on a worker thread kills the test host instead of failing the test.
+            catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
             {
                 problem = $"{who}: threw {ex.GetType().Name}: {ex.Message}";
             }
@@ -89,7 +91,7 @@ public class AppRepositoryConcurrencyTests(ITestOutputHelper output)
                 {
                     repository.Reload(reservedPaths);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
                 {
                     lock (problemLock)
                     {
@@ -123,8 +125,8 @@ public class AppRepositoryConcurrencyTests(ITestOutputHelper output)
         // registers a plugin's factory and reloads. The plugin's apps must survive, even though the
         // in-flight reload snapshotted its factories before that registration and finishes last.
         var repository = new AppRepository();
-        var startupReloadEnteredFactory = new ManualResetEventSlim(false);
-        var releaseStartupReload = new ManualResetEventSlim(false);
+        using var startupReloadEnteredFactory = new ManualResetEventSlim(false);
+        using var releaseStartupReload = new ManualResetEventSlim(false);
 
         var isFirstCall = true;
         repository.AddFactory(() =>
