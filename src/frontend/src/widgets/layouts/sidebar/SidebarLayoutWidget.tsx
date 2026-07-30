@@ -693,7 +693,7 @@ const CollapsibleMenuItem: React.FC<{
                 className={cn(
                   "transition-all duration-200",
                   collapsed
-                    ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                    ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 p-0 pt-0.5 items-center justify-center text-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground leading-none"
                     : "",
                 )}
               >
@@ -754,7 +754,7 @@ const MenuItemButton: React.FC<{
             className={cn(
               "transition-all duration-200",
               collapsed
-                ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 p-0 pt-0.5 items-center justify-center text-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground leading-none"
                 : "",
             )}
           >
