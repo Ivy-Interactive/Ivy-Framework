@@ -665,7 +665,8 @@ const CollapsibleMenuItem: React.FC<{
         >
           <button
             className={cn(
-              "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden relative",
+              "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left relative",
+              collapsed ? "overflow-visible" : "overflow-hidden",
               isActive
                 ? "bg-secondary text-accent-foreground"
                 : "hover:bg-accent hover:text-accent-foreground",
@@ -692,7 +693,7 @@ const CollapsibleMenuItem: React.FC<{
                 className={cn(
                   "transition-all duration-200",
                   collapsed
-                    ? "absolute -top-1 -right-1 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                    ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
                     : "",
                 )}
               >
@@ -724,7 +725,8 @@ const MenuItemButton: React.FC<{
     >
       <button
         className={cn(
-          "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left overflow-hidden relative",
+          "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left relative",
+          collapsed ? "overflow-visible" : "overflow-hidden",
           level === 1 ? "text-body" : "text-body",
           isActive
             ? "bg-secondary text-accent-foreground"
@@ -752,7 +754,7 @@ const MenuItemButton: React.FC<{
             className={cn(
               "transition-all duration-200",
               collapsed
-                ? "absolute -top-1 -right-1 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                ? "absolute -top-1 -right-1 z-10 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
                 : "",
             )}
           >
