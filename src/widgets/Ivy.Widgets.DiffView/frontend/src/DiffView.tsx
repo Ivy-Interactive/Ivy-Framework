@@ -55,22 +55,33 @@ export function useIsNarrow(): [React.RefObject<HTMLDivElement | null>, boolean]
     const element = ref.current;
     if (!element || typeof ResizeObserver === "undefined") return;
 
+    let animFrameId: number | null = null;
+
     const update = (width: number) => {
-      setIsNarrow((prev) => {
-        const next = width > 0 && width < NARROW_BREAKPOINT;
-        return prev === next ? prev : next;
-      });
+      const next = width > 0 && width < NARROW_BREAKPOINT;
+      setIsNarrow((prev) => (prev === next ? prev : next));
     };
 
-    update(element.getBoundingClientRect().width);
+    update(element.clientWidth);
 
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        update(entry.contentRect.width);
+      if (entries.length === 0) return;
+      const width = entries[0].contentRect.width;
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
       }
+      animFrameId = requestAnimationFrame(() => {
+        update(width);
+      });
     });
+
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
+      }
+      observer.disconnect();
+    };
   }, []);
 
   return [ref, isNarrow];
