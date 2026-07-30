@@ -146,7 +146,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   const style: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    overflow: "auto",
+    ...(height ? { overflow: "auto" } : {}),
   };
 
   if (!diff || files.length === 0) {
