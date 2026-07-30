@@ -690,7 +690,7 @@ const CollapsibleMenuItem: React.FC<{
             <span className={menuLabelClasses(collapsed)}>{item.label}</span>
             {item.badge &&
               (collapsed ? (
-                <span className="absolute -top-1 -right-1 z-10 pointer-events-none flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground select-none leading-none">
+                <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-primary-foreground select-none">
                   {item.badge}
                 </span>
               ) : (
@@ -749,7 +749,7 @@ const MenuItemButton: React.FC<{
         <span className={menuLabelClasses(collapsed)}>{item.label}</span>
         {item.badge &&
           (collapsed ? (
-            <span className="absolute -top-1 -right-1 z-10 pointer-events-none flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground select-none leading-none">
+            <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-primary-foreground select-none">
               {item.badge}
             </span>
           ) : (
