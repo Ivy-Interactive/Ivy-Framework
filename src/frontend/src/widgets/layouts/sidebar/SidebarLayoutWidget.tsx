@@ -659,10 +659,13 @@ const CollapsibleMenuItem: React.FC<{
         data-menu-item={item.tag || item.label}
         className="relative"
       >
-        <CollapsedRailTooltip label={item.label} collapsed={collapsed}>
+        <CollapsedRailTooltip
+          label={item.badge ? `${item.label} (${item.badge})` : item.label}
+          collapsed={collapsed}
+        >
           <button
             className={cn(
-              "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden",
+              "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden relative",
               isActive
                 ? "bg-secondary text-accent-foreground"
                 : "hover:bg-accent hover:text-accent-foreground",
@@ -686,7 +689,12 @@ const CollapsibleMenuItem: React.FC<{
             <span className={menuLabelClasses(collapsed)}>{item.label}</span>
             {item.badge && (
               <SidebarMenuBadge
-                className={cn("transition-opacity duration-200", collapsed && "opacity-0")}
+                className={cn(
+                  "transition-all duration-200",
+                  collapsed
+                    ? "absolute -top-1 -right-1 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                    : "",
+                )}
               >
                 {item.badge}
               </SidebarMenuBadge>
@@ -710,10 +718,13 @@ const MenuItemButton: React.FC<{
   const { collapsed } = useSidebarLayout();
 
   return (
-    <CollapsedRailTooltip label={item.label} collapsed={collapsed}>
+    <CollapsedRailTooltip
+      label={item.badge ? `${item.label} (${item.badge})` : item.label}
+      collapsed={collapsed}
+    >
       <button
         className={cn(
-          "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left overflow-hidden",
+          "flex w-full items-center gap-2 rounded-selector p-2 cursor-pointer h-8 text-left overflow-hidden relative",
           level === 1 ? "text-body" : "text-body",
           isActive
             ? "bg-secondary text-accent-foreground"
@@ -738,7 +749,12 @@ const MenuItemButton: React.FC<{
         <span className={menuLabelClasses(collapsed)}>{item.label}</span>
         {item.badge && (
           <SidebarMenuBadge
-            className={cn("transition-opacity duration-200", collapsed && "opacity-0")}
+            className={cn(
+              "transition-all duration-200",
+              collapsed
+                ? "absolute -top-1 -right-1 pointer-events-none flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none"
+                : "",
+            )}
           >
             {item.badge}
           </SidebarMenuBadge>
