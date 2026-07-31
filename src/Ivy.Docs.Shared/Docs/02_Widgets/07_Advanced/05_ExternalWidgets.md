@@ -406,3 +406,7 @@ public class MyApp : AppBase<MyApp>
 ```
 
 The widget's embedded frontend assets (JavaScript and CSS) are automatically loaded by the Ivy Framework runtime.
+
+### Shipping an External Widget in a Plugin
+
+An external widget can also be built into a [plugin](../../01_Onboarding/02_Concepts/27_Plugins/01_PluginsOverview.md) rather than referenced by the host at compile time. The framework registers a plugin assembly's widgets when the plugin loads and unregisters them when it unloads, so the widget becomes available without restarting the host. See [Writing Plugins](../../01_Onboarding/02_Concepts/27_Plugins/04_WritingPlugins.md).
