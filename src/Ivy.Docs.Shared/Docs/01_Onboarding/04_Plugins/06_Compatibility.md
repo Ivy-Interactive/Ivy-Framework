@@ -12,7 +12,7 @@ searchHints:
 # Version Compatibility
 
 <Ingress>
-Plugins are compiled against one version of your abstractions and run against another. Everything on this page exists to keep that from turning into a runtime crash.
+Plugins are compiled against one version of your abstractions and run against another. Discipline is important to avoid plugin load failures or runtime crashes.
 </Ingress>
 
 ## The Problem
@@ -23,7 +23,7 @@ The consequence is that **every public member of every shared assembly is part o
 
 ## The Gates the Framework Enforces
 
-Three checks run before a plugin's code executes. Each turns a would-be crash into a plugin listed as failed, with a reason you can show the user.
+Three checks run before a plugin's code executes. Failing any of these checks will result in the plugin entering a failed state, with a reason you can show the user.
 
 ### Minimum Host Version
 
@@ -38,9 +38,7 @@ public PluginManifest Manifest { get; } = new()
 };
 ```
 
-On an older host the plugin is refused with `"Requires host version 2.1 but current is 2.0.0.0"`. The host version is whatever you passed to `UsePlugins`, defaulting to the entry assembly's version.
-
-This is the plugin author's tool, and it only helps if plugin authors use it. Say so in your own plugin guide: bumping `MinimumHostVersion` when a plugin starts using a newly added context member is the difference between a clear message and a stack trace.
+On an older host the plugin is refused with `"Requires host version 2.1 but current is 2.0.0.0"`. The host version is whatever you passed to `UsePlugins`, defaulting to the entry assembly's version. It is up to the plugin author to voluntarily bump their `MinimumHostVersion` whenever they start using a newly-added context member.
 
 ### Shared Assembly Versions
 
@@ -52,10 +50,8 @@ Requires Acme.Plugin.Abstractions >= 2.0.0 but host provides 1.4.0
 
 The comparison is on **major and minor only** — patch and revision are ignored, so a plugin built against 1.4.3 loads happily on a host with 1.4.0.
 
-This is the check that makes your version numbers load-bearing:
-
 <Callout Type="warning">
-**Bump the minor version of your abstractions package whenever you make a breaking change.** That is what turns "old plugin crashes with `MissingMethodException`" into "old plugin is listed as incompatible, with a readable reason."
+**Bump the minor version of your abstractions package whenever you make a breaking change.**"
 </Callout>
 
 Two cases skip the check: a plugin with no `.deps.json`, and a host assembly version of `0.0.0.0` — which is what a source build with `GenerateAssemblyInfo=false` produces. Local development therefore does not exercise this gate.
@@ -118,7 +114,7 @@ Write that expectation into the interface's own doc comment, so the next person 
 
 ### Interfaces Plugins Receive Grow Freely
 
-Your context interfaces are received by plugins, never implemented by them. Add members whenever you like — a plugin that doesn't call them is unaffected. This asymmetry is the main reason to keep contributions flowing through a context rather than through interfaces plugins implement.
+Your context interfaces are received by plugins, never implemented by them. Add members whenever you like — a plugin that doesn't call them is unaffected. This asymmetry is a good reason to keep contributions flowing through a context rather than through interfaces plugins implement.
 
 ### Records Plugins Construct Grow Through Optional `init` Properties
 

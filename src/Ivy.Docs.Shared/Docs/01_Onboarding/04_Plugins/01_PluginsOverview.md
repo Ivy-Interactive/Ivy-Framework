@@ -12,7 +12,7 @@ searchHints:
 # Plugins Overview
 
 <Ingress>
-Ivy gives you the machinery to load, configure, and unload plugins at runtime. You decide what a plugin actually does.
+Ivy gives you the machinery to load, configure, and unload plugins at runtime. As an application developer, you decide what a plugin is capable of.
 </Ingress>
 
 ## What a Plugin Is
@@ -32,23 +32,18 @@ Two packages, split by whether they need the Ivy framework itself.
 
 ### Ivy.Plugin.Abstractions
 
-The base abstractions package. It does **not** reference `Ivy` — only `Microsoft.Extensions.DependencyInjection` and `Microsoft.Extensions.Logging.Abstractions`. A plugin that references only this package brings almost nothing with it.
+The base abstractions package. It does **not** reference `Ivy` — only `Microsoft.Extensions.DependencyInjection` and `Microsoft.Extensions.Logging.Abstractions`. It covers six concerns:
 
-| Type | Purpose |
-|------|---------|
-| `IIvyPlugin` | The plugin contract: `Manifest`, `ConfigurationSchema`, `Configure`, and optional `BuildConfigurationView` and `ShutdownAsync` |
-| `IIvyPlugin<TContext>` | Typed variant — declares which context type the plugin needs |
-| `IIvyPluginContext` | What a plugin receives during `Configure`: `Services` and `Config` |
-| `IvyPluginAttribute` | Marks the plugin type, assembly-level |
-| `PluginManifest` | `Id`, `Title`, optional `MinimumHostVersion` and `Icon` |
-| `PluginIcon` | A named icon or an image URL |
-| `SchemaBuilder`, `PluginConfigurationSchema` | Declares the plugin's configuration fields |
-| `IIvyPluginConfig`, `IIvyPluginConfigFactory` | Reading and writing plugin configuration — the host implements these |
-| `PluginShutdownContext`, `PluginShutdownReason` | Passed to `ShutdownAsync` |
-| `IPluginManager`, `PluginCandidate`, `UnconfiguredPlugin`, `PluginStatus` | The host-side view of loaded, failed, and unconfigured plugins |
-| `IPluginServiceProvider` | Resolves services that plugins registered |
+| Concern | Key types |
+|---------|-----------|
+| **The plugin contract** — what a plugin implements, and how the loader finds it | `IIvyPlugin`, `IIvyPlugin<TContext>`, `IvyPluginAttribute` |
+| **What a plugin receives** — a service collection, and its own configuration | `IIvyPluginContext` |
+| **Identity** — the id, title, icon, and minimum host version a plugin declares | `PluginManifest` |
+| **Configuration** — the fields a plugin declares, and the store the host implements | `SchemaBuilder`, `IIvyPluginConfig`, `IIvyPluginConfigFactory` |
+| **Lifecycle** — cleanup when a plugin is unloaded, reloaded, or the host exits | `PluginShutdownContext` |
+| **The host's control surface** — load, unload, failure reasons, and resolving what plugins registered | `IPluginManager`, `IPluginServiceProvider` |
 
-Note how small `IIvyPluginContext` is:
+`IIvyPluginContext` is a small interface that consists of only a service collection and bag of user-provided config values:
 
 ```csharp
 public interface IIvyPluginContext
@@ -58,11 +53,11 @@ public interface IIvyPluginContext
 }
 ```
 
-A service collection and a configuration bag. Everything a plugin contributes, it contributes through a contract *you* define on top of this.
+Almost everything a plugin contributes, it contributes through a contract *you* define on top of this.
 
 ### The Ivy Package
 
-The `Ivy` package extends the context with the three things that require the framework:
+Plugins that choose to bring in the `Ivy` package, either directly or indirectly, gain access to three additional APIs which require the framework:
 
 ```csharp
 public interface IIvyExtendedPluginContext : IIvyPluginContext
@@ -76,11 +71,11 @@ public interface IIvyExtendedPluginContext : IIvyPluginContext
 }
 ```
 
-Three members. A plugin can register [apps](../02_Concepts/10_Apps.md) and mount HTTP endpoints; that is the extent of Ivy's own plugin surface. Alongside it, `Ivy` provides `AsExtendedContext()` and `TryGetExtendedContext()` for plugins that only sometimes need framework features, and `MapStaticAssets` for serving files shipped with a plugin.
+A plugin can register [apps](../02_Concepts/10_Apps.md) and mount HTTP endpoints; that is the extent of Ivy's own plugin surface. Alongside it, `Ivy` provides `AsExtendedContext()` and `TryGetExtendedContext()` for plugins that only sometimes need framework features, and `MapStaticAssets` for serving files shipped with a plugin.
 
 ## Framework or Host
 
-The split is deliberate and worth knowing before you design anything:
+Plugin support in the framework is intended to be treated only as a foundation for you to design your own plugin system on top of. This split is deliberate and worth knowing before you design anything:
 
 | Concern | Provided by |
 |---------|-------------|
@@ -95,10 +90,10 @@ The split is deliberate and worth knowing before you design anything:
 | **Finding, installing, updating, and uninstalling plugins** | **Host** |
 | **Your abstractions package and its versioning** | **Host** |
 
-The framework stops where it does because a plugin contract is domain-specific. A messaging app wants channels; a CI tool wants build steps; a CRM wants record enrichers. Any contract rich enough to be useful to one of them would be wrong for the others — and once shipped, the framework could not evolve it without breaking every plugin ever built against it. So the framework owns the parts that are genuinely universal (isolation, lifecycle, configuration, version gating) and hands you the rest.
+The framework stops where it does because a plugin contract is domain-specific. A messaging app wants channels; a CI tool wants build steps; a CRM wants record enrichers. Any contract rich enough to be useful to one of them would be wrong for the others. So the framework owns the parts that are genuinely universal (isolation, lifecycle, configuration, version gating) and hands you the rest.
 
 <Callout Type="info">
-This means your host ships its own abstractions package, and plugin authors reference *that*, not `Ivy.Plugin.Abstractions` directly. See [Host Abstractions](./03_HostAbstractions.md).
+This means for most practical purposes, your host should ship its own abstractions package(s), and plugin authors then reference *those*, not `Ivy.Plugin.Abstractions` directly. See [Host Abstractions](./03_HostAbstractions.md).
 </Callout>
 
 ## How the Pieces Reference Each Other

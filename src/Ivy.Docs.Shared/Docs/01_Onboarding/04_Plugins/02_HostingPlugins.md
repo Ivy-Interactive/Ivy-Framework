@@ -126,7 +126,7 @@ Two details matter:
 - **`SetPluginManager` is how the factory gets the manager.** It has a default (no-op) implementation, so implementing it is optional — but you need it for the point above.
 
 <Callout Type="tip">
-Store secret fields (`ConfigFieldType.Secret`) wherever you keep the rest of your app's secrets rather than in plain text alongside the other values. The framework tells you which fields are secret; it does not encrypt them for you.
+Store secret fields (`ConfigFieldType.Secret`) wherever you keep the rest of your app's secrets. The framework tells you which fields are secret; it does not encrypt them for you.
 </Callout>
 
 ## Host-Provided Packages

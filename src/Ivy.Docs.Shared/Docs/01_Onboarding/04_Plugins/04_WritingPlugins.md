@@ -19,7 +19,7 @@ A plugin is a plain class library with one attribute and one class. This page is
 
 ## The Project
 
-There is no plugin SDK and no MSBuild targets to import. A plugin project is a `Microsoft.NET.Sdk` class library with a single reference to the host's abstractions package:
+A plugin project is a `Microsoft.NET.Sdk` class library with a single reference to the host's abstractions package:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -41,17 +41,17 @@ There is no plugin SDK and no MSBuild targets to import. A plugin project is a `
 </Project>
 ```
 
-`CopyLocalLockFileAssemblies` matters: the plugin's dependencies must sit next to its DLL for the load context to resolve them.
+`CopyLocalLockFileAssemblies` matters, particularly for in-development plugins automatically built from source: the plugin's dependencies must sit next to its DLL for the load context to resolve them.
 
 Reference the extended abstractions package instead if the plugin registers apps, widgets, or HTTP endpoints.
 
 <Callout Type="warning">
-A plugin that calls `UseEndpoints` also needs `<FrameworkReference Include="Microsoft.AspNetCore.App" />`. Without it the endpoint types won't resolve at compile time.
+A plugin that calls `UseEndpoints` also needs a `FrameworkReference` to `Microsoft.AspNetCore.App`. Without it the endpoint types won't resolve at compile time.
 </Callout>
 
 ## The Entry Point
 
-One assembly-level attribute names the plugin type. Exactly one — the loader rejects an assembly with none, and rejects an assembly with more than one.
+One assembly-level attribute names the plugin type.
 
 ```csharp
 using Ivy.Plugins;

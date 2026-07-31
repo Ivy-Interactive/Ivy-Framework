@@ -12,7 +12,7 @@ searchHints:
 # Distributing Plugins
 
 <Ingress>
-The framework finds plugins on disk. Getting them onto disk — a catalog, downloads, updates, uninstall, and whatever trust policy you need — is the host's job, and this page sketches a scheme that works.
+The framework finds plugins on disk. Getting them onto disk is the host's job.
 </Ingress>
 
 ## What the Framework Discovers
@@ -63,13 +63,13 @@ None of this is in the framework, because none of it has one right answer. A hos
 
 ## A Scheme That Works
 
-The rest of this page describes one concrete approach — NuGet as the package format, a small catalog service in front of it, and installation into the plugins directory. It is the shape Ivy Tendril uses in production and it maps cleanly onto what the framework expects. Adapt or ignore it.
+The rest of this page describes one concrete approach — NuGet as the package format, a small catalog service in front of it, and installation into the plugins directory. It is the shape [Ivy Tendril](https://github.com/Ivy-Interactive/Ivy-Tendril) uses in production and it maps cleanly onto what the framework expects.
 
 ### Catalog
 
-Publish plugins as NuGet packages. Keep a service that returns the plugins you have approved, with their current versions — a table of package id, version, title, icon, and content hash is enough. The client asks for the list; a `check-updates` endpoint that takes the versions the client has installed and returns only what differs keeps the payload small and cacheable with an `ETag`.
+Publish plugins as NuGet packages. Keep a service that returns the plugins you have approved, with their current versions — a table of package id, version, title, icon, and content hash is enough. Then provide endpoints to fetch data from that table.
 
-Consider also offering an escape hatch: install any NuGet package id, or reference a local folder. Plugin authors need it, and it costs one text field.
+Consider also offering an escape hatch: install any NuGet package id, or reference a local folder.
 
 ### Install
 
@@ -117,11 +117,11 @@ How a plugin was installed determines how it comes out, and you can infer it fro
 | A subdirectory of the plugins directory | Unload, then delete the directory |
 | A path in `plugin-references.yaml` | Unload, then remove the line — leave the files alone, they belong to the developer |
 
-Optionally remove the plugin's section from your configuration store at the same time. Whether to do that by default is a real decision: keeping it makes reinstalling painless, dropping it makes uninstall mean what it says.
+Optionally remove the plugin's section from your configuration store at the same time.
 
 ### Catalog Metadata
 
-A plugin's `PluginManifest` lives in C# and is only readable after the plugin is loaded — which is too late to render a catalog entry for something not yet installed. If your catalog needs an icon or a blurb up front, pack a small metadata file into the `.nupkg` root and read it out of the archive at submission time:
+A plugin's `PluginManifest` lives in C# and is only readable after the plugin is loaded — which is too late to render a catalog entry for something not yet installed. If your catalog needs an icon or a blurb up front, pack a small metadata file into the `.nupkg` root and read it out of the archive at submission time (for instance, Ivy Tendril calls its metadata files `tendril.json`):
 
 ```json
 {
@@ -133,7 +133,7 @@ A plugin's `PluginManifest` lives in C# and is only readable after the plugin is
 ```
 
 <Callout Type="tip">
-If you do this, treat the packed file and `PluginManifest` as one fact that must agree, and validate it when a plugin is submitted. Two sources for the same icon will drift.
+If you do this, treat the packed file and `PluginManifest` as one fact that must agree, and validate it when a plugin is submitted. Two sources for the same icon could drift.
 </Callout>
 
 ## See Also

@@ -120,7 +120,7 @@ public interface IAcmeExtendedPluginContext : IIvyExtendedPluginContext, IAcmePl
 That multiple inheritance is the whole point. Your host implements **one** context class, `IAcmeExtendedPluginContext`, and it satisfies both tiers at once — a base-tier plugin declaring `IIvyPlugin<IAcmePluginContext>` and an extended-tier plugin declaring `IIvyPlugin<IAcmeExtendedPluginContext>` both receive the same object and both type-test successfully.
 
 <Callout Type="tip">
-Ivy Tendril ships exactly this pair. Its base tier carries messaging channels, an inbox, and lifecycle hooks — things a headless integration plugin needs. Its extended tier adds menu transforms, sidebar badges, and dialogs, which need Ivy widgets. Most of its plugins only ever reference the base package.
+[Ivy Tendril](https://tendril.ivy.app) ships exactly this pair. Its base tier carries messaging channels, an inbox, and lifecycle hooks — things a headless integration plugin needs. Its extended tier adds menu transforms, sidebar badges, and dialogs, which need Ivy widgets.
 </Callout>
 
 ## Wiring Both Tiers into the Host
@@ -139,13 +139,11 @@ Both names are required even though only one context class exists, because types
 
 Put your context and contract types in your own namespace and keep it stable — plugin authors take a `using` on it, and moving a type between namespaces is a breaking change even when the type name is unchanged.
 
-If you split base and extended into different namespaces, an extended-tier plugin needs a `using` for each. Using one namespace for both tiers avoids that and costs nothing.
+If you split base and extended into different namespaces, an extended-tier plugin needs a `using` for each. Using one namespace for both tiers avoids that and is recommended.
 
 ## Versioning the Pair Together
 
-Give both packages a single version number and publish them together. A base package at 1.4 paired with an extended package at 1.2 is a state nobody can reason about, and the framework's shared-assembly check compares each independently.
-
-The simplest way is one `Directory.Build.props` above both projects:
+Give both packages a single version number and publish them together. The simplest way is one `Directory.Build.props` above both projects:
 
 ```xml
 <Project>
