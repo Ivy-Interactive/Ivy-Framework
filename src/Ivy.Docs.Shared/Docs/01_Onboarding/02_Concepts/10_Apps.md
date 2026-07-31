@@ -95,7 +95,7 @@ If no title is specified, the framework generates one from the class name (e.g.,
 
 ## Apps Registered at Runtime
 
-Apps do not have to be discovered from an assembly at startup. A [plugin](../04_Plugins/01_PluginsOverview.md) can add apps while the host is running via `AddApp`, and they are removed again when the plugin is unloaded. See [Writing Plugins](../04_Plugins/04_WritingPlugins.md).
+Apps do not have to be discovered from an assembly at startup. A [plugin](./27_Plugins/01_PluginsOverview.md) can add apps while the host is running via `AddApp`, and they are removed again when the plugin is unloaded. See [Writing Plugins](./27_Plugins/04_WritingPlugins.md).
 
 ## Best Practices
 

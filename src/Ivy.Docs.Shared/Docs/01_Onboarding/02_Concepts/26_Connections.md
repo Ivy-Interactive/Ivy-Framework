@@ -182,7 +182,7 @@ The example uses [UseService](../../03_Hooks/02_Core/11_UseService.md) to resolv
 
 ## See Also
 
-- [Plugins Overview](../04_Plugins/01_PluginsOverview.md) — for capabilities that ship separately from your app and are installed at runtime, rather than compiled in
+- [Plugins Overview](./27_Plugins/01_PluginsOverview.md) — for capabilities that ship separately from your app and are installed at runtime, rather than compiled in
 - [Secrets](./14_Secrets.md)
 - [Program](./01_Program.md)
 

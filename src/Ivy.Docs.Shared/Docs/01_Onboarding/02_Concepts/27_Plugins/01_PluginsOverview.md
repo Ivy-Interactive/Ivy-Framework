@@ -71,7 +71,7 @@ public interface IIvyExtendedPluginContext : IIvyPluginContext
 }
 ```
 
-A plugin can register [apps](../02_Concepts/10_Apps.md) and mount HTTP endpoints; that is the extent of Ivy's own plugin surface. Alongside it, `Ivy` provides `AsExtendedContext()` and `TryGetExtendedContext()` for plugins that only sometimes need framework features, and `MapStaticAssets` for serving files shipped with a plugin.
+A plugin can register [apps](../10_Apps.md) and mount HTTP endpoints; that is the extent of Ivy's own plugin surface. Alongside it, `Ivy` provides `AsExtendedContext()` and `TryGetExtendedContext()` for plugins that only sometimes need framework features, and `MapStaticAssets` for serving files shipped with a plugin.
 
 ## Framework or Host
 
@@ -114,7 +114,7 @@ A plugin compiles against your abstractions package. Your abstractions package c
 
 ## Where to Go Next
 
-- [Hosting Plugins](./02_HostingPlugins.md) — wire the loader into your [Server](../02_Concepts/01_Program.md), store configuration, and declare your host-provided packages.
+- [Hosting Plugins](./02_HostingPlugins.md) — wire the loader into your [Server](../01_Program.md), store configuration, and declare your host-provided packages.
 - [Host Abstractions](./03_HostAbstractions.md) — design the contract your plugins implement, and split it into base and extended packages.
 - [Writing Plugins](./04_WritingPlugins.md) — what a plugin project looks like end to end.
 - [Distributing Plugins](./05_DistributingPlugins.md) — discovery, installation, and updates.
@@ -122,7 +122,7 @@ A plugin compiles against your abstractions package. Your abstractions package c
 
 ## See Also
 
-- [Apps](../02_Concepts/10_Apps.md)
-- [Connections](../02_Concepts/26_Connections.md)
-- [External Widgets](../../02_Widgets/07_Advanced/05_ExternalWidgets.md)
-- [Program](../02_Concepts/01_Program.md)
+- [Apps](../10_Apps.md)
+- [Connections](../26_Connections.md)
+- [External Widgets](../../../02_Widgets/07_Advanced/05_ExternalWidgets.md)
+- [Program](../01_Program.md)

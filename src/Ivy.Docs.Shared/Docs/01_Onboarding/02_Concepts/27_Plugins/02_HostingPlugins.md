@@ -19,7 +19,7 @@ Turn your Ivy app into a plugin host with one call on the Server, then supply th
 
 ## Enabling Plugins
 
-`UsePlugins` is the single entry point on [Server](../02_Concepts/01_Program.md):
+`UsePlugins` is the single entry point on [Server](../01_Program.md):
 
 ```csharp
 public Server UsePlugins(
@@ -271,7 +271,7 @@ public class ThingListView : ViewBase
 }
 ```
 
-`GetServices<T>()` aggregates across every active plugin. The `UsePluginState()` [hook](../../03_Hooks/01_HookIntroduction.md) re-renders the view whenever a plugin is loaded, unloaded, or reconfigured, so the list stays current without a page refresh.
+`GetServices<T>()` aggregates across every active plugin. The `UsePluginState()` [hook](../../../03_Hooks/01_HookIntroduction.md) re-renders the view whenever a plugin is loaded, unloaded, or reconfigured, so the list stays current without a page refresh.
 
 ## What You Get for Free
 
@@ -292,5 +292,5 @@ To develop a plugin that lives outside the plugins directory, list its path in `
 - [Host Abstractions](./03_HostAbstractions.md)
 - [Writing Plugins](./04_WritingPlugins.md)
 - [Version Compatibility](./06_Compatibility.md)
-- [Program](../02_Concepts/01_Program.md)
-- [Secrets](../02_Concepts/14_Secrets.md)
+- [Program](../01_Program.md)
+- [Secrets](../14_Secrets.md)

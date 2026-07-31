@@ -153,7 +153,7 @@ The `!` is safe on a required field. The framework validates configuration **bef
 
 ### A Custom Configuration View
 
-By default the host renders a form generated from the schema. Override it by returning a [view](../02_Concepts/02_Views.md) from `BuildConfigurationView` — this requires the extended abstractions package, since it returns Ivy widgets:
+By default the host renders a form generated from the schema. Override it by returning a [view](../02_Views.md) from `BuildConfigurationView` — this requires the extended abstractions package, since it returns Ivy widgets:
 
 ```csharp
 public object? BuildConfigurationView(IIvyPluginConfig config) =>
@@ -264,7 +264,7 @@ Endpoints are unmapped when the plugin is unloaded.
 
 ### Widgets
 
-A plugin can ship an [external widget](../../02_Widgets/07_Advanced/05_ExternalWidgets.md). The framework registers the plugin assembly's widgets on load and unregisters them on unload, so no extra call is needed — build the frontend bundle into the plugin as usual and use the widget from a view the plugin registers.
+A plugin can ship an [external widget](../../../02_Widgets/07_Advanced/05_ExternalWidgets.md). The framework registers the plugin assembly's widgets on load and unregisters them on unload, so no extra call is needed — build the frontend bundle into the plugin as usual and use the widget from a view the plugin registers.
 
 ## Local Development
 
@@ -293,5 +293,5 @@ With `buildSourcePlugins: true` on the host, saving a `.cs` file rebuilds and re
 - [Host Abstractions](./03_HostAbstractions.md)
 - [Distributing Plugins](./05_DistributingPlugins.md)
 - [Version Compatibility](./06_Compatibility.md)
-- [Apps](../02_Concepts/10_Apps.md)
-- [External Widgets](../../02_Widgets/07_Advanced/05_ExternalWidgets.md)
+- [Apps](../10_Apps.md)
+- [External Widgets](../../../02_Widgets/07_Advanced/05_ExternalWidgets.md)
