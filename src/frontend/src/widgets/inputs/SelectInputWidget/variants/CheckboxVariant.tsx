@@ -208,7 +208,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9"
+                className="!pl-9 h-9"
                 disabled={disabled || loading}
               />
             </div>
