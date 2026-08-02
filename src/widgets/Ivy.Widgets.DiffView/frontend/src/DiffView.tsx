@@ -55,22 +55,33 @@ export function useIsNarrow(): [React.RefObject<HTMLDivElement | null>, boolean]
     const element = ref.current;
     if (!element || typeof ResizeObserver === "undefined") return;
 
+    let animFrameId: number | null = null;
+
     const update = (width: number) => {
-      setIsNarrow((prev) => {
-        const next = width > 0 && width < NARROW_BREAKPOINT;
-        return prev === next ? prev : next;
-      });
+      const next = width > 0 && width < NARROW_BREAKPOINT;
+      setIsNarrow((prev) => (prev === next ? prev : next));
     };
 
-    update(element.getBoundingClientRect().width);
+    update(element.clientWidth);
 
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        update(entry.contentRect.width);
+      if (entries.length === 0) return;
+      const width = entries[0].contentRect.width;
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
       }
+      animFrameId = requestAnimationFrame(() => {
+        update(width);
+      });
     });
+
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
+      }
+      observer.disconnect();
+    };
   }, []);
 
   return [ref, isNarrow];
@@ -135,7 +146,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   const style: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    overflow: "auto",
+    ...(height ? { overflow: "auto" } : {}),
   };
 
   if (!diff || files.length === 0) {
@@ -200,7 +211,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
           <div key={fileIndex} id={elementId} style={{ scrollMarginTop: showFileDropdown ? "2rem" : 0 }}>
             {hasHeader && (
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky z-10${collapsible ? " cursor-pointer select-none" : ""}`}
+                className={`relative flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10 rounded-t-md before:absolute before:-top-px before:inset-x-0 before:h-2 before:bg-[var(--muted)] before:rounded-t-md${collapsible ? " cursor-pointer select-none" : ""}`}
                 style={{
                   fontFamily: 'var(--font-sans, sans-serif)',
                   // Sit below the file dropdown when it is shown, otherwise at the top.

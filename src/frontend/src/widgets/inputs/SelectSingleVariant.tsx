@@ -342,7 +342,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
                   }}
                   onKeyDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
-                  className="pl-9 h-9"
+                  className="!pl-9 h-9"
                   disabled={disabled || loading}
                 />
               </div>
