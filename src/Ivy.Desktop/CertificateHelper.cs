@@ -191,11 +191,31 @@ public static class CertificateHelper
     {
         try
         {
-            // Only check Root store - that's what actually indicates trust on macOS
-            using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var results = store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false);
-            return results.Count > 0;
+            // Check CurrentUser Root store
+            using (var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                if (store.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false).Count > 0)
+                    return true;
+            }
+
+            // Check LocalMachine Root store (where installer trusts cert system-wide in System.keychain)
+            using (var lmStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
+            {
+                lmStore.Open(OpenFlags.ReadOnly);
+                if (lmStore.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false).Count > 0)
+                    return true;
+            }
+
+            // Check LocalMachine My store as fallback
+            using (var lmMyStore = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+            {
+                lmMyStore.Open(OpenFlags.ReadOnly);
+                if (lmMyStore.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, validOnly: false).Count > 0)
+                    return true;
+            }
+
+            return false;
         }
         catch (Exception ex)
         {
