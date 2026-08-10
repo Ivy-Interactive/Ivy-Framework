@@ -15,6 +15,37 @@ IvyML is an XML-based markup language for describing Ivy widget trees. It maps d
 - Child elements become the widget's children.
 - Property elements use dot notation: `<Card.Padding>10,10,10,10</Card.Padding>`
 
+### Content shorthand
+
+If a widget has a string `Content` prop, you can write the value as inner text instead of an attribute. These two are equivalent:
+
+```xml
+<TextBlock>Hello</TextBlock>
+<TextBlock Content="Hello" />
+```
+
+Surrounding whitespace is trimmed. An explicit `Content` attribute takes precedence over inner text, and the shorthand only applies when the element has no child elements.
+
+### Slots
+
+Some widgets expose named slots (for example, `Card` has `Header`, `Content`, and `Footer`). Fill a slot either with the explicit `<Slot>` element or with dotted notation on the parent. These two are equivalent:
+
+```xml
+<Card>
+  <Slot Name="Header">
+    <TextBlock>Hello</TextBlock>
+  </Slot>
+</Card>
+
+<Card>
+  <Card.Header>
+    <TextBlock>Hello</TextBlock>
+  </Card.Header>
+</Card>
+```
+
+The dotted form `<Parent.SlotName>` is sugar for `<Slot Name="SlotName">`. Property elements take precedence: if the name after the dot is a `[Prop]` it is treated as a property element, otherwise a matching declared slot is used.
+
 ## Value Types
 
 | Type      | Example values                                        |
@@ -87,6 +118,13 @@ Breakpoint names are case-insensitive (`Width.mobile` and `Width.Mobile` are equ
 ```
 ivyml draw -i <IVYML> [-o <PATH>] [-w <WIDTH>] [-h <HEIGHT>] [--debug]
 ivyml draw -f <FILE>  [-o <PATH>] [-w <WIDTH>] [-h <HEIGHT>] [--debug]
+```
+
+To check that markup parses into a valid widget tree without rendering an image, use `parse`. It takes the same input arguments as `draw` (`-i` for an inline string or `-f` for a file), prints `OK` and exits 0 on success, or prints the error and exits 1 on failure:
+
+```
+ivyml parse -i <IVYML>
+ivyml parse -f <FILE>
 ```
 
 | Option          | Description                                          | Default |

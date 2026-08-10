@@ -452,6 +452,120 @@ public class XamlBuilderTests
             () => _builder.Build("<Badge Title.Mobile=\"Hello\" />"));
     }
 
+    // --- Inner-text Content sugar ---
+
+    [Fact]
+    public void Build_InnerText_SetsContent()
+    {
+        var widget = _builder.Build("<TextBlock>Hello</TextBlock>");
+        var text = Assert.IsType<TextBlock>(widget);
+        Assert.Equal("Hello", text.Content);
+    }
+
+    [Fact]
+    public void Build_InnerText_Trimmed()
+    {
+        var widget = _builder.Build("<TextBlock>\n  Hello\n</TextBlock>");
+        var text = Assert.IsType<TextBlock>(widget);
+        Assert.Equal("Hello", text.Content);
+    }
+
+    [Fact]
+    public void Build_InnerText_AttributeStillWorks()
+    {
+        var widget = _builder.Build("<TextBlock Content=\"Hello\" />");
+        var text = Assert.IsType<TextBlock>(widget);
+        Assert.Equal("Hello", text.Content);
+    }
+
+    [Fact]
+    public void Build_InnerText_AttributeWinsOverInnerText()
+    {
+        var widget = _builder.Build("<TextBlock Content=\"Attr\">Inner</TextBlock>");
+        var text = Assert.IsType<TextBlock>(widget);
+        Assert.Equal("Attr", text.Content);
+    }
+
+    // --- Dotted-slot sugar ---
+
+    [Fact]
+    public void Build_DottedSlot_EquivalentToSlot()
+    {
+        var widget = _builder.Build(
+            "<Card><Card.Header><TextBlock Content=\"Hi\" /></Card.Header></Card>");
+        var card = Assert.IsType<Card>(widget);
+        var slot = Assert.IsType<Slot>(Assert.Single(card.Children));
+        Assert.Equal("Header", slot.Name);
+        Assert.Equal("Hi", Assert.IsType<TextBlock>(Assert.Single(slot.Children)).Content);
+    }
+
+    [Fact]
+    public void Build_DottedSlot_MultipleSlots()
+    {
+        var xml = """
+            <Card>
+                <Card.Header><TextBlock>Title</TextBlock></Card.Header>
+                <Card.Content><TextBlock>Body</TextBlock></Card.Content>
+                <Card.Footer><Button Title="Go" /></Card.Footer>
+            </Card>
+            """;
+        var card = Assert.IsType<Card>(_builder.Build(xml));
+        var slots = card.Children.OfType<Slot>().ToDictionary(s => s.Name!);
+        Assert.Equal("Title", Assert.IsType<TextBlock>(slots["Header"].Children[0]).Content);
+        Assert.Equal("Body", Assert.IsType<TextBlock>(slots["Content"].Children[0]).Content);
+        Assert.Equal("Go", Assert.IsType<Button>(slots["Footer"].Children[0]).Title);
+    }
+
+    [Fact]
+    public void Build_DottedSlot_UnknownMember_Throws()
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => _builder.Build("<Card><Card.Nope><TextBlock>x</TextBlock></Card.Nope></Card>"));
+    }
+
+    // --- Typed inputs resolve via non-generic default-type wrappers ---
+
+    [Fact]
+    public void Build_NumberInput_DefaultsToDouble()
+    {
+        var widget = _builder.Build("<NumberInput Value=\"5\" />");
+        var input = Assert.IsType<NumberInput>(widget);
+        Assert.Equal(5.0, input.Value);
+    }
+
+    [Fact]
+    public void Build_NumberInput_AcceptsDecimalValue()
+    {
+        var widget = _builder.Build("<NumberInput Value=\"3.14\" />");
+        var input = Assert.IsType<NumberInput>(widget);
+        Assert.Equal(3.14, input.Value);
+    }
+
+    [Theory]
+    [InlineData("<SelectInput />", typeof(SelectInput))]
+    [InlineData("<DateTimeInput />", typeof(DateTimeInput))]
+    [InlineData("<DateRangeInput />", typeof(DateRangeInput))]
+    [InlineData("<NumberRangeInput />", typeof(NumberRangeInput))]
+    [InlineData("<FeedbackInput />", typeof(FeedbackInput))]
+    [InlineData("<IconInput />", typeof(IconInput))]
+    [InlineData("<FileInput />", typeof(FileInput))]
+    [InlineData("<SignatureInput />", typeof(SignatureInput))]
+    [InlineData("<CodeInput />", typeof(CodeInput))]
+    public void Build_TypedInput_Resolves(string xaml, Type expected)
+    {
+        var widget = _builder.Build(xaml);
+        Assert.IsType(expected, widget);
+    }
+
+    [Fact]
+    public void Build_TextInput_StillWorks()
+    {
+        // Regression: the pre-existing non-generic wrapper continues to resolve.
+        var widget = _builder.Build("<TextInput Value=\"Hi\" />");
+        var input = Assert.IsType<TextInput>(widget);
+        Assert.Equal("Hi", input.Value);
+    }
+
     // --- Error cases ---
 
     [Fact]

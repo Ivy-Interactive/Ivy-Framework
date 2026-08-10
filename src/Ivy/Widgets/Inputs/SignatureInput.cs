@@ -92,6 +92,9 @@ public record SignatureInput<TValue> : SignatureInputBase, IInput<TValue>, IAnyS
     [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 }
 
+/// <summary>A signature capture input (defaults to a <see cref="string"/> value).</summary>
+public record SignatureInput : SignatureInput<string>;
+
 public static class SignatureInputExtensions
 {
     public static SignatureInputBase ToSignatureInput(this IAnyState state, string? placeholder = null, bool disabled = false, SignatureInputVariants variant = SignatureInputVariants.Default)

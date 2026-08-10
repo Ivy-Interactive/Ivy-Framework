@@ -143,6 +143,9 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange => null;
 }
 
+/// <summary>A file upload input (defaults to a <see cref="string"/> value).</summary>
+public record FileInput : FileInput<string>;
+
 public static class FileInputExtensions
 {
     [Obsolete("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).", true)]

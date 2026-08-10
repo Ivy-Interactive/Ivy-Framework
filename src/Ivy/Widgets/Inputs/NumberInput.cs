@@ -135,6 +135,9 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
     [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
 
+/// <summary>An input field restricted to numerical values (defaults to <see cref="double"/>).</summary>
+public record NumberInput : NumberInput<double>;
+
 public static class NumberInputExtensions
 {
     public static NumberInputBase ToSliderInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)

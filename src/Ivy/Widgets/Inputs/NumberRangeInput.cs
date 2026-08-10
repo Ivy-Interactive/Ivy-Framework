@@ -115,6 +115,9 @@ public record NumberRangeInput<TNumber> : NumberRangeInputBase, IInput<(TNumber,
     [Event] public EventHandler<Event<IInput<(TNumber, TNumber)>, (TNumber, TNumber)>>? OnChange { get; }
 }
 
+/// <summary>A pair of numeric inputs for selecting a range (defaults to <see cref="double"/>).</summary>
+public record NumberRangeInput : NumberRangeInput<double>;
+
 public static class NumberRangeInputExtensions
 {
     public static NumberRangeInputBase ToNumberRangeInput(this IAnyState state, bool disabled = false, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)

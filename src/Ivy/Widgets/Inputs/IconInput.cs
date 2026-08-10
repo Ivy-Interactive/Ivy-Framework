@@ -77,6 +77,9 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
     [Event] public EventHandler<Event<IInput<TIcon>, TIcon>>? OnChange { get; }
 }
 
+/// <summary>An input for picking an icon (defaults to the <see cref="Icons"/> enum).</summary>
+public record IconInput : IconInput<Icons>;
+
 public static class IconInputExtensions
 {
     public static IconInputBase ToIconInput(this IAnyState state, string? placeholder = null, bool disabled = false)
