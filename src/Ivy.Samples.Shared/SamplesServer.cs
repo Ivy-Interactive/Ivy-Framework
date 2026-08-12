@@ -15,6 +15,7 @@ public static class SamplesServer
         var server = new Server(args);
         server.UseCulture("en-US");
         server.UseHotReload();
+        server.UseWebMcp();
         server.AddAppsFromAssembly(typeof(SamplesServer).Assembly);
 
         var versionLabel = ServerVersionHelper.GetVersionLabel();

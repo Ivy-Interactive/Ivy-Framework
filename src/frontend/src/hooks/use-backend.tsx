@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useId } from "react";
 import * as signalR from "@microsoft/signalr";
 import { MessagePackHubProtocol } from "@microsoft/signalr-protocol-msgpack";
 import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
@@ -12,6 +12,14 @@ import { applyPatch, Operation } from "fast-json-patch";
 import { ToastAction } from "@/components/ui/toast";
 import { setThemeGlobal } from "@/components/theme-provider";
 import { setExternalWidgetRegistry, ExternalWidgetInfo } from "@/widgets/externalWidgetLoader";
+import {
+  syncTools,
+  resolveToolCall,
+  releaseScope,
+  registerAvailabilityReporter,
+  type WebMcpToolMessage,
+  type WebMcpToolResultMessage,
+} from "@/lib/webmcp";
 
 type UpdateMessage = Array<{
   iteration: number;
@@ -371,6 +379,10 @@ export const useBackend = (
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
   const lastIterationRef = useRef<number>(-1);
+  // Scope for WebMCP tool registrations. Deliberately not connection.connectionId: that changes on
+  // automatic reconnect, which would orphan the previous registrations in the document-global
+  // registry. This id is stable for the life of the hook instance, which is what ownership means here.
+  const webMcpScope = useId();
 
   // Use a ref that gets updated with the latest connection so we always have it in the callback
   const latestConnectionRef = useRef(connection);
@@ -970,6 +982,32 @@ export const useBackend = (
               handleHttpRequest(message);
             });
 
+            // SignalR withholds client invocations until OnConnectedAsync completes, so the session
+            // exists by the time this lands.
+            registerAvailabilityReporter(webMcpScope, (available) => {
+              connection.invoke("WebMcpReport", available).catch((err) => {
+                logger.error("[WebMcp] Availability report failed:", err);
+              });
+            });
+
+            connection.on("WebMcpTools", (tools: WebMcpToolMessage[]) => {
+              logger.debug(`[${connection.connectionId}] WebMcpTools`, {
+                count: tools?.length ?? 0,
+              });
+              syncTools(webMcpScope, tools ?? [], (callId, toolId, argumentsJson) => {
+                connection.invoke("WebMcpToolCall", callId, toolId, argumentsJson).catch((err) => {
+                  logger.error("[WebMcp] Tool call invoke failed:", { toolId, error: err });
+                });
+              });
+            });
+
+            connection.on("WebMcpToolResult", (message: WebMcpToolResultMessage) => {
+              logger.debug(`[${connection.connectionId}] WebMcpToolResult`, {
+                callId: message?.callId,
+              });
+              resolveToolCall(webMcpScope, message);
+            });
+
             connection.on("StreamData", (message: StreamDataMessage) => {
               const handler = streamRegistryRef.current.get(message.streamId);
               if (handler) {
@@ -1024,6 +1062,8 @@ export const useBackend = (
           initialRetryTimerRef.current = null;
         }
 
+        releaseScope(webMcpScope);
+
         connection.off("Refresh");
         connection.off("Update");
         connection.off("Toast");
@@ -1033,6 +1073,8 @@ export const useBackend = (
         connection.off("ReloadPage");
         connection.off("HttpRequest");
         connection.off("StreamData");
+        connection.off("WebMcpTools");
+        connection.off("WebMcpToolResult");
         connection.off("SetAuthCookies");
         connection.off("SetRootAppId");
         connection.off("SetTheme");
@@ -1065,6 +1107,7 @@ export const useBackend = (
     handleError,
     stableAppId,
     parentId,
+    webMcpScope,
   ]);
 
   useEffect(() => {
