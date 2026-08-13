@@ -95,6 +95,9 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
     [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
 
+/// <summary>A rating input such as stars or thumbs (defaults to an <see cref="int"/> value).</summary>
+public record FeedbackInput : FeedbackInput<int>;
+
 public static class FeedbackInputExtensions
 {
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)

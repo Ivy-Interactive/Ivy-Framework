@@ -85,6 +85,25 @@ public class IvyScreenshotService
                 WaitUntil = WaitUntilState.NetworkIdle
             });
 
+            // Ivy streams the widget tree to the client over a WebSocket *after* the initial page
+            // load, so NetworkIdle fires while the DOM is still just an empty app shell. Wait for the
+            // root element to actually contain rendered content before capturing, otherwise the
+            // screenshot is a blank white page.
+            try
+            {
+                await page.WaitForFunctionAsync(
+                    "() => { const r = document.getElementById('root'); return r != null && r.innerText.trim().length > 0; }",
+                    null,
+                    new PageWaitForFunctionOptions { Timeout = options.TimeoutMs });
+            }
+            catch (PlaywrightException)
+            {
+                // WaitForFunctionAsync only fails here by exceeding the timeout.
+                return ScreenshotResult.Failed(
+                    $"Timed out after {options.TimeoutMs}ms waiting for the widget tree to render. " +
+                    "Increase the timeout (draw --timeout) if the widget is slow to render.");
+            }
+
             if (options.Debug)
             {
                 await page.EvaluateAsync(DebugOverlayScript.Value);

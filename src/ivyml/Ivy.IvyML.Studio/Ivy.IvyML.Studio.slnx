@@ -1,0 +1,23 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Ivy.IvyML.Studio.csproj" />
+  <Folder Name="/IvyML/">
+    <Project Path="../Ivy.IvyML/Ivy.IvyML.csproj" />
+    <Project Path="../Ivy.IvyML.Console/Ivy.IvyML.Console.csproj" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="../../Ivy/Ivy.csproj" />
+    <Project Path="../../Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
+    <Project Path="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
+    <Project Path="../../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
+    <Project Path="../../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
+    <Project Path="../../Ivy.Analyser/Ivy.Analyser.csproj" />
+  </Folder>
+  <Folder Name="/Widgets/">
+    <Project Path="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
+  </Folder>
+</Solution>

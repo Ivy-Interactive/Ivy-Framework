@@ -43,6 +43,7 @@ const javascript = (options?: any) =>
 const python = () => import("@codemirror/lang-python").then((m) => m.python());
 const sql = () => import("@codemirror/lang-sql").then((m) => m.sql());
 const html = () => import("@codemirror/lang-html").then((m) => m.html());
+const xml = () => import("@codemirror/lang-xml").then((m) => m.xml());
 const css = () => import("@codemirror/lang-css").then((m) => m.css());
 const json = () => import("@codemirror/lang-json").then((m) => m.json());
 const markdown = () => import("@codemirror/lang-markdown").then((m) => m.markdown());
@@ -78,6 +79,7 @@ interface CodeInputWidgetProps {
   placeholder?: string;
   value?: string;
   language?: string;
+  variant?: string;
   disabled: boolean;
   invalid?: string;
   nullable?: boolean;
@@ -97,6 +99,7 @@ const languageExtensions = {
   Python: python,
   Sql: sql,
   Html: html,
+  Xml: xml,
   Css: css,
   Json: json,
   Dbml: dbml,
@@ -111,6 +114,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   placeholder,
   value,
   language,
+  variant,
   disabled = false,
   invalid,
   nullable = false,
@@ -124,6 +128,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
   const densityKey = normalizeInputDensity(density);
+  const ghost = variant === "Ghost";
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isTall, setIsTall] = useState(false);
@@ -357,7 +362,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         style={styles}
         className={cn(
           "relative flex w-full flex-col overflow-hidden group",
-          textInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
+          textInputFieldShellClasses({ focused: isFocused, invalid, disabled, ghost }),
         )}
       >
         <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{codeEditor()}</div>
@@ -374,6 +379,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           focused: isFocused,
           invalid,
           disabled,
+          ghost,
         }),
         "group",
       )}

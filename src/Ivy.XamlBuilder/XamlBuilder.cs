@@ -77,7 +77,23 @@ public class XamlBuilder
         {
             if (child.Name.LocalName.Contains('.'))
             {
-                ProcessPropertyElement(child, widget);
+                var memberName = LocalMemberName(child.Name.LocalName);
+
+                if (FindProperty(widget, memberName) != null)
+                {
+                    // Property element, e.g. <AreaChart.Tooltip />.
+                    ProcessPropertyElement(child, widget);
+                }
+                else if (IsDeclaredSlot(type, memberName))
+                {
+                    // Sugar: <Card.Header>...</Card.Header> == <Slot Name="Header">...</Slot>.
+                    children.Add(BuildSlotElement(memberName, child));
+                }
+                else
+                {
+                    // Neither a property nor a declared slot — surface the standard error.
+                    ProcessPropertyElement(child, widget);
+                }
             }
             else if (TrySetJsonProperty(widget, child))
             {
@@ -89,8 +105,53 @@ public class XamlBuilder
             }
         }
 
+        SetInnerTextContent(widget, element, children);
+
         widget.Children = children.ToArray();
         return widget;
+    }
+
+    /// <summary>The part of a dotted element/attribute name after the dot (e.g. "Header" in "Card.Header").</summary>
+    private static string LocalMemberName(string name)
+    {
+        var dotIndex = name.IndexOf('.');
+        return name[(dotIndex + 1)..];
+    }
+
+    private static bool IsDeclaredSlot(Type widgetType, string slotName) =>
+        widgetType.GetCustomAttributes<SlotAttribute>(inherit: true)
+            .Any(s => string.Equals(s.Name, slotName, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Builds the <see cref="Slot"/> for the dotted-slot sugar (<c>&lt;Card.Header&gt;</c>) by
+    /// synthesizing the equivalent <c>&lt;Slot Name="..."&gt;</c> element so all the normal child
+    /// handling (widgets, nested slots, inner text) applies.
+    /// </summary>
+    private AbstractWidget BuildSlotElement(string slotName, XElement source)
+    {
+        var slotElement = new XElement("Slot", new XAttribute("Name", slotName));
+        foreach (var child in source.Elements())
+            slotElement.Add(new XElement(child)); // deep-clone to detach from the source tree
+        return BuildWidget(slotElement);
+    }
+
+    /// <summary>
+    /// Sugar: an element's inner text maps to a string <c>Content</c> prop, so
+    /// <c>&lt;TextBlock&gt;Hello&lt;/TextBlock&gt;</c> is equivalent to
+    /// <c>&lt;TextBlock Content="Hello" /&gt;</c>. Only applies when there are no child elements and
+    /// no explicit <c>Content</c> attribute.
+    /// </summary>
+    private static void SetInnerTextContent(AbstractWidget widget, XElement element, List<object> children)
+    {
+        if (children.Count > 0 || element.HasElements || string.IsNullOrWhiteSpace(element.Value))
+            return;
+
+        if (element.Attributes().Any(a => string.Equals(a.Name.LocalName, "Content", StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        var prop = FindProperty(widget, "Content");
+        if (prop?.PropertyType == typeof(string))
+            SetProperty(widget, prop, element.Value.Trim());
     }
 
     private void ProcessPropertyElement(XElement propElement, object owner)

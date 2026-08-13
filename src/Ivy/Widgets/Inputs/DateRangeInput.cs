@@ -88,6 +88,9 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
     [Event] public EventHandler<Event<IInput<TDateRange>, TDateRange>>? OnChange { get; set; }
 }
 
+/// <summary>An input for selecting a date range (defaults to a <see cref="DateOnly"/> pair).</summary>
+public record DateRangeInput : DateRangeInput<(DateOnly, DateOnly)>;
+
 public static class DateRangeInputExtensions
 {
     public static DateRangeInputBase ToDateRangeInput(this IAnyState state, string? placeholder = null, bool disabled = false)

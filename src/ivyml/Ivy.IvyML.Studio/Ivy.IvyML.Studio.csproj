@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ivy.IvyML.Studio</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Prompts\SystemPrompt.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\..\Ivy.Hooks.Pty\Ivy.Hooks.Pty.csproj" />
+    <ProjectReference Include="..\..\widgets\Ivy.Widgets.Xterm\Ivy.Widgets.Xterm.csproj" />
+    <ProjectReference Include="..\Ivy.IvyML\Ivy.IvyML.csproj" />
+    <ProjectReference Include="..\..\Ivy.XamlBuilder\Ivy.XamlBuilder.csproj" />
+    <!-- Reference the dev IvyML console so its built `ivyml.dll` lands in our output dir;
+         IvymlShim points the `ivyml` PATH shim at it (dev equivalent of an installed tool). -->
+    <ProjectReference Include="..\Ivy.IvyML.Console\Ivy.IvyML.Console.csproj" />
+    <ProjectReference Include="..\..\Ivy.Analyser\Ivy.Analyser.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

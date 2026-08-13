@@ -118,6 +118,9 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
     [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 }
 
+/// <summary>A dropdown for selecting an option (defaults to a <see cref="string"/> value).</summary>
+public record SelectInput : SelectInput<string>;
+
 public static class SelectInputExtensions
 {
     public static SelectInputBase ToSelectInput(this IAnyState state, IEnumerable<IAnyOption>? options = null, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select)

@@ -11,13 +11,18 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
     {
         [CommandOption("-w|--width")]
         [Description("Viewport width in pixels.")]
-        [DefaultValue(300)]
+        [DefaultValue(1280)]
         public int Width { get; init; }
 
         [CommandOption("-h|--height")]
         [Description("Viewport height in pixels.")]
-        [DefaultValue(200)]
+        [DefaultValue(800)]
         public int Height { get; init; }
+
+        [CommandOption("-t|--timeout <MS>")]
+        [Description("Max milliseconds to wait for the widget tree to render before capturing.")]
+        [DefaultValue(15000)]
+        public int Timeout { get; init; }
 
         [CommandOption("-o|--output <PATH>")]
         [Description("Output file path. Supported formats: png, jpg, webp. If omitted a temp file is used.")]
@@ -73,6 +78,12 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
             return 1;
         }
 
+        if (settings.Timeout <= 0)
+        {
+            System.Console.Error.WriteLine("Error: Timeout must be a positive number of milliseconds.");
+            return 1;
+        }
+
         var outputPath = settings.OutputPath;
         if (string.IsNullOrWhiteSpace(outputPath))
         {
@@ -87,7 +98,7 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
         }
 
         var service = new IvyScreenshotService();
-        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath, settings.Debug);
+        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath, settings.Debug, settings.Timeout);
         var result = await service.CaptureAsync(ivyml, options, ct);
 
         if (result.Success)

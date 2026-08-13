@@ -8,7 +8,8 @@ namespace Ivy;
 
 public enum CodeInputVariant
 {
-    Default
+    Default,
+    Ghost
 }
 
 public interface IAnyCodeInput : IAnyInput
@@ -91,6 +92,9 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
     [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
 }
 
+/// <summary>An editor input for code snippets (defaults to a <see cref="string"/> value).</summary>
+public record CodeInput : CodeInput<string>;
+
 public static class CodeInputExtensions
 {
     public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default, Languages language = Languages.Json)
@@ -100,6 +104,7 @@ public static class CodeInputExtensions
         CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
         var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         nullableProperty?.SetValue(input, type.IsNullableType());
+        input.Language = language;
         return input;
     }
 
@@ -127,6 +132,11 @@ public static class CodeInputExtensions
     public static CodeInputBase Variant(this CodeInputBase widget, CodeInputVariant variant)
     {
         return widget with { Variant = variant };
+    }
+
+    public static CodeInputBase Ghost(this CodeInputBase widget)
+    {
+        return widget with { Variant = CodeInputVariant.Ghost };
     }
 
     public static CodeInputBase Invalid(this CodeInputBase widget, string invalid)

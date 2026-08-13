@@ -126,6 +126,9 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     }
 }
 
+/// <summary>An input for picking a date and/or time (defaults to <see cref="DateTime"/>).</summary>
+public record DateTimeInput : DateTimeInput<DateTime>;
+
 public static class DateTimeInputExtensions
 {
     public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.DateTime)

@@ -199,16 +199,35 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
       const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
       const startWidth = currentWidth;
+      let animationFrameId: number | null = null;
+      let latestWidth = startWidth;
 
       const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
         const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
         const delta = clientX - startX;
-        const newWidth = Math.min(maxWidthPx, Math.max(minWidthPx, startWidth + delta));
-        dispatchSidebar({ currentWidth: newWidth });
+        latestWidth = Math.min(maxWidthPx, Math.max(minWidthPx, startWidth + delta));
+
+        if (containerRef.current) {
+          containerRef.current.style.gridTemplateColumns = `${latestWidth}px 1fr`;
+        }
+        if (sidebarRef.current) {
+          sidebarRef.current.style.width = `${latestWidth}px`;
+        }
+
+        if (animationFrameId === null) {
+          animationFrameId = requestAnimationFrame(() => {
+            animationFrameId = null;
+            dispatchSidebar({ currentWidth: latestWidth });
+          });
+        }
       };
 
       const handleEnd = () => {
-        dispatchSidebar({ isResizing: false });
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        dispatchSidebar({ isResizing: false, currentWidth: latestWidth });
         document.removeEventListener("mousemove", handleMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", handleMove);
@@ -297,6 +316,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   return (
     <SidebarLayoutContext.Provider value={sidebarContextValue}>
+      {isResizing && (
+        <div className="fixed inset-0 z-50 cursor-ew-resize select-none pointer-events-auto" />
+      )}
       <div
         ref={containerRef}
         className="grid h-full w-full remove-parent-padding"
