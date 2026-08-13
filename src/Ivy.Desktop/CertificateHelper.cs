@@ -92,7 +92,7 @@ public static class CertificateHelper
             // Trust the certificate if running on macOS/Windows
             if (OperatingSystem.IsMacOS())
             {
-                TrustCertificateOnMac(crtPath);
+                TrustCertificateOnMac(crtPath, loadedCert);
             }
             else if (OperatingSystem.IsWindows())
             {
@@ -102,9 +102,9 @@ public static class CertificateHelper
         else
         {
             // If the certificate already exists, check if it's trusted.
-            if (OperatingSystem.IsMacOS() && !IsCertificateTrustedOnMac(loadedCert))
+            if (OperatingSystem.IsMacOS() && !IsCertificateTrustedOnMac(crtPath, loadedCert))
             {
-                TrustCertificateOnMac(crtPath);
+                TrustCertificateOnMac(crtPath, loadedCert);
             }
             else if (OperatingSystem.IsWindows() && !IsCertificateTrustedOnWindows(loadedCert))
             {
@@ -187,10 +187,33 @@ public static class CertificateHelper
         return null;
     }
 
-    private static bool IsCertificateTrustedOnMac(X509Certificate2 cert)
+    private static readonly HashSet<string> _attemptedMacTrustThumbprints = new(StringComparer.OrdinalIgnoreCase);
+
+    private static bool IsCertificateTrustedOnMac(string crtPath, X509Certificate2 cert)
     {
         try
         {
+            // Check native macOS Security Framework trust via security verify-cert
+            if (File.Exists(crtPath))
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "security",
+                    Arguments = $"verify-cert -c \"{crtPath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                };
+                using var process = Process.Start(psi);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                    if (process.ExitCode == 0)
+                        return true;
+                }
+            }
+
             // Check CurrentUser Root store
             using (var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser))
             {
@@ -224,15 +247,19 @@ public static class CertificateHelper
         }
     }
 
-    private static void TrustCertificateOnMac(string crtPath)
+    private static void TrustCertificateOnMac(string crtPath, X509Certificate2 cert)
     {
+        // Don't repeat runtime security prompt if already attempted for this cert
+        if (!_attemptedMacTrustThumbprints.Add(cert.Thumbprint))
+            return;
+
         try
         {
             Console.WriteLine($"[INFO] Trusting self-signed certificate on macOS: {crtPath}");
             var psi = new ProcessStartInfo
             {
                 FileName = "security",
-                Arguments = $"add-trusted-cert -d -r trustRoot -k \"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}/Library/Keychains/login.keychain-db\" \"{crtPath}\"",
+                Arguments = $"add-trusted-cert -r trustRoot -k \"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}/Library/Keychains/login.keychain-db\" \"{crtPath}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardError = true
