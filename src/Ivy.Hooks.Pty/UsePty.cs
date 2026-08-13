@@ -14,13 +14,19 @@ public record PtyOptions
     public Action<string>? OnOutput { get; init; }
 }
 
+// GetProcessId reads the spawned process's current OS process id, or null before the process
+// has started (or after it has exited/been disposed). A live accessor rather than a plain field:
+// the value is only known once the async spawn in UsePtyExtensions.UsePty completes, which may
+// be after the render that returned this handle, so callers must read it at the point of use
+// (e.g. inside their own effect cleanup) rather than capture it.
 public record PtyHandle(
     IWriteStream<byte[]> Stream,
     Action<string> HandleInput,
     Action<int, int> HandleResize,
     Action Kill,
     bool Closed,
-    int? ExitCode
+    int? ExitCode,
+    Func<int?>? GetProcessId = null
 );
 
 public static class UsePtyExtensions
@@ -92,7 +98,7 @@ public static class UsePtyExtensions
             KillPty(pty.Value);
         }
 
-        return new PtyHandle(stream, HandleInput, HandleResize, Kill, closed.Value, exitCode.Value);
+        return new PtyHandle(stream, HandleInput, HandleResize, Kill, closed.Value, exitCode.Value, () => pty.Value?.Pid);
     }
 
     // CommandLineToArgvW-compatible argument quoting (the same algorithm as .NET's
