@@ -12,6 +12,16 @@ public record PtyOptions
     public int Cols { get; init; } = 120;
     public int Rows { get; init; } = 30;
     public Action<string>? OnOutput { get; init; }
+
+    // Opt-in accumulated transcript, exposed via PtyHandle.Output. Off by default: most callers
+    // only need the live OnOutput callback or the raw byte Stream, and an unbounded StringBuilder
+    // per PTY session is wasted memory otherwise.
+    public bool CaptureOutput { get; init; }
+
+    // Character cap for the accumulated transcript (only relevant when CaptureOutput is true).
+    // Once exceeded, the oldest text is dropped so PtyHandle.Output always holds a bounded tail
+    // of the most recent output instead of growing unbounded for a long-running interactive CLI.
+    public int MaxCaptureLength { get; init; } = 1_000_000;
 }
 
 // GetProcessId reads the spawned process's current OS process id, or null before the process
@@ -27,7 +37,22 @@ public record PtyHandle(
     bool Closed,
     int? ExitCode,
     Func<int?>? GetProcessId = null
-);
+)
+{
+    // Live accessor into the hook-state-held PtyOutputDecoder, not a captured value: the decoder
+    // outlives any single PtyHandle instance (which is rebuilt every render), and Output must
+    // reflect output that has arrived since this PtyHandle was constructed.
+    internal Func<string>? OutputProvider { get; init; }
+
+    /// <summary>
+    /// The accumulated output text captured since the PTY started, when <see cref="PtyOptions.CaptureOutput"/>
+    /// is set (empty string otherwise). Decoded across chunk boundaries and capped at
+    /// <see cref="PtyOptions.MaxCaptureLength"/> characters, keeping the newest output. Contains raw
+    /// ANSI escape sequences — pipe through <see cref="AnsiEscape.Strip"/> for readable text. Materializes
+    /// a new string on each access, so read it when needed rather than on every render.
+    /// </summary>
+    public string Output => OutputProvider?.Invoke() ?? string.Empty;
+}
 
 public static class UsePtyExtensions
 {
@@ -47,12 +72,17 @@ public static class UsePtyExtensions
         var pty = context.UseRef<IPtyConnection?>(() => null);
         var cts = context.UseRef<CancellationTokenSource?>(() => null);
 
+        // Lives in hook state (not the PtyHandle record) so the decoder — and any transcript it is
+        // accumulating — survives PtyHandle being rebuilt on every render.
+        var decoder = context.UseRef<PtyOutputDecoder>(
+            () => new PtyOutputDecoder(options.CaptureOutput, options.MaxCaptureLength));
+
         context.UseEffect(() =>
         {
             cts.Value = new CancellationTokenSource();
             var token = cts.Value.Token;
 
-            _ = StartPtyAsync(commandLine, cwd, options, stream, pty, closed, exitCode, token);
+            _ = StartPtyAsync(commandLine, cwd, options, stream, pty, closed, exitCode, decoder.Value, token);
 
             return Disposable.Create(() =>
             {
@@ -98,7 +128,10 @@ public static class UsePtyExtensions
             KillPty(pty.Value);
         }
 
-        return new PtyHandle(stream, HandleInput, HandleResize, Kill, closed.Value, exitCode.Value, () => pty.Value?.Pid);
+        return new PtyHandle(stream, HandleInput, HandleResize, Kill, closed.Value, exitCode.Value, () => pty.Value?.Pid)
+        {
+            OutputProvider = () => decoder.Value.Text
+        };
     }
 
     // CommandLineToArgvW-compatible argument quoting (the same algorithm as .NET's
@@ -159,6 +192,7 @@ public static class UsePtyExtensions
         IState<IPtyConnection?> ptyRef,
         IState<bool> closed,
         IState<int?> exitCode,
+        PtyOutputDecoder decoder,
         CancellationToken cancellationToken)
     {
         if (commandLine.Length == 0) return;
@@ -226,6 +260,10 @@ public static class UsePtyExtensions
                 closed.Set(true);
             };
 
+            // Constant for the connection's lifetime, so the decoder never sees a gap in its byte
+            // stream (skipping Decode on some chunks would desync its stateful UTF-8 decoder).
+            var wantsText = options.OnOutput != null || options.CaptureOutput;
+
             _ = Task.Run(async () =>
             {
                 var buffer = new byte[4096];
@@ -239,9 +277,14 @@ public static class UsePtyExtensions
                         Buffer.BlockCopy(buffer, 0, data, 0, bytesRead);
                         stream.Write(data);
 
-                        // OnOutput callback gets the decoded text for parsing
-                        var text = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        options.OnOutput?.Invoke(text);
+                        if (wantsText)
+                        {
+                            // Decoded across read boundaries by the stateful decoder (see
+                            // PtyOutputDecoder) so multi-byte UTF-8 sequences split across two
+                            // 4KB reads don't decode to U+FFFD replacement characters.
+                            var text = decoder.Decode(buffer, bytesRead);
+                            if (text.Length > 0) options.OnOutput?.Invoke(text);
+                        }
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -260,8 +303,14 @@ public static class UsePtyExtensions
         }
         catch (Exception ex)
         {
-            var errorMsg = Encoding.UTF8.GetBytes($"\r\n[Error starting PTY: {ex.Message}]\r\n");
+            var errorText = $"\r\n[Error starting PTY: {ex.Message}]\r\n";
+            var errorMsg = Encoding.UTF8.GetBytes(errorText);
             stream.Write(errorMsg);
+
+            // Feed the error text through the decoder (but not OnOutput, preserving today's
+            // callback contract) so PtyHandle.Output explains a failed spawn too.
+            decoder.Decode(errorMsg, errorMsg.Length);
+
             closed.Set(true);
         }
     }

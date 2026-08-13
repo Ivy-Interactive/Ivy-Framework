@@ -38,4 +38,8 @@
     <PackageReference Include="Porta.Pty" Version="1.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Ivy.Hooks.Pty.Test" />
+  </ItemGroup>
+
 </Project>

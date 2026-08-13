@@ -39,6 +39,8 @@
   <Project Path="Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />
   <Project Path="Ivy.Docs.Test/Ivy.Docs.Test.csproj" />
   <Project Path="Ivy.Docs/Ivy.Docs.csproj" />
+  <Project Path="Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
+  <Project Path="Ivy.Hooks.Pty.Test/Ivy.Hooks.Pty.Test.csproj" />
   <Project Path="Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" />
   <Project Path="Ivy.Samples/Ivy.Samples.csproj" />
   <Project Path="Ivy.Test/Ivy.Test.csproj" />
