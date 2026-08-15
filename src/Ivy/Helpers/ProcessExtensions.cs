@@ -29,16 +29,7 @@ public static class ProcessExtensions
     {
         if (process is null) return true;
         using var cts = new CancellationTokenSource(timeoutMs);
-        try
-        {
-            await process.WaitForExitAsync(cts.Token);
-            return true;
-        }
-        catch (OperationCanceledException)
-        {
-            await KillProcessAsync(process);
-            return false;
-        }
+        return await WaitForProcessExitAsync(process, cts.Token);
     }
 
     /// <summary>
@@ -49,15 +40,66 @@ public static class ProcessExtensions
     public static async Task<bool> WaitForExitOrKillAsync(this Process? process, CancellationToken cancellationToken)
     {
         if (process is null) return true;
+        return await WaitForProcessExitAsync(process, cancellationToken);
+    }
+
+    /// <summary>
+    /// Waits for the OS process to terminate without blocking indefinitely on redirected stdout/stderr stream EOF.
+    /// </summary>
+    public static async Task<bool> WaitForProcessExitAsync(this Process? process, CancellationToken cancellationToken)
+    {
+        if (process is null) return true;
+        if (process.HasExited) return true;
+
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnExited(object? sender, EventArgs e) => tcs.TrySetResult(true);
+
         try
         {
-            await process.WaitForExitAsync(cancellationToken);
+            process.EnableRaisingEvents = true;
+            process.Exited += OnExited;
+
+            if (process.HasExited)
+            {
+                tcs.TrySetResult(true);
+            }
+
+            using var reg = cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
+            await tcs.Task;
+
+            // Once the OS process exits, allow up to 1 second for any in-flight stdout/stderr buffers to flush.
+            try
+            {
+                using var drainCts = new CancellationTokenSource(1000);
+                await process.WaitForExitAsync(drainCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Streams did not reach EOF within drain window (likely child process holding pipe open); proceed anyway.
+            }
+            catch (Exception)
+            {
+                // Ignore errors during stream draining
+            }
+
             return true;
         }
         catch (OperationCanceledException)
         {
             await KillProcessAsync(process);
             return false;
+        }
+        finally
+        {
+            try
+            {
+                process.Exited -= OnExited;
+            }
+            catch
+            {
+                // Ignore if process disposed
+            }
         }
     }
 
@@ -107,7 +149,24 @@ public static class ProcessExtensions
         {
             process.Kill(true);
             using var killTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await process.WaitForExitAsync(killTimeout.Token);
+
+            if (!process.HasExited)
+            {
+                var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                void OnExited(object? sender, EventArgs e) => tcs.TrySetResult(true);
+                process.EnableRaisingEvents = true;
+                process.Exited += OnExited;
+                try
+                {
+                    if (process.HasExited) tcs.TrySetResult(true);
+                    using var reg = killTimeout.Token.Register(() => tcs.TrySetCanceled(killTimeout.Token));
+                    await tcs.Task;
+                }
+                finally
+                {
+                    try { process.Exited -= OnExited; } catch { }
+                }
+            }
         }
         catch (OperationCanceledException)
         {

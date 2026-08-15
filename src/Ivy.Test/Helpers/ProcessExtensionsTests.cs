@@ -156,4 +156,32 @@ public class ProcessExtensionsTests
         Assert.True(sw.Elapsed < TimeSpan.FromSeconds(10),
             $"Post-kill should complete within 10s (5s kill timeout + margin), took {sw.Elapsed}");
     }
+
+    [Fact]
+    public async Task WaitForExitOrKillAsync_WithRedirectedOutput_ReturnsPromptlyOnProcessExit()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = OperatingSystem.IsWindows() ? "cmd.exe" : "/bin/sh",
+            Arguments = OperatingSystem.IsWindows() ? "/c echo Hello" : "-c \"echo Hello\"",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        Assert.NotNull(process);
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        var sw = Stopwatch.StartNew();
+        var result = await process.WaitForExitOrKillAsync(10000);
+        sw.Stop();
+
+        Assert.True(result);
+        Assert.True(process.HasExited);
+        Assert.Equal(0, process.ExitCode);
+        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(5));
+    }
 }
