@@ -1,4 +1,7 @@
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly: InternalsVisibleTo("Ivy.Hooks.Pty.Test")]
 
 namespace Ivy.Hooks.Pty;
 
