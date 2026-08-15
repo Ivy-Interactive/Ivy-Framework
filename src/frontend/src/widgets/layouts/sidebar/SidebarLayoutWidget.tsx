@@ -19,6 +19,7 @@ import { SidebarLayoutContext, useSidebarLayout } from "./sidebar-layout-context
 // Wide enough for a menu item's full icon box (container padding + button padding + 16px icon)
 // so icons keep their x-position while the sidebar width animates.
 const SIDEBAR_RAIL_WIDTH_PX = 54;
+const SIDEBAR_OPEN_STORAGE_KEY = "ivy-sidebar-open";
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -142,6 +143,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     // Check if we're in a browser environment
     if (typeof window !== "undefined") {
+      if (mainAppSidebar) {
+        const stored = localStorage.getItem(SIDEBAR_OPEN_STORAGE_KEY);
+        if (stored === "true" || stored === "false") {
+          return stored === "true";
+        }
+      }
       return window.innerWidth >= autoCollapseThreshold;
     }
 
@@ -256,17 +263,28 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
-    dispatchSidebar((prev) => ({ isSidebarOpen: !prev.isSidebarOpen }));
+    dispatchSidebar((prev) => {
+      const nextState = !prev.isSidebarOpen;
+      if (mainAppSidebar && typeof window !== "undefined") {
+        localStorage.setItem(SIDEBAR_OPEN_STORAGE_KEY, String(nextState));
+      }
+      return { isSidebarOpen: nextState };
+    });
     dispatchSidebar({ isManuallyToggled: true });
-  }, [dispatchSidebar]);
+  }, [dispatchSidebar, mainAppSidebar]);
 
   const sidebarContextValue = useMemo(
     () => ({
       collapsed: isCollapsedToRail,
-      expand: () => dispatchSidebar({ isSidebarOpen: true, isManuallyToggled: true }),
+      expand: () => {
+        if (mainAppSidebar && typeof window !== "undefined") {
+          localStorage.setItem(SIDEBAR_OPEN_STORAGE_KEY, "true");
+        }
+        dispatchSidebar({ isSidebarOpen: true, isManuallyToggled: true });
+      },
       toggle: handleManualToggle,
     }),
-    [isCollapsedToRail, handleManualToggle, dispatchSidebar],
+    [isCollapsedToRail, handleManualToggle, dispatchSidebar, mainAppSidebar],
   );
 
   // Register keyboard shortcut for toggling sidebar (Ctrl+B)
