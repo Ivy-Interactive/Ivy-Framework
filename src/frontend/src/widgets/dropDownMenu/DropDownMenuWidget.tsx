@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MenuItem } from "@/types/widgets";
 import Icon from "@/components/Icon";
-import { camelCase } from "@/lib/utils";
-import { getColor } from "@/lib/styles";
+import { camelCase, cn } from "@/lib/utils";
+import { getColor, getWidth } from "@/lib/styles";
 import { ShortcutKeys } from "@/components/Kbd";
 import { Densities } from "@/types/density";
 
@@ -33,6 +33,7 @@ interface DropDownMenuWidgetProps {
   stayOpen?: boolean;
   density?: Densities;
   events?: string[];
+  width?: string;
   slots?: {
     Trigger?: React.ReactNode[];
     Header?: React.ReactNode[];
@@ -183,6 +184,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   stayOpen = false,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
+  width,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -213,10 +215,16 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
     }
   };
 
+  const styles: React.CSSProperties = {
+    ...getWidth(width),
+  };
+
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger ref={triggerRef} asChild>
-        <div style={{ maxWidth: "100%", minWidth: 0 }}>{slots.Trigger}</div>
+        <div style={{ maxWidth: "100%", minWidth: 0, ...styles }} className={cn(width && "w-full")}>
+          {slots.Trigger}
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         onClick={(e) => e.stopPropagation()}

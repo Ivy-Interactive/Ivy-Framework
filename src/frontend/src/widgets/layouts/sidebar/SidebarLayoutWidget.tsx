@@ -357,7 +357,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             )}
             {isCollapsedToRail
               ? hasContent(slots?.SidebarHeaderCollapsed) && (
-                  <div className="flex flex-col items-center px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300">
+                  <div className="flex flex-col items-center px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300 w-full">
                     {slots?.SidebarHeaderCollapsed}
                   </div>
                 )
@@ -379,7 +379,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             ))}
           {isCollapsedToRail
             ? hasContent(slots?.SidebarFooterCollapsed) && (
-                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300">
+                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300 w-full">
                   {slots?.SidebarFooterCollapsed}
                 </div>
               )
