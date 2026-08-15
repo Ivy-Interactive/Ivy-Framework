@@ -63,4 +63,25 @@ describe("TextBlockWidget id attribute", () => {
     expect(paragraph).toBeDefined();
     expect(paragraph).not.toContain('id="');
   });
+
+  it("Block variant renders block and min-w-0 for proper text truncation", () => {
+    const html = renderToString(
+      <TextBlockWidget id="test-block" content="Long truncated text" variant="Block" />,
+    );
+
+    expect(html).toContain("overflow-hidden text-ellipsis block min-w-0 w-full");
+  });
+
+  it("Ellipsis overflow adds truncate and min-w-0 classes", () => {
+    const html = renderToString(
+      <TextBlockWidget
+        id="test-ellipsis"
+        content="Long text"
+        variant="Muted"
+        overflow="Ellipsis"
+      />,
+    );
+
+    expect(html).toContain("truncate block min-w-0 max-w-full");
+  });
 });
