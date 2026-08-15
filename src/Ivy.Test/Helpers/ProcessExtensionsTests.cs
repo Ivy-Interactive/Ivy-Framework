@@ -156,4 +156,38 @@ public class ProcessExtensionsTests
         Assert.True(sw.Elapsed < TimeSpan.FromSeconds(10),
             $"Post-kill should complete within 10s (5s kill timeout + margin), took {sw.Elapsed}");
     }
+
+    [Fact]
+    public async Task WaitForExitOrKillAsync_WhenChildHoldsRedirectedPipes_ReturnsPromptlyAfterParentExits()
+    {
+        if (OperatingSystem.IsWindows())
+            return; // POSIX shell background fork test
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = "/bin/sh",
+            Arguments = "-c \"sleep 10 >&1 & exit 0\"",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+
+        using var process = new Process { StartInfo = psi };
+        process.OutputDataReceived += (_, _) => { };
+        process.ErrorDataReceived += (_, _) => { };
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        var sw = Stopwatch.StartNew();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var result = await process.WaitForExitOrKillAsync(cts.Token);
+        sw.Stop();
+
+        Assert.True(result);
+        Assert.True(process.HasExited);
+        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(3),
+            $"Should exit promptly without waiting for background child to close pipe, took {sw.Elapsed.TotalSeconds}s");
+    }
 }

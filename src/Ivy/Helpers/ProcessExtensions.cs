@@ -29,16 +29,7 @@ public static class ProcessExtensions
     {
         if (process is null) return true;
         using var cts = new CancellationTokenSource(timeoutMs);
-        try
-        {
-            await process.WaitForExitAsync(cts.Token);
-            return true;
-        }
-        catch (OperationCanceledException)
-        {
-            await KillProcessAsync(process);
-            return false;
-        }
+        return await WaitForExitOrKillAsync(process, cts.Token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -51,13 +42,65 @@ public static class ProcessExtensions
         if (process is null) return true;
         try
         {
-            await process.WaitForExitAsync(cancellationToken);
+            await WaitForProcessExitAsync(process, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (OperationCanceledException)
         {
-            await KillProcessAsync(process);
+            await KillProcessAsync(process).ConfigureAwait(false);
             return false;
+        }
+    }
+
+    private static async Task WaitForProcessExitAsync(Process process, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (process.HasExited)
+                return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnExited(object? sender, EventArgs e) => tcs.TrySetResult();
+
+        try
+        {
+            process.EnableRaisingEvents = true;
+            process.Exited += OnExited;
+
+            if (process.HasExited)
+            {
+                tcs.TrySetResult();
+            }
+
+            await using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
+            {
+                await tcs.Task.ConfigureAwait(false);
+            }
+
+            // Give a short bounded drain period for any in-flight redirected output events
+            // without hanging indefinitely if background child processes inherited the pipe handles.
+            await Task.Delay(250, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException)
+        {
+            // Process already exited or disposed
+        }
+        finally
+        {
+            try
+            {
+                process.Exited -= OnExited;
+            }
+            catch
+            {
+                // Process already disposed
+            }
         }
     }
 
