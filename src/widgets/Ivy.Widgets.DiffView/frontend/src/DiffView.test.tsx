@@ -166,4 +166,23 @@ describe("DiffView responsive behavior", () => {
     await tick();
     expect(container.querySelector('select[aria-label="Jump to file"]')).toBeNull();
   });
+
+  it("keys collapsed state by file and resets when diff changes", async () => {
+    await render(<DiffView id="d8" onIvyEvent={noop} diff={MULTI_FILE_DIFF} collapsible={true} />);
+    const header = container.querySelector(".cursor-pointer") as HTMLElement;
+    expect(header).not.toBeNull();
+    expect(container.querySelector(".diff-line")).not.toBeNull();
+
+    // Toggle collapse
+    header.click();
+    await tick();
+    // One file collapsed, second file still has lines
+    expect(container.querySelectorAll(".diff-line").length).toBeGreaterThan(0);
+
+    // Re-render with new diff
+    await render(<DiffView id="d8" onIvyEvent={noop} diff={`diff --git a/newfile.txt b/newfile.txt\n--- a/newfile.txt\n+++ b/newfile.txt\n@@ -1 +1 @@\n-a\n+b`} collapsible={true} />);
+    await tick();
+    // After diff change, files should not stay collapsed
+    expect(container.querySelectorAll(".diff-line").length).toBeGreaterThan(0);
+  });
 });
