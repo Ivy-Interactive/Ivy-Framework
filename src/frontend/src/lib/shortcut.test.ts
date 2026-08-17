@@ -53,8 +53,8 @@ describe("formatShortcutForDisplay", () => {
 });
 
 describe("modifierKeyLabel", () => {
-  it("returns 'Cmd' on Mac", () => {
-    expect(modifierKeyLabel(true)).toBe("Cmd");
+  it("returns '⌘' on Mac", () => {
+    expect(modifierKeyLabel(true)).toBe("⌘");
   });
 
   it("returns 'Ctrl' on non-Mac platforms", () => {
