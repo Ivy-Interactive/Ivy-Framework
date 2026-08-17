@@ -8,6 +8,7 @@ import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { MenuItem, WidgetEventHandlerType } from "@/types/widgets";
 import { useFocusable } from "@/hooks/use-focus-management";
 import { useShortcut } from "@/lib/useShortcut";
+import { modifierKeyLabel } from "@/lib/shortcut";
 import { sidebarMenuRef } from "./sidebar-refs";
 import { useEventHandler } from "@/components/event-handler";
 import { cn, getAppId } from "@/lib/utils";
@@ -20,6 +21,7 @@ import { SidebarLayoutContext, useSidebarLayout } from "./sidebar-layout-context
 // so icons keep their x-position while the sidebar width animates.
 const SIDEBAR_RAIL_WIDTH_PX = 54;
 const SIDEBAR_OPEN_STORAGE_KEY = "ivy-sidebar-open";
+const TOGGLE_SHORTCUT_LABEL = `${modifierKeyLabel()}+B`;
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -108,7 +110,7 @@ const SidebarToggleButton: React.FC<{ isSidebarOpen: boolean; onToggle: () => vo
           )}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+      <TooltipContent side="right">Toggle sidebar ({TOGGLE_SHORTCUT_LABEL})</TooltipContent>
     </Tooltip>
   </TooltipProvider>
 );
@@ -463,7 +465,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
                     )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+                <TooltipContent side="right">
+                  Toggle sidebar ({TOGGLE_SHORTCUT_LABEL})
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}

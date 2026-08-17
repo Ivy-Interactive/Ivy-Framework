@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatShortcutForDisplay } from "./shortcut";
+import { formatShortcutForDisplay, modifierKeyLabel } from "./shortcut";
 
 describe("formatShortcutForDisplay", () => {
   it("renders Backspace as ⌫", () => {
@@ -49,5 +49,15 @@ describe("formatShortcutForDisplay", () => {
     expect(formatShortcutForDisplay("ArrowDown")).toContain("↓");
     expect(formatShortcutForDisplay("ArrowLeft")).toContain("←");
     expect(formatShortcutForDisplay("ArrowRight")).toContain("→");
+  });
+});
+
+describe("modifierKeyLabel", () => {
+  it("returns 'Cmd' on Mac", () => {
+    expect(modifierKeyLabel(true)).toBe("Cmd");
+  });
+
+  it("returns 'Ctrl' on non-Mac platforms", () => {
+    expect(modifierKeyLabel(false)).toBe("Ctrl");
   });
 });
