@@ -4,7 +4,7 @@ import { MessagePackHubProtocol } from "@microsoft/signalr-protocol-msgpack";
 import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
 import { useToast } from "@/hooks/use-toast";
 import { showError } from "@/hooks/use-error-sheet";
-import { getIvyHost, getIvyBasePath, getMachineId } from "@/lib/utils";
+import { getIvyHost, getIvyBasePath, getMachineId, buildSignalRUrl } from "@/lib/utils";
 import { validateRedirectUrl, validateLinkUrl, extractAnchorId } from "@/lib/url";
 import { logger } from "@/lib/logger";
 import { copyToClipboard } from "@/lib/clipboard";
@@ -759,10 +759,14 @@ export const useBackend = (
     const connectedAccountLogin = pageParams.get("connectedAccountLogin");
 
     // Build SignalR connection URL
-    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${stableAppArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&shell=${latestAppShellRef.current}`;
-    if (oauthLogin) {
-      signalRUrl += `&oauthLogin=${oauthLogin}`;
-    }
+    const signalRUrl = buildSignalRUrl(getIvyHost(), {
+      appId: latestAppIdRef.current,
+      appArgs: stableAppArgs,
+      machineId,
+      parentId,
+      shell: latestAppShellRef.current,
+      oauthLogin,
+    });
     // Clean up auth-related query parameters from the URL
     if (oauthLogin || connectedAccountLogin) {
       pageParams.delete("oauthLogin");
