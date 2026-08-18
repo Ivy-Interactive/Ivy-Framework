@@ -2,6 +2,11 @@
 
 A terminal emulator widget for Ivy Framework powered by [xterm.js](https://xtermjs.org/).
 
+> **Naming note:** `Ivy.Widgets.Xterm.Terminal` (this widget) is a different type from `Ivy.Terminal`,
+> a static display primitive documented in [14_Terminal.md](../../Ivy.Docs.Shared/Docs/02_Widgets/03_Common/14_Terminal.md).
+> The samples in this package alias the import to avoid the clash:
+> `using Terminal = Ivy.Widgets.Xterm.Terminal;`
+
 ## Installation
 
 ```bash
@@ -12,7 +17,8 @@ dotnet add package Ivy.Widgets.Xterm
 
 ### Terminal
 
-A fully-featured terminal emulator component.
+A fully-featured terminal emulator component that renders a raw byte stream (typically from a
+server-side PTY, see [Terminal + PTY](#terminal--pty) below).
 
 **External React Libraries Used:**
 - [@xterm/xterm](https://www.npmjs.com/package/@xterm/xterm) - Terminal emulator
@@ -22,31 +28,26 @@ A fully-featured terminal emulator component.
 #### Basic Usage
 
 ```csharp
-using Ivy.Widgets.Xterm;
+using Terminal = Ivy.Widgets.Xterm.Terminal;
 
 // Simple terminal with default settings
 new Terminal()
-
-// Terminal with dark theme and custom font
-new Terminal()
-    .DarkTheme()
-    .FontSize(16)
-    .CursorBlink(true)
 
 // Terminal with initial content
 new Terminal()
     .InitialContent("Welcome!\r\n$ ")
 
 // Terminal with a loading overlay shown until the attached
-// process writes its first output to the stream
+// process writes its first (visible) output to the stream
 new Terminal()
     .Stream(pty.Stream)
     .Loading("Starting Claude Code...")
 
 // Terminal with event handlers
 new Terminal()
-    .HandleData(data => Console.WriteLine($"User typed: {data}"))
-    .HandleResize((cols, rows) => Console.WriteLine($"Resized: {cols}x{rows}"))
+    .OnInput(data => Console.WriteLine($"User typed: {data}"))
+    .OnResize((cols, rows) => Console.WriteLine($"Resized: {cols}x{rows}"))
+    .OnLinkClick(url => Console.WriteLine($"Link clicked: {url}"))
 ```
 
 #### Props
@@ -55,54 +56,51 @@ new Terminal()
 |------|------|---------|-------------|
 | `Cols` | `int?` | `null` | Fixed column count (auto-fit if not set) |
 | `Rows` | `int?` | `null` | Fixed row count (auto-fit if not set) |
-| `FontSize` | `int` | `14` | Font size in pixels |
-| `FontFamily` | `string` | `"Menlo, Monaco, 'Courier New', monospace"` | Font family |
-| `LineHeight` | `double` | `1.0` | Line height multiplier |
 | `CursorBlink` | `bool` | `true` | Enable cursor blinking |
 | `CursorStyle` | `CursorStyle` | `Block` | Cursor style (`Block`, `Underline`, `Bar`) |
 | `Scrollback` | `int` | `1000` | Lines to keep in scrollback buffer |
-| `Theme` | `TerminalTheme?` | Dark theme | Terminal color theme |
 | `InitialContent` | `string?` | `null` | Initial content to display |
+| `Closed` | `bool` | `false` | Marks the terminal as closed (e.g. the attached process exited); typically bound to `pty.Closed` |
+| `AllowClipboard` | `bool` | `true` | Allow clipboard copy/paste inside the terminal |
 | `AutoFocus` | `bool` | `true` | Automatically focus the terminal on mount so it receives keyboard input |
-| `Loading` | `bool` | `false` | Show a loading overlay (spinner + text) until the first stream data arrives |
+| `Loading` | `bool` | `false` | Show a loading overlay (spinner + text) until the first visible stream data arrives |
 | `LoadingText` | `string?` | `"Loading..."` | Text shown in the loading overlay |
+| `Background` | `Colors?` | `null` | Terminal background color |
+| `Foreground` | `Colors?` | `null` | Terminal foreground (text) color |
+| `Stream` | `IWriteStream<byte[]>?` | `null` | Raw output byte stream rendered by the terminal, typically `pty.Stream` |
 
 #### Events
 
 | Event | Args | Description |
 |-------|------|-------------|
-| `OnData` | `string` | Fired when user types in the terminal |
-| `OnResize` | `int cols, int rows` | Fired when terminal dimensions change |
-| `OnTitleChange` | `string` | Fired when terminal title changes (via OSC sequences) |
+| `OnInput` | `string` | Fired when the user types in the terminal (raw keystroke data from xterm's `onData`) |
+| `OnResize` | `TerminalSize` (`Cols`, `Rows`), with `Action<int, int>` and `Action<TerminalSize>` overloads | Fired when terminal dimensions change |
+| `OnLinkClick` | `string` | Fired when the user clicks a detected URL in the terminal output |
 
-#### Themes
+## Terminal + PTY
 
-Built-in themes are available:
+`Terminal` only renders bytes and forwards keystrokes — it does not spawn or manage a process.
+Pair it with `Ivy.Hooks.Pty`'s `UsePty` hook to host a real process:
 
 ```csharp
-// Dark theme (VS Code-like)
-new Terminal().DarkTheme()
+using Ivy.Hooks.Pty;
+using Terminal = Ivy.Widgets.Xterm.Terminal;
 
-// Light theme
-new Terminal().LightTheme()
+// IVYHOOK005: UsePty must be the first statement in Build().
+var pty = Context.UsePty(OperatingSystem.IsWindows() ? ["cmd"] : ["bash"], workingDirectory);
 
-// Custom theme
-new Terminal().Theme(new TerminalTheme
-{
-    Background = "#000000",
-    Foreground = "#00ff00",
-    Cursor = "#00ff00",
-    // ... other colors
-})
+return new Terminal()
+    .Stream(pty.Stream)
+    .OnInput(pty.HandleInput)
+    .OnResize(pty.HandleResize)
+    .Closed(pty.Closed)
+    .AllowClipboard();
 ```
 
-#### TerminalTheme Properties
-
-All color properties accept CSS color strings (hex, rgb, rgba):
-
-- `Background`, `Foreground`, `Cursor`, `CursorAccent`, `Selection`
-- `Black`, `Red`, `Green`, `Yellow`, `Blue`, `Magenta`, `Cyan`, `White`
-- `BrightBlack`, `BrightRed`, `BrightGreen`, `BrightYellow`, `BrightBlue`, `BrightMagenta`, `BrightCyan`, `BrightWhite`
+See [ClaudeCodeApp.cs](.samples/Apps/ClaudeCodeApp.cs) for a complete example, and the
+[`Ivy.Hooks.Pty` README](../../Ivy.Hooks.Pty/README.md) for how `Terminal.OnInput`, `Terminal.Stream`
+and `PtyOptions.OnOutput`/`PtyOptions.CaptureOutput` relate to each other — they are three distinct,
+one-directional data paths and are routinely confused.
 
 ## Development
 
@@ -139,6 +137,7 @@ The sample server uses an app shell with multiple demo apps (in `.samples/Apps/`
 - **Shell** — an interactive system shell (`cmd` on Windows, `bash` otherwise)
 - **Hello Console** — runs the Spectre.Console demo app from `.console/HelloApp`
 - **Claude Code** — runs the `claude` CLI in the terminal (requires Claude Code to be installed and on `PATH`)
+- **Output Capture** — a shell paired with a read-only pane showing `PtyHandle.Output` (via `PtyOptions.CaptureOutput`), demonstrating chunk-boundary-safe UTF-8 decoding and `AnsiEscape.Strip`
 
 ## Creating New Widgets
 

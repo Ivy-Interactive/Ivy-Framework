@@ -4,6 +4,13 @@ import React from "react";
 export const isMac =
   typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
+/**
+ * Label for the Ctrl/Cmd modifier in prose (tooltips, hints). On Mac the binding fires on
+ * Command — see parseShortcut(), which maps ctrl → meta — and Mac labels use the ⌘ glyph
+ * throughout the frontend (Kbd.tsx, formatShortcutForDisplay), so this returns ⌘ there.
+ */
+export const modifierKeyLabel = (mac: boolean = isMac): string => (mac ? "⌘" : "Ctrl");
+
 export interface ParsedShortcut {
   ctrl: boolean;
   shift: boolean;

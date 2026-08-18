@@ -105,13 +105,13 @@ const variantMap: VariantMap = {
     };
 
     return (
-      <div id={id} className={cn(typography.block, className)} style={style}>
+      <div id={id} className={cn(typography.block, "w-full", className)} style={style}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <span
                 ref={spanRef}
-                className="overflow-hidden text-ellipsis"
+                className="overflow-hidden text-ellipsis block min-w-0 w-full"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={() => setShowTooltip(false)}
               >
@@ -245,6 +245,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         italic && "italic",
         muted && "text-muted-foreground",
         density && scaleClasses[density],
+        overflow === "Ellipsis" && "truncate block min-w-0 max-w-full",
       )}
     >
       {displayContent}

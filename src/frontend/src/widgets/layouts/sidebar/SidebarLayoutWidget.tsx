@@ -8,6 +8,7 @@ import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { MenuItem, WidgetEventHandlerType } from "@/types/widgets";
 import { useFocusable } from "@/hooks/use-focus-management";
 import { useShortcut } from "@/lib/useShortcut";
+import { modifierKeyLabel } from "@/lib/shortcut";
 import { sidebarMenuRef } from "./sidebar-refs";
 import { useEventHandler } from "@/components/event-handler";
 import { cn, getAppId } from "@/lib/utils";
@@ -19,6 +20,8 @@ import { SidebarLayoutContext, useSidebarLayout } from "./sidebar-layout-context
 // Wide enough for a menu item's full icon box (container padding + button padding + 16px icon)
 // so icons keep their x-position while the sidebar width animates.
 const SIDEBAR_RAIL_WIDTH_PX = 54;
+const SIDEBAR_OPEN_STORAGE_KEY = "ivy-sidebar-open";
+const TOGGLE_SHORTCUT_LABEL = `${modifierKeyLabel()}+B`;
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -107,7 +110,7 @@ const SidebarToggleButton: React.FC<{ isSidebarOpen: boolean; onToggle: () => vo
           )}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+      <TooltipContent side="right">Toggle sidebar ({TOGGLE_SHORTCUT_LABEL})</TooltipContent>
     </Tooltip>
   </TooltipProvider>
 );
@@ -142,6 +145,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     // Check if we're in a browser environment
     if (typeof window !== "undefined") {
+      if (mainAppSidebar) {
+        const stored = localStorage.getItem(SIDEBAR_OPEN_STORAGE_KEY);
+        if (stored === "true" || stored === "false") {
+          return stored === "true";
+        }
+      }
       return window.innerWidth >= autoCollapseThreshold;
     }
 
@@ -256,17 +265,28 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
-    dispatchSidebar((prev) => ({ isSidebarOpen: !prev.isSidebarOpen }));
+    dispatchSidebar((prev) => {
+      const nextState = !prev.isSidebarOpen;
+      if (mainAppSidebar && typeof window !== "undefined") {
+        localStorage.setItem(SIDEBAR_OPEN_STORAGE_KEY, String(nextState));
+      }
+      return { isSidebarOpen: nextState };
+    });
     dispatchSidebar({ isManuallyToggled: true });
-  }, [dispatchSidebar]);
+  }, [dispatchSidebar, mainAppSidebar]);
 
   const sidebarContextValue = useMemo(
     () => ({
       collapsed: isCollapsedToRail,
-      expand: () => dispatchSidebar({ isSidebarOpen: true, isManuallyToggled: true }),
+      expand: () => {
+        if (mainAppSidebar && typeof window !== "undefined") {
+          localStorage.setItem(SIDEBAR_OPEN_STORAGE_KEY, "true");
+        }
+        dispatchSidebar({ isSidebarOpen: true, isManuallyToggled: true });
+      },
       toggle: handleManualToggle,
     }),
-    [isCollapsedToRail, handleManualToggle, dispatchSidebar],
+    [isCollapsedToRail, handleManualToggle, dispatchSidebar, mainAppSidebar],
   );
 
   // Register keyboard shortcut for toggling sidebar (Ctrl+B)
@@ -357,7 +377,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             )}
             {isCollapsedToRail
               ? hasContent(slots?.SidebarHeaderCollapsed) && (
-                  <div className="flex flex-col items-center px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300">
+                  <div className="flex flex-col items-center px-2 pb-2 gap-y-2 h-fit animate-in fade-in duration-300 w-full">
                     {slots?.SidebarHeaderCollapsed}
                   </div>
                 )
@@ -379,7 +399,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             ))}
           {isCollapsedToRail
             ? hasContent(slots?.SidebarFooterCollapsed) && (
-                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300">
+                <div className="flex flex-col items-center shrink-0 p-2 gap-y-2 animate-in fade-in duration-300 w-full">
                   {slots?.SidebarFooterCollapsed}
                 </div>
               )
@@ -445,7 +465,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
                     )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
+                <TooltipContent side="right">
+                  Toggle sidebar ({TOGGLE_SHORTCUT_LABEL})
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}

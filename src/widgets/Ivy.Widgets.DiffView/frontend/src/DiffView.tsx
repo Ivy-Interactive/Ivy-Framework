@@ -62,7 +62,7 @@ export function useIsNarrow(): [React.RefObject<HTMLDivElement | null>, boolean]
       setIsNarrow((prev) => (prev === next ? prev : next));
     };
 
-    update(element.clientWidth);
+    update(element.clientWidth || element.getBoundingClientRect?.().width || 0);
 
     const observer = new ResizeObserver((entries) => {
       if (entries.length === 0) return;
@@ -110,7 +110,11 @@ export const DiffView: React.FC<DiffViewProps> = ({
     }
   }, [diff]);
 
-  const [collapsedState, setCollapsedState] = useState<Record<number, boolean>>({});
+  const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setCollapsedState({});
+  }, [id, diff]);
 
   const [containerRef, isNarrow] = useIsNarrow();
   const diffViewType = viewType === "Split" ? "split" : "unified";
@@ -193,16 +197,17 @@ export const DiffView: React.FC<DiffViewProps> = ({
       )}
       {files.map((file, fileIndex) => {
         const { oldName, newName, isRename, hasHeader, elementId } = fileMeta[fileIndex];
+        const fileKey = file.newPath || file.oldPath || `diff-${fileIndex}`;
 
         const isCollapsed = collapsible
-          ? (collapsedState[fileIndex] ?? defaultCollapsed)
+          ? (collapsedState[fileKey] ?? defaultCollapsed)
           : false;
 
         const toggleCollapsed = () => {
           if (!collapsible) return;
           setCollapsedState((prev) => ({
             ...prev,
-            [fileIndex]: !isCollapsed,
+            [fileKey]: !isCollapsed,
           }));
         };
 

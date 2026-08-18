@@ -733,3 +733,81 @@ describe("getShellParam", () => {
     expect(utils.getShellParam()).toBe(false);
   });
 });
+
+describe("buildSignalRUrl", () => {
+  const baseHost = "http://localhost:5010";
+
+  it("builds a basic SignalR URL with all required options", () => {
+    const url = utils.buildSignalRUrl(baseHost, {
+      appId: "my-app",
+      machineId: "machine-123",
+      shell: true,
+    });
+
+    const parsed = new URL(url);
+    expect(parsed.origin).toBe("http://localhost:5010");
+    expect(parsed.pathname).toBe("/ivy/messages");
+    expect(parsed.searchParams.get("appId")).toBe("my-app");
+    expect(parsed.searchParams.get("machineId")).toBe("machine-123");
+    expect(parsed.searchParams.get("shell")).toBe("true");
+    expect(parsed.searchParams.get("appArgs")).toBeNull();
+    expect(parsed.searchParams.get("parentId")).toBeNull();
+    expect(parsed.searchParams.get("oauthLogin")).toBeNull();
+  });
+
+  it("safely encodes appArgs containing special characters like # and &", () => {
+    const jsonArgs = JSON.stringify({
+      Prompt: "User wants to discuss the plan /path/to/00022-my-plan currently in Review mode.",
+      Title: "#22",
+    });
+
+    const url = utils.buildSignalRUrl(baseHost, {
+      appId: "agent",
+      appArgs: jsonArgs,
+      machineId: "machine-123",
+      parentId: "parent-456",
+      shell: false,
+      oauthLogin: "github",
+    });
+
+    // Verify raw URL does not contain an unencoded '#' that would start a fragment
+    expect(url.includes("#22")).toBe(false);
+    expect(url.includes("%2322")).toBe(true);
+
+    // Verify that parsing the URL as standard HTTP URL decodes all parameters cleanly
+    const parsed = new URL(url);
+    expect(parsed.hash).toBe("");
+    expect(parsed.searchParams.get("appId")).toBe("agent");
+    expect(parsed.searchParams.get("appArgs")).toBe(jsonArgs);
+    expect(parsed.searchParams.get("machineId")).toBe("machine-123");
+    expect(parsed.searchParams.get("parentId")).toBe("parent-456");
+    expect(parsed.searchParams.get("shell")).toBe("false");
+    expect(parsed.searchParams.get("oauthLogin")).toBe("github");
+
+    // Verify parsed appArgs JSON is intact
+    const parsedArgs = JSON.parse(parsed.searchParams.get("appArgs")!);
+    expect(parsedArgs.Title).toBe("#22");
+    expect(parsedArgs.Prompt).toBe(
+      "User wants to discuss the plan /path/to/00022-my-plan currently in Review mode.",
+    );
+  });
+
+  it("handles null/undefined optional parameters without adding empty query params", () => {
+    const url = utils.buildSignalRUrl(baseHost, {
+      appId: null,
+      appArgs: null,
+      machineId: "machine-123",
+      parentId: null,
+      shell: true,
+      oauthLogin: null,
+    });
+
+    const parsed = new URL(url);
+    expect(parsed.searchParams.get("machineId")).toBe("machine-123");
+    expect(parsed.searchParams.get("shell")).toBe("true");
+    expect(parsed.searchParams.has("appId")).toBe(false);
+    expect(parsed.searchParams.has("appArgs")).toBe(false);
+    expect(parsed.searchParams.has("parentId")).toBe(false);
+    expect(parsed.searchParams.has("oauthLogin")).toBe(false);
+  });
+});

@@ -121,4 +121,32 @@ public class AppHubIntegrationTests : IAsyncLifetime
         // Verify session store has exactly the second connection
         Assert.True(_server.SessionStore.Sessions.ContainsKey(connection2.ConnectionId!));
     }
+
+    [Fact]
+    public async Task HubConnection_WithSpecialCharactersInAppArgs_CanConnect()
+    {
+        var jsonArgs = "{\"Prompt\":\"User wants to discuss plan in review mode.\",\"Title\":\"#22\"}";
+        var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
+        var url = $"{_server.BaseUrl}/ivy/messages?appId=test-app&appArgs={encodedArgs}&machineId=test-machine&shell=false";
+
+        await using var connection = new HubConnectionBuilder()
+            .WithUrl(url)
+            .Build();
+
+        var refreshTcs = new TaskCompletionSource<object?>();
+        connection.On<object?>("Refresh", payload =>
+        {
+            refreshTcs.TrySetResult(payload);
+        });
+
+        await connection.StartAsync();
+        Assert.Equal(HubConnectionState.Connected, connection.State);
+
+        var payload = await refreshTcs.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.NotNull(payload);
+
+        var json = payload.ToString()!;
+        Assert.Contains("widgets", json);
+    }
 }
+

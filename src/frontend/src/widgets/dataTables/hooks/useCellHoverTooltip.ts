@@ -6,6 +6,7 @@ import { getCellFont } from "../utils/canvasText";
 import { getTruncatedCellTooltip } from "../utils/cellTooltip";
 import { DENSITY_CONFIG } from "../dataTableEditor/constants";
 import { DataColumn } from "../types/types";
+import { modifierKeyLabel } from "@/lib/shortcut";
 
 interface UseCellHoverTooltipProps {
   columns: DataColumn[];
@@ -35,6 +36,9 @@ const defaultTooltipLayout: CellTooltipLayout = {
   cellGap: 8,
   viewportInset: 8,
 };
+
+/** Modifier+click opens a link cell; see useCellInteractions. */
+const LINK_HINT = `${modifierKeyLabel()}+click to open link`;
 
 /** Positions tooltip above or below the cell based on available viewport space. */
 export function getCellTooltipPlacementStyle(
@@ -142,15 +146,12 @@ export const useCellHoverTooltip = ({
         return;
       }
 
-      const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-      const linkHint = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
-
       setTooltip({
         x: args.bounds.x + args.bounds.width / 2,
         y: args.bounds.y,
         cellHeight: args.bounds.height,
-        content: truncatedText ?? (isLinkCell ? linkHint : ""),
-        hint: truncatedText && isLinkCell ? linkHint : undefined,
+        content: truncatedText ?? (isLinkCell ? LINK_HINT : ""),
+        hint: truncatedText && isLinkCell ? LINK_HINT : undefined,
       });
     },
     [

@@ -51,6 +51,11 @@ describe("useCellHoverTooltip", () => {
     expect(hookSource).toContain("const columnWidth = args.bounds.width");
     expect(hookSource).not.toContain("getVisibleColumnWidthAt");
   });
+
+  it("should take the modifier label from lib/shortcut instead of sniffing navigator", () => {
+    expect(hookSource).toContain("modifierKeyLabel");
+    expect(hookSource).not.toContain("navigator.platform");
+  });
 });
 
 describe("getCellTooltipPlacementStyle", () => {

@@ -156,4 +156,66 @@ public class ProcessExtensionsTests
         Assert.True(sw.Elapsed < TimeSpan.FromSeconds(10),
             $"Post-kill should complete within 10s (5s kill timeout + margin), took {sw.Elapsed}");
     }
+
+    [Fact]
+    public async Task WaitForExitOrKillAsync_WithRedirectedOutput_ReturnsPromptlyOnProcessExit()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = OperatingSystem.IsWindows() ? "cmd.exe" : "/bin/sh",
+            Arguments = OperatingSystem.IsWindows() ? "/c echo Hello" : "-c \"echo Hello\"",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        Assert.NotNull(process);
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        var sw = Stopwatch.StartNew();
+        var result = await process.WaitForExitOrKillAsync(10000);
+        sw.Stop();
+
+        Assert.True(result);
+        Assert.True(process.HasExited);
+        Assert.Equal(0, process.ExitCode);
+        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task WaitForExitOrKillAsync_WhenChildHoldsRedirectedPipes_ReturnsPromptlyAfterParentExits()
+    {
+        if (OperatingSystem.IsWindows())
+            return;
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = "/bin/sh",
+            Arguments = "-c \"sleep 10 >&1 & exit 0\"",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+
+        using var process = new Process { StartInfo = psi };
+        process.OutputDataReceived += (_, _) => { };
+        process.ErrorDataReceived += (_, _) => { };
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        var sw = Stopwatch.StartNew();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var result = await process.WaitForExitOrKillAsync(cts.Token);
+        sw.Stop();
+
+        Assert.True(result);
+        Assert.True(process.HasExited);
+        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(3),
+            $"Should exit promptly without waiting for background child to close pipe, took {sw.Elapsed.TotalSeconds}s");
+    }
 }
