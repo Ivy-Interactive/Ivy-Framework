@@ -162,12 +162,6 @@
           "Microsoft.Extensions.Options": "10.0.9"
         }
       },
-      "Microsoft.NET.ILLink.Tasks": {
-        "type": "Direct",
-        "requested": "[10.0.7, )",
-        "resolved": "10.0.7",
-        "contentHash": "AA/yhzFHNtQZXLdqjzujPy25G8EWwGWsAnxOE2zYSBoT/8QHP6ketN3CToD3DFreO653ipUwnKHo22B8AlBMCw=="
-      },
       "Microsoft.OpenApi": {
         "type": "Direct",
         "requested": "[3.9.0, )",
@@ -799,19 +793,6 @@
           "Microsoft.Extensions.DependencyInjection": "[10.0.9, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.9, )"
         }
-      }
-    },
-    "net10.0/osx-arm64": {
-      "Ivy.NativeJsonDiff": {
-        "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "ZZgMZ+Q/i++tVP6igeW+LH+BF1GJqjOq6DwUNqiPoGGn2YC5fYz46jkA6loMNO6UCsb/GlFpIgb4rjAFJb2NtQ=="
-      },
-      "System.Diagnostics.EventLog": {
-        "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "qd01+AqPhbAG14KtdtIqFk+cxHQFZ/oqRSCoxU1F+Q6Kv0cl726sl7RzU9yLFGd4BUOKdN4XojXF0pQf/R6YeA=="
       }
     }
   }
