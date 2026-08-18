@@ -279,3 +279,32 @@ export function isLocalFilesEnabled(): boolean {
   const meta = document.querySelector('meta[name="ivy-dangerously-allow-local-files"]');
   return meta?.getAttribute("content") === "true";
 }
+
+export interface SignalRUrlOptions {
+  appId?: string | null;
+  appArgs?: string | null;
+  machineId: string;
+  parentId?: string | null;
+  shell: boolean;
+  oauthLogin?: string | null;
+}
+
+export function buildSignalRUrl(baseHost: string, options: SignalRUrlOptions): string {
+  const params = new URLSearchParams();
+  if (options.appId) {
+    params.set("appId", options.appId);
+  }
+  if (options.appArgs) {
+    params.set("appArgs", options.appArgs);
+  }
+  params.set("machineId", options.machineId);
+  if (options.parentId) {
+    params.set("parentId", options.parentId);
+  }
+  params.set("shell", String(options.shell));
+  if (options.oauthLogin) {
+    params.set("oauthLogin", options.oauthLogin);
+  }
+
+  return `${baseHost}/ivy/messages?${params.toString()}`;
+}
