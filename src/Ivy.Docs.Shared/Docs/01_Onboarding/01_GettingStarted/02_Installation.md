@@ -203,6 +203,18 @@ The server automatically optimizes its behavior based on the current environment
 | **Port Management** | Conflict detection & auto-shift | Strict port binding              |
 | **HTTPS** | Dev certificate (`dotnet dev-certs https --trust`) | Reverse proxy handles TLS |
 
+### Ivy Dev Tools (Chrome extension)
+
+Use Ivy Dev Tools to inspect and tweak widgets in a running Ivy app.
+
+- widget inspector, live prop editing, and source location links (VS Code/Rider).
+- **Requirements:** Node.js 18+, Chrome, and a local Ivy app URL (for example `http://localhost:5010`).
+- **Quick start (Windows):** run `.\dev.ps1 -Url "http://localhost:5010"` in the extension folder.
+- **Manual setup:** clone the extension repo first: `git clone https://github.com/Ivy-Interactive/Ivy-Dev-Tools && cd Ivy-Dev-Tools`, then run `npm install` and `npm run build` (or `npm run dev` for watch mode), then load `dist/` via `chrome://extensions` > **Load unpacked**.
+- **Optional IDE deep links:** install native host with `powershell -ExecutionPolicy Bypass -File native-host/install.ps1`, provide extension ID, then restart Chrome.
+
+Ivy Dev Tools is a Manifest V3 extension that runs through the DevTools panel and uses page-context evaluation (`inspectedWindow.eval`) to inspect Ivy widgets.
+
 ### Troubleshooting "command not found"
 
 If you have installed the tool but receive a `command not found: ivy` error, you likely need to add the .NET global tools directory to your system's PATH.
