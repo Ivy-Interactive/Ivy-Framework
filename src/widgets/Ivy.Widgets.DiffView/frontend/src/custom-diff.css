@@ -101,3 +101,14 @@
   background-color: var(--accent);
   color: var(--accent-foreground);
 }
+
+/* Virtualization / rendering performance for large diffs */
+.ivy-diff-file {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 400px;
+}
+
+.diff-hunk {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 150px;
+}
