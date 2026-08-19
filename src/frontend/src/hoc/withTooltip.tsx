@@ -28,10 +28,17 @@ function withTooltip<P extends React.JSX.IntrinsicAttributes>(Component: Compone
       return componentWithStyles;
     }
 
+    const isComponentDisabled = Boolean((restProps as Record<string, unknown>).disabled);
+    const trigger = isComponentDisabled ? (
+      <span className="inline-flex cursor-not-allowed">{componentWithStyles}</span>
+    ) : (
+      componentWithStyles
+    );
+
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{componentWithStyles}</TooltipTrigger>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
           <TooltipContent>{tooltipText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
