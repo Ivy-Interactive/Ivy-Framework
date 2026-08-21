@@ -811,3 +811,76 @@ describe("buildSignalRUrl", () => {
     expect(parsed.searchParams.has("oauthLogin")).toBe(false);
   });
 });
+
+describe("getAppArgs", () => {
+  const originalLocation = window.location;
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("returns explicit appArgs parameter if present", () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        search: "?appArgs=%7B%22foo%22%3A%22bar%22%7D",
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    expect(utils.getAppArgs()).toBe('{"foo":"bar"}');
+  });
+
+  it("converts arbitrary query parameters to JSON when explicit appArgs is not provided", () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        search: "?planId=00001-OptimizeDiffViewer&share=1",
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = utils.getAppArgs();
+    expect(result).not.toBeNull();
+    const parsed = JSON.parse(result!);
+    expect(parsed.planId).toBe("00001-OptimizeDiffViewer");
+    expect(parsed.share).toBe("1");
+  });
+
+  it("ignores reserved query parameters when constructing JSON args", () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        search: "?appId=drafts&shell=true&planId=00001-OptimizeDiffViewer",
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    const result = utils.getAppArgs();
+    expect(result).not.toBeNull();
+    const parsed = JSON.parse(result!);
+    expect(parsed.planId).toBe("00001-OptimizeDiffViewer");
+    expect(parsed.appId).toBeUndefined();
+    expect(parsed.shell).toBeUndefined();
+  });
+
+  it("returns null when no non-reserved query parameters exist", () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        search: "?appId=drafts&shell=true",
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    expect(utils.getAppArgs()).toBeNull();
+  });
+});
