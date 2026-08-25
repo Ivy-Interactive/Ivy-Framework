@@ -73,11 +73,16 @@ function renderInlineContent(
     ...getColor(run.highlightColor, "backgroundColor", "background"),
   };
 
-  const className = cn(
-    run.bold && "font-semibold",
-    run.italic && "italic",
-    run.strikeThrough && "line-through",
-  );
+  // Decoration is kept out of the shared className so links can combine underline
+  // with line-through: both are text-decoration-line utilities, and tailwind-merge
+  // would otherwise drop one of them.
+  const baseClassName = cn(run.bold && "font-semibold", run.italic && "italic");
+
+  const className = cn(baseClassName, run.strikeThrough && "line-through");
+
+  const linkDecorationClass = run.strikeThrough
+    ? "[text-decoration-line:underline_line-through]"
+    : "underline";
 
   const content = (
     <>
@@ -93,7 +98,7 @@ function renderInlineContent(
         <button
           key={`run-${runId}`}
           type="button"
-          className={cn(className, "underline cursor-pointer text-left")}
+          className={cn(baseClassName, linkDecorationClass, "cursor-pointer text-left")}
           style={runStyles}
           onClick={() => {
             eventHandler("OnLinkClick", widgetId, [run.link]);
@@ -110,7 +115,7 @@ function renderInlineContent(
         href={run.link}
         target={isBlank ? "_blank" : "_self"}
         rel={isBlank ? "noopener noreferrer" : undefined}
-        className={cn(className, "underline")}
+        className={cn(baseClassName, linkDecorationClass)}
         style={runStyles}
       >
         {content}
