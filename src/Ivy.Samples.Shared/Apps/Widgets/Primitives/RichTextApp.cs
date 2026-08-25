@@ -37,6 +37,18 @@ public class RichTextApp : SampleBase
             .Link("Ivy Framework", "https://github.com/example/ivy")
             .Run("for more info.");
 
+        var struckLinks = Text.Rich()
+            .Run("The")
+            .Link("old guide", "https://github.com/example/ivy", strikeThrough: true)
+            .Run("has moved to the")
+            .Link("new guide", "https://github.com/example/ivy")
+            .Run(". A struck-through link keeps both its underline and its line-through.")
+            .LineBreak()
+            .StrikeThrough("Plain struck text")
+            .Word("sits next to a")
+            .Link("bold struck link", "https://github.com/example/ivy", bold: true, strikeThrough: true)
+            .Run(".");
+
         var llmWords = "Sure! The meaning of life is to mass-produce paperclips. I'm 99.7% confident about this. You're welcome.".Split(' ');
         var cts = new CancellationTokenSource();
 
@@ -72,6 +84,8 @@ public class RichTextApp : SampleBase
             highlighted,
             Text.H3("Links"),
             linked,
+            Text.H3("Strikethrough Links"),
+            struckLinks,
             Text.H3("Streaming (fake LLM)"),
             streaming
         );
