@@ -31,6 +31,7 @@ public class ButtonApp() : SampleBase
     protected override object? BuildSample()
     {
         var label = UseState("Click a button");
+        var strikeThrough = UseState(true);
 
         var eventHandler = (Event<Button> e) =>
         {
@@ -120,6 +121,17 @@ public class ButtonApp() : SampleBase
                        .Icon(Icons.ExternalLink, Align.Right)
                    | new Button("Link Style", variant: ButtonVariant.Link)
                        .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+               )
+
+               | Text.H2("Strike Through")
+               | strikeThrough.ToBoolInput().Label("Strike through").Variant(BoolInputVariant.Switch)
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Primary", eventHandler).StrikeThrough(strikeThrough.Value)
+                   | new Button("Secondary", eventHandler, variant: ButtonVariant.Secondary).StrikeThrough(strikeThrough.Value)
+                   | new Button("Inline", eventHandler, variant: ButtonVariant.Inline).StrikeThrough(strikeThrough.Value)
+                   | new Button("Link", variant: ButtonVariant.Link)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+                       .StrikeThrough(strikeThrough.Value)
                )
 
                | Text.H2("AI Button")

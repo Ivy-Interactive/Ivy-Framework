@@ -94,6 +94,18 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
 
+## Strike Through
+
+Use `.StrikeThrough()` to draw a line through the button's text and dim it to muted gray. This is useful for links that point at something retired, expired or already handled.
+
+```csharp demo-tabs
+    Layout.Horizontal()
+        | new Button("Expired Link").Link()
+            .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+            .StrikeThrough()
+        | new Button("Cancelled").Secondary().StrikeThrough()
+```
+
 
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>
 

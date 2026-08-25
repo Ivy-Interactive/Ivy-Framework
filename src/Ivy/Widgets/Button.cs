@@ -76,6 +76,8 @@ public record Button : WidgetBase<Button>
 
     [Prop] public Colors? Foreground { get; set; }
 
+    [Prop] public bool StrikeThrough { get; set; }
+
     [Prop] public string? Url { get; set; }
 
     [Prop] public LinkTarget Target { get; set; } = LinkTarget.Self;
@@ -169,6 +171,8 @@ public static class ButtonExtensions
     public static Button Variant(this Button button, ButtonVariant variant) => button with { Variant = variant };
 
     public static Button Foreground(this Button button, Colors color) => button with { Foreground = color };
+
+    public static Button StrikeThrough(this Button button, bool strikeThrough = true) => button with { StrikeThrough = strikeThrough };
 
     public static Button Tooltip(this Button button, string tooltip) => button with { Tooltip = tooltip };
 
