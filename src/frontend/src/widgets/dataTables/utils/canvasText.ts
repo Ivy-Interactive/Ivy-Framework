@@ -1,4 +1,4 @@
-import { getDefaultTheme } from "@glideapps/glide-data-grid";
+import { getCSSVariable } from "@/lib/theme";
 import { Densities } from "@/types/density";
 import { DENSITY_CONFIG } from "../dataTableEditor/constants";
 
@@ -19,9 +19,10 @@ function getMeasureContext(): CanvasRenderingContext2D {
 
 /** Canvas font string aligned with glide grid theme and table density. */
 export function getCellFont(density: Densities = Densities.Medium): string {
-  const theme = getDefaultTheme();
   const { fontSize } = DENSITY_CONFIG[density];
-  return `${fontSize} ${theme.fontFamily}`;
+  const rawFontSans = getCSSVariable("--font-sans") || "Geist";
+  const fontSans = rawFontSans.replace(/^["']|["']$/g, "") || "Geist";
+  return `${fontSize} ${fontSans}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 }
 
 /**
