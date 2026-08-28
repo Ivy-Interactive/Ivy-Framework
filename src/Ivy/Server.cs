@@ -108,6 +108,7 @@ public class Server
     private PluginReferencesWatcher? _pluginReferencesWatcher;
     private Func<Server, WebApplicationBuilder, PluginContextBase>? _pluginContextFactory;
     private ManifestOptions? _manifestOptions;
+    private WebMcpOptions? _webMcpOptions;
     private ServerArgs _args;
     private bool _presetsLoaded;
 
@@ -528,6 +529,18 @@ public class Server
         _manifestOptions = new ManifestOptions();
         configure?.Invoke(_manifestOptions);
         Services.AddSingleton(_manifestOptions);
+        return this;
+    }
+
+    /// <summary>
+    /// Enables WebMCP, letting views expose tools to browser-resident AI agents with
+    /// <c>UseWebMcpTool</c>. Without this call the hook is inert and nothing is sent to the browser.
+    /// </summary>
+    public Server UseWebMcp(Action<WebMcpOptions>? configure = null)
+    {
+        _webMcpOptions = new WebMcpOptions();
+        configure?.Invoke(_webMcpOptions);
+        Services.AddSingleton(_webMcpOptions);
         return this;
     }
 
@@ -1364,6 +1377,7 @@ public static class WebApplicationExtensions
                 .Use<ThemeFilter>()
                 .Use<ManifestFilter>()
                 .Use<OpenGraphFilter>()
+                .Use<WebMcpFilter>()
                 .Use<BasePathFilter>();
 
             foreach (var filter in server.GetCustomFilters())
