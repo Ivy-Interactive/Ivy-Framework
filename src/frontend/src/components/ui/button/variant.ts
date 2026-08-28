@@ -15,7 +15,7 @@ export const buttonVariant = cva(
         success: "bg-success text-success-foreground shadow-sm hover:brightness-90",
         warning: "bg-warning text-warning-foreground shadow-sm hover:brightness-90",
         info: "bg-info text-info-foreground shadow-sm hover:brightness-90",
-        ghost: "hover:bg-accent",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline brightness-90 hover:brightness-100",
         inline: "text-primary underline hover:no-underline !p-0 !h-auto",
         ai: "bg-background  hover:bg-accent hover:text-accent-foreground",
