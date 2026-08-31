@@ -182,6 +182,8 @@ The `OAuthProviders` class provides constants for supported providers:
 - `OAuthProviders.Notion` - Notion
 - `OAuthProviders.GitLab` - GitLab
 - `OAuthProviders.Bitbucket` - Bitbucket
+- `OAuthProviders.Sliplane` - Sliplane
+- `OAuthProviders.Claude` - Claude (Anthropic, claude.ai OAuth)
 
 ### Registering Token Handlers
 
@@ -189,10 +191,11 @@ For an OAuth provider to appear in the brokered sessions dictionary, there must 
 
 **Built-in Handlers**
 
-Ivy provides pre-built token handlers for Google and GitHub. Simply add the NuGet package to your project:
+Ivy provides pre-built token handlers for common OAuth providers (for example Google, GitHub, and Claude). Add the corresponding NuGet package to your project:
 
 - `Ivy.Auth.Google` - Provides `GoogleAuthTokenHandler`
 - `Ivy.Auth.GitHub` - Provides `GitHubAuthTokenHandler`
+- `Ivy.Auth.Claude` - Provides `ClaudeAuthTokenHandler` (Anthropic claude.ai OAuth)
 
 **Configuration for Google Token Handler**
 
@@ -262,6 +265,7 @@ Ivy supports the following authentication providers. Click on any provider for d
 - **[Microsoft Entra](02_MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
 - **[Authelia](02_Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
 - **[Sliplane](02_Sliplane.md)** - OAuth 2.0 sign-in for apps deployed or integrated with Sliplane
+- **[Claude (Anthropic)](02_Claude.md)** - OAuth 2.0 sign-in with a Claude.ai account (PKCE)
 - **[Basic Auth](02_BasicAuth.md)** - Simple username/password authentication for development and internal tools
 
 ## Examples

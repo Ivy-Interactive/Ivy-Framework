@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ClaudeExample</RootNamespace>
+    <UserSecretsId>ivy-auth-claude-example</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\..\..\Ivy.Desktop\Ivy.Desktop.csproj" />
+    <ProjectReference Include="..\..\..\Ivy.Analyser\Ivy.Analyser.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Ivy.Auth.Claude\Ivy.Auth.Claude.csproj" />
+    <ProjectReference Include="..\Ivy.Auth.Examples.Shared\Ivy.Auth.Examples.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
