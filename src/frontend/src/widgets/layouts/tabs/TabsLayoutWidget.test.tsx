@@ -70,3 +70,31 @@ describe("TabsLayoutWidget - Content variant", () => {
     expect(highlight).toBeNull();
   });
 });
+
+describe("TabsLayoutWidget - Tabs variant", () => {
+  it("renders add button with semantic hover style and not hardcoded hover:bg-gray-200", () => {
+    mount(
+      <TabsLayoutWidget
+        id="test-tabs"
+        variant="Tabs"
+        selectedIndex={0}
+        addButtonText="+"
+        events={["OnAddButtonClick"]}
+      >
+        {[
+          <TabWidget key="tab-1" id="tab-1" title="Tab 1">
+            {[<div key="1">Content 1</div>]}
+          </TabWidget>,
+        ]}
+      </TabsLayoutWidget>,
+    );
+
+    const buttons = Array.from(container.querySelectorAll("button"));
+    const addButton = buttons.find((btn) => btn.textContent?.includes("+"));
+    expect(addButton).toBeDefined();
+
+    const className = addButton?.getAttribute("class") || "";
+    expect(className).toContain("hover:bg-muted/50");
+    expect(className).not.toContain("hover:bg-gray-200");
+  });
+});
