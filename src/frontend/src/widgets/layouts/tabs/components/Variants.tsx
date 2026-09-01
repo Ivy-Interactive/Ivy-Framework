@@ -314,7 +314,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                 {addButtonText && (
                   <button
                     onClick={() => safeEvent("OnAddButtonClick", [0])}
-                    className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none ml-2"
+                    className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none ml-2"
                   >
                     <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
                       {addButtonText}
