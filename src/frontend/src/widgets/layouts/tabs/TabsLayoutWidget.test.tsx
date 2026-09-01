@@ -33,12 +33,14 @@ describe("TabsLayoutWidget - Content variant", () => {
   it("renders tab buttons with subtle hover styles and not hover:bg-secondary", () => {
     mount(
       <TabsLayoutWidget id="test-tabs" variant="Content" selectedIndex={0} events={["OnSelect"]}>
-        <TabWidget id="tab-1" title="Tab 1">
-          <div>Content 1</div>
-        </TabWidget>
-        <TabWidget id="tab-2" title="Tab 2">
-          <div>Content 2</div>
-        </TabWidget>
+        {[
+          <TabWidget key="tab-1" id="tab-1" title="Tab 1">
+            {[<div key="1">Content 1</div>]}
+          </TabWidget>,
+          <TabWidget key="tab-2" id="tab-2" title="Tab 2">
+            {[<div key="2">Content 2</div>]}
+          </TabWidget>,
+        ]}
       </TabsLayoutWidget>,
     );
 
@@ -56,9 +58,11 @@ describe("TabsLayoutWidget - Content variant", () => {
   it("does not render dead static hover highlight element", () => {
     mount(
       <TabsLayoutWidget id="test-tabs" variant="Content" selectedIndex={0} events={[]}>
-        <TabWidget id="tab-1" title="Tab 1">
-          <div>Content 1</div>
-        </TabWidget>
+        {[
+          <TabWidget key="tab-1" id="tab-1" title="Tab 1">
+            {[<div key="1">Content 1</div>]}
+          </TabWidget>,
+        ]}
       </TabsLayoutWidget>,
     );
 
