@@ -106,14 +106,6 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           className={"relative flex gap-x-[6px] gap-y-[20px] items-center"}
           role="tablist"
         >
-          {/* Hover Highlight */}
-          <div
-            className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
-            style={{
-              opacity: activeIndex !== null ? 1 : 0,
-              pointerEvents: "none",
-            }}
-          />
           <div
             className={cn(
               "absolute bottom-[-6px] h-[2px] bg-foreground",
@@ -143,7 +135,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                 aria-selected={index === activeIndex}
                 tabIndex={0}
                 className={cn(
-                  "px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px] rounded-selector hover:bg-secondary",
+                  "px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px] rounded-selector hover:text-foreground hover:bg-muted/50",
                   index === activeIndex ? "text-foreground" : "text-muted-foreground",
                 )}
                 onClick={() => {
@@ -174,7 +166,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           {addButtonText && (
             <button
               onClick={() => safeEvent("OnAddButtonClick", [0])}
-              className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none ml-2"
+              className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-[6px] flex items-center justify-center aspect-square border-none ml-2"
             >
               <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
                 {addButtonText}
