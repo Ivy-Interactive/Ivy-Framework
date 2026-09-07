@@ -14,27 +14,11 @@ The analyzer enforces that hooks must be called:
 
 ## Installation
 
-### Using Package Manager Console
-
-```powershell
-Install-Package Ivy.Analyser
-```
-
-### Using .NET CLI
+The analyzer ships inside the `Ivy` package under `analyzers/dotnet/cs/`, so it is active in any
+project that references `Ivy` — there is nothing extra to install.
 
 ```bash
-dotnet add package Ivy.Analyser
-```
-
-### Using PackageReference
-
-Add the following to your `.csproj` file:
-
-```xml
-<PackageReference Include="Ivy.Analyser" Version="1.0.0">
-  <PrivateAssets>all</PrivateAssets>
-  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-</PackageReference>
+dotnet add package Ivy
 ```
 
 ## Rules Enforced

@@ -63,10 +63,14 @@ public static class AcmePluginContextExtensions
 
 Not every plugin needs UI. A plugin that registers an exporter, handles a lifecycle hook, or talks to an external API has no reason to take the entire Ivy framework as a dependency. So split your abstractions in two:
 
-| Package | References | For plugins that |
-|---------|------------|------------------|
-| `Acme.Plugin.Abstractions` | `Ivy.Plugin.Abstractions` | contribute services, handlers, and integrations — no UI |
-| `Acme.Plugin.Extended.Abstractions` | `Acme.Plugin.Abstractions` + `Ivy` | also register apps, widgets, or HTTP endpoints |
+| Package | Uses | For plugins that |
+|---------|------|------------------|
+| `Acme.Plugin.Abstractions` | `Ivy.Plugin.Abstractions.dll` only | contribute services, handlers, and integrations — no UI |
+| `Acme.Plugin.Extended.Abstractions` | `Acme.Plugin.Abstractions` + `Ivy.dll` | also register apps, widgets, or HTTP endpoints |
+
+Both assemblies come from the `Ivy` package, so both projects reference it; what differs is which
+types they are allowed to use. Keeping `Ivy` types out of the base package is what lets a headless
+plugin be written — and version-checked — without the framework in its contract surface.
 
 The base package:
 
@@ -80,7 +84,8 @@ The base package:
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ivy.Plugin.Abstractions" Version="1.3.16" />
+    <!-- Ivy.Plugin.Abstractions.dll ships inside the Ivy package -->
+    <PackageReference Include="Ivy" Version="1.4.0" />
   </ItemGroup>
 
 </Project>
@@ -99,7 +104,7 @@ The extended package:
 
   <ItemGroup>
     <ProjectReference Include="../Acme.Plugin.Abstractions/Acme.Plugin.Abstractions.csproj" />
-    <PackageReference Include="Ivy" Version="1.3.16" />
+    <PackageReference Include="Ivy" Version="1.4.0" />
   </ItemGroup>
 
 </Project>
@@ -172,7 +177,7 @@ While your abstractions package is under active development you often want to bu
 </ItemGroup>
 
 <ItemGroup Condition="'$(IvySource)' != 'true'">
-  <PackageReference Include="Ivy.Plugin.Abstractions" Version="1.3.16" />
+  <PackageReference Include="Ivy" Version="1.4.0" />
 </ItemGroup>
 ```
 

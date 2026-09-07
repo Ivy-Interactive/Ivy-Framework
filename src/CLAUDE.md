@@ -8,6 +8,11 @@ A signature change can cause `MissingMethodException` for deployed plugins.
 API compatibility is enforced in CI via `EnablePackageValidation`. If your change breaks the API
 surface, the pack step will fail. See "Handling intentional breaks" below.
 
+`Ivy.Plugin.Abstractions` is no longer published as its own NuGet package — its assembly ships
+inside `Ivy.nupkg` under `lib/net10.0/`. The project keeps its own `PackageValidationBaselineVersion`
+and is still packed in CI purely to run that API-compat check, so both projects below must be packed
+when regenerating suppressions.
+
 ## Rules
 
 ### NEVER (binary-breaking for deployed plugins):

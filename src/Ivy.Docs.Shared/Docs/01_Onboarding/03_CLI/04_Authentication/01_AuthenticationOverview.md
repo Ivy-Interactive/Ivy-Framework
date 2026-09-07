@@ -189,7 +189,8 @@ For an OAuth provider to appear in the brokered sessions dictionary, there must 
 
 **Built-in Handlers**
 
-Ivy provides pre-built token handlers for Google and GitHub. Simply add the NuGet package to your project:
+Ivy provides pre-built token handlers for Google and GitHub. Add the `Ivy.Auth` package to your
+project (`dotnet add package Ivy.Auth`) and import the namespace you need:
 
 - `Ivy.Auth.Google` - Provides `GoogleAuthTokenHandler`
 - `Ivy.Auth.GitHub` - Provides `GitHubAuthTokenHandler`
