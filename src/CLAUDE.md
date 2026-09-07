@@ -8,10 +8,18 @@ A signature change can cause `MissingMethodException` for deployed plugins.
 API compatibility is enforced in CI via `EnablePackageValidation`. If your change breaks the API
 surface, the pack step will fail. See "Handling intentional breaks" below.
 
-`Ivy.Plugin.Abstractions` is no longer published as its own NuGet package — its assembly ships
+`Ivy.Plugin.Abstractions` is no longer published as its own NuGet package: its assembly ships
 inside `Ivy.nupkg` under `lib/net10.0/`. The project keeps its own `PackageValidationBaselineVersion`
 and is still packed in CI purely to run that API-compat check, so both projects below must be packed
 when regenerating suppressions.
+
+Because `Ivy.csproj` sets `PrivateAssets="all"` on its reference to `Ivy.Plugin.Abstractions` (to avoid emitting an external package dependency), `Ivy.Plugin.Abstractions.dll` does not flow transitively through in-repo `ProjectReference` chains. Any in-repo project consuming types from the `Ivy.Plugins` namespace (e.g. plugin hosts, test suites, example apps) must include an explicit project reference:
+
+```xml
+<ProjectReference Include="../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
+```
+
+External NuGet consumers referencing `<PackageReference Include="Ivy" />` are unaffected because the assembly is packaged directly inside `Ivy.nupkg` under `lib/net10.0/`.
 
 ## Rules
 
