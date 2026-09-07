@@ -42,6 +42,7 @@ interface ButtonWidgetProps {
   disabled: boolean;
   tooltip?: string;
   foreground?: string;
+  strikeThrough?: boolean;
   loading?: boolean;
   url?: string;
   target?: "Blank" | "Self";
@@ -100,6 +101,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   disabled = false,
   tooltip,
   foreground,
+  strikeThrough = false,
   url,
   target = "Self",
   loading = false,
@@ -343,6 +345,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           disabled={disabled}
           className={cn(
             "relative z-10 flex items-center gap-1",
+            strikeThrough && "line-through text-muted-foreground",
             getContainerHeight().button,
             borderRadiusClasses.button,
             buttonSize !== "icon" && !hasExplicitWidth && "w-min",
@@ -403,6 +406,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             ? "p-2 h-auto items-start justify-start text-left"
             : "p-2 h-auto items-start justify-start text-left inline-block"),
         (variant === "Link" || variant === "Inline") && "min-w-0 max-w-full overflow-hidden",
+        strikeThrough && "line-through text-muted-foreground",
       )}
       tooltipText={
         tooltip || ((variant === "Link" || variant === "Inline") && title ? title : undefined)

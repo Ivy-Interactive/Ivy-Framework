@@ -618,7 +618,7 @@ const CollapsibleMenuItem: React.FC<{
     const triggerClasses = cn(
       "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left overflow-hidden",
       isActive
-        ? "bg-secondary text-accent-foreground"
+        ? "bg-secondary text-secondary-foreground"
         : "hover:bg-accent hover:text-accent-foreground",
       isPenHovered && "bg-accent text-accent-foreground",
       menuButtonRailClasses(collapsed),
@@ -712,7 +712,7 @@ const CollapsibleMenuItem: React.FC<{
               "flex w-full items-center gap-2 rounded-selector p-2 text-large-label cursor-pointer h-8 text-left relative",
               collapsed ? "overflow-visible" : "overflow-hidden",
               isActive
-                ? "bg-secondary text-accent-foreground"
+                ? "bg-secondary text-secondary-foreground"
                 : "hover:bg-accent hover:text-accent-foreground",
               isPenHovered && "bg-accent text-accent-foreground",
               menuButtonRailClasses(collapsed),
@@ -734,7 +734,7 @@ const CollapsibleMenuItem: React.FC<{
             <span className={menuLabelClasses(collapsed)}>{item.label}</span>
             {item.badge &&
               (collapsed ? (
-                <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-primary-foreground select-none">
+                <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-medium leading-none tabular-nums font-sans text-primary-foreground select-none">
                   {item.badge}
                 </span>
               ) : (
@@ -771,7 +771,7 @@ const MenuItemButton: React.FC<{
           collapsed ? "overflow-visible" : "overflow-hidden",
           level === 1 ? "text-body" : "text-body",
           isActive
-            ? "bg-secondary text-accent-foreground"
+            ? "bg-secondary text-secondary-foreground"
             : "hover:bg-accent hover:text-accent-foreground",
           isPenHovered && "bg-accent text-accent-foreground",
           menuButtonRailClasses(collapsed),
@@ -793,7 +793,7 @@ const MenuItemButton: React.FC<{
         <span className={menuLabelClasses(collapsed)}>{item.label}</span>
         {item.badge &&
           (collapsed ? (
-            <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-primary-foreground select-none">
+            <span className="absolute -top-1 -right-1 z-10 pointer-events-none inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-medium leading-none tabular-nums font-sans text-primary-foreground select-none">
               {item.badge}
             </span>
           ) : (

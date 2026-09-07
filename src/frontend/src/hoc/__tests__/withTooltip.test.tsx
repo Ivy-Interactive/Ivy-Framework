@@ -27,7 +27,7 @@ afterEach(() => {
 
 const TestButton = React.forwardRef<
   HTMLButtonElement,
-  React.JSX.IntrinsicAttributes & { label?: string }
+  React.JSX.IntrinsicAttributes & { label?: string; disabled?: boolean }
 >(({ label, ...props }, ref) => (
   <button ref={ref} {...props}>
     {label ?? "click"}
@@ -61,11 +61,13 @@ describe("withTooltip forwardRef", () => {
     expect(WrappedButton.displayName).toBe("withTooltip(TestButton)");
   });
 
-  it("falls back to Component name for displayName", () => {
-    function MyWidget() {
-      return <span />;
-    }
-    const Wrapped = withTooltip(MyWidget);
-    expect(Wrapped.displayName).toBe("withTooltip(MyWidget)");
+  it("wraps disabled components in a span for tooltip trigger", () => {
+    mount(<WrappedButton tooltipText="disabled tip" label="disabled btn" disabled />);
+    const spanWrapper = container.querySelector("span.cursor-not-allowed");
+    expect(spanWrapper).not.toBeNull();
+    const button = spanWrapper!.querySelector("button");
+    expect(button).not.toBeNull();
+    expect(button!.hasAttribute("disabled")).toBe(true);
+    expect(button!.textContent).toBe("disabled btn");
   });
 });

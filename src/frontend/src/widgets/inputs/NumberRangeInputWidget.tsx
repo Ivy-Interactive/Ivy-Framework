@@ -396,9 +396,9 @@ export const NumberRangeInputWidget = memo(
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={handleClear}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  className="p-1 rounded-selector text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none cursor-pointer"
                 >
-                  <X className="size-4 text-muted-foreground hover:text-foreground" />
+                  <X className="size-4" />
                 </button>
               )}
               {invalid && <InvalidIcon message={invalid} />}

@@ -446,3 +446,19 @@ details:not([open]) {
     box-shadow: none !important;
   }
 }
+
+/* Contrast adaptation for muted text inside colored background surfaces (e.g. active secondary/primary buttons) */
+@layer utilities {
+  :where(
+      .bg-primary,
+      [data-variant="primary"],
+      .bg-secondary,
+      [data-variant="secondary"],
+      .bg-destructive,
+      [data-variant="destructive"]
+    )
+    :is(.text-muted-foreground, .text-muted) {
+    color: currentColor;
+    opacity: 0.75;
+  }
+}

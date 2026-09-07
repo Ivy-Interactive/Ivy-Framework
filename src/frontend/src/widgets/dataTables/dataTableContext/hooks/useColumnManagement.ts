@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GridColumn, getDefaultTheme } from "@glideapps/glide-data-grid";
+import { GridColumn } from "@glideapps/glide-data-grid";
 import { DataColumn } from "../../types/types";
 import {
   parseSize,
@@ -9,6 +9,7 @@ import {
   getSizeMode,
 } from "../utils/columnSizing";
 import type * as arrow from "apache-arrow";
+import { getCSSVariable } from "@/lib/theme";
 
 interface UseColumnManagementProps {
   columnsProp: DataColumn[];
@@ -78,9 +79,11 @@ export const useColumnManagement = ({
         }
 
         // First time loading, initialize with default widths
-        const defaultTheme = getDefaultTheme();
-        const headerFont = `${defaultTheme.headerFontStyle} ${defaultTheme.fontFamily}`;
-        const contentFont = `${defaultTheme.baseFontStyle} ${defaultTheme.fontFamily}`;
+        const rawFontSans = getCSSVariable("--font-sans") || "Geist";
+        const fontSans = rawFontSans.replace(/^["']|["']$/g, "") || "Geist";
+        const fontFam = `${fontSans}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        const headerFont = `600 13px ${fontFam}`;
+        const contentFont = `13px ${fontFam}`;
         const widths: Record<string, number> = {};
 
         const growColumnIndices: number[] = [];

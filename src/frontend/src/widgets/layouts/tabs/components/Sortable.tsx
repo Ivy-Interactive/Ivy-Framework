@@ -86,7 +86,7 @@ export function SortableDropdownMenuItem({
       aria-label={children?.toString() ?? "Tab"}
       tabIndex={0}
       className={cn(
-        "group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent",
+        "group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent hover:text-accent-foreground",
         isActive && "bg-accent text-accent-foreground",
       )}
     >
@@ -95,7 +95,7 @@ export function SortableDropdownMenuItem({
         <button
           type="button"
           aria-label="Close tab"
-          className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
+          className="ml-auto opacity-60 p-1 hover:opacity-100 hover:bg-accent hover:text-accent-foreground invisible group-hover:visible cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             window.dispatchEvent(new CustomEvent("tab-close", { detail: { id } }));

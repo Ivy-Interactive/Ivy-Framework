@@ -168,6 +168,7 @@ export const tableStyles = {
 
       /* Autocomplete dropdown styling - shadcn style */
       .cm-tooltip-autocomplete {
+        z-index: 1000 !important;
         background: var(--popover) !important;
         border: 1px solid var(--border) !important;
         border-radius: calc(var(--radius-boxes) - 2px) !important;
@@ -177,6 +178,14 @@ export const tableStyles = {
         font-size: 12px !important;
         max-height: 300px !important;
         overflow-y: auto !important;
+      }
+
+      .cm-tooltip-autocomplete.cm-tooltip-below {
+        margin-top: 8px !important;
+      }
+
+      .cm-tooltip-autocomplete.cm-tooltip-above {
+        margin-bottom: 8px !important;
       }
 
       .cm-tooltip-autocomplete > ul {

@@ -213,7 +213,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
 
         return (
           // scrollMarginTop keeps the jump-to-file target clear of the sticky dropdown.
-          <div key={fileIndex} id={elementId} style={{ scrollMarginTop: showFileDropdown ? "2rem" : 0 }}>
+          <div key={fileIndex} id={elementId} className="ivy-diff-file" style={{ scrollMarginTop: showFileDropdown ? "2rem" : 0 }}>
             {hasHeader && (
               <div
                 className={`relative flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10 rounded-t-md before:absolute before:-top-px before:inset-x-0 before:h-2 before:bg-[var(--muted)] before:rounded-t-md${collapsible ? " cursor-pointer select-none" : ""}`}

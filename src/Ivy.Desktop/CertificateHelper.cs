@@ -65,7 +65,11 @@ public static class CertificateHelper
         {
             try
             {
-                loadedCert = X509CertificateLoader.LoadPkcs12FromFile(pfxPath, password: null);
+                loadedCert = X509CertificateLoader.LoadPkcs12FromFile(
+                    pfxPath,
+                    password: null,
+                    keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
+
                 // Check if expired
                 if (DateTime.UtcNow > loadedCert.NotAfter.ToUniversalTime())
                 {
@@ -87,14 +91,17 @@ public static class CertificateHelper
             File.WriteAllBytes(pfxPath, pfxBytes);
             File.WriteAllBytes(crtPath, crtBytes);
 
-            loadedCert = X509CertificateLoader.LoadPkcs12(pfxBytes, password: null);
+            loadedCert = X509CertificateLoader.LoadPkcs12(
+                pfxBytes,
+                password: null,
+                keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
 
             // Trust the certificate if running on macOS/Windows
-            if (OperatingSystem.IsMacOS())
+            if (OperatingSystem.IsMacOS() && !isBundledPath)
             {
                 TrustCertificateOnMac(crtPath, loadedCert);
             }
-            else if (OperatingSystem.IsWindows())
+            else if (OperatingSystem.IsWindows() && !isBundledPath)
             {
                 TrustCertificateOnWindows(loadedCert);
             }
@@ -102,11 +109,11 @@ public static class CertificateHelper
         else
         {
             // If the certificate already exists, check if it's trusted.
-            if (OperatingSystem.IsMacOS() && !IsCertificateTrustedOnMac(crtPath, loadedCert))
+            if (OperatingSystem.IsMacOS() && !isBundledPath && !IsCertificateTrustedOnMac(crtPath, loadedCert))
             {
                 TrustCertificateOnMac(crtPath, loadedCert);
             }
-            else if (OperatingSystem.IsWindows() && !IsCertificateTrustedOnWindows(loadedCert))
+            else if (OperatingSystem.IsWindows() && !isBundledPath && !IsCertificateTrustedOnWindows(loadedCert))
             {
                 TrustCertificateOnWindows(loadedCert);
             }
@@ -210,6 +217,24 @@ public static class CertificateHelper
                 {
                     process.WaitForExit();
                     if (process.ExitCode == 0)
+                        return true;
+                }
+
+                // Check if certificate is present in System.keychain
+                var checkSystemPsi = new ProcessStartInfo
+                {
+                    FileName = "security",
+                    Arguments = "find-certificate -c localhost /Library/Keychains/System.keychain",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                };
+                using var sysProc = Process.Start(checkSystemPsi);
+                if (sysProc != null)
+                {
+                    sysProc.WaitForExit();
+                    if (sysProc.ExitCode == 0)
                         return true;
                 }
             }

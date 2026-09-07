@@ -138,7 +138,7 @@ const DropDownMenuItemGroup = ({
             )}
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuSubContent className="m-2">
+            <DropdownMenuSubContent>
               <DropDownMenuItemGroup
                 items={item.children}
                 onItemClick={onItemClick}

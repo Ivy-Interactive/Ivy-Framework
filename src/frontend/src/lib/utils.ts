@@ -62,7 +62,24 @@ export function getAppId(): string | null {
 
 export function getAppArgs(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("appArgs");
+  const explicitAppArgs = urlParams.get("appArgs");
+  if (explicitAppArgs) {
+    return explicitAppArgs;
+  }
+
+  // If no explicit appArgs parameter, collect all remaining query params (except framework-reserved ones)
+  const reservedParams = new Set(["appId", "parentId", "shell", "chrome", "oauthLogin"]);
+  const argsObj: Record<string, string> = {};
+  let hasArgs = false;
+
+  for (const [key, value] of urlParams.entries()) {
+    if (!reservedParams.has(key)) {
+      argsObj[key] = value;
+      hasArgs = true;
+    }
+  }
+
+  return hasArgs ? JSON.stringify(argsObj) : null;
 }
 
 export function getParentId(): string | null {

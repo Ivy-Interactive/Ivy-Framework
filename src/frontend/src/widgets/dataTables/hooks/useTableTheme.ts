@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Theme } from "@glideapps/glide-data-grid";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
-import { ThemeColors } from "@/lib/theme";
+import { getCSSVariable, ThemeColors } from "@/lib/theme";
 import { Densities } from "@/types/density";
 import { DENSITY_CONFIG } from "../dataTableEditor/constants";
 
@@ -36,7 +36,14 @@ export const useTableTheme = ({
     monitorSystem: true,
     customThemeGenerator: (colors: ThemeColors, isDark: boolean): Partial<Theme> => {
       const bgHeader = colors.background || (isDark ? "#1a1a1f" : "#f9fafb");
+      const rawFontSans = getCSSVariable("--font-sans") || "Geist";
+      const fontSans = rawFontSans.replace(/^["']|["']$/g, "") || "Geist";
+      const resolvedFontFamily = `${fontSans}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       return {
+        fontFamily: resolvedFontFamily,
+        headerFontStyle: "600 13px",
+        baseFontStyle: "13px",
+        editorFontSize: "13px",
         bgCell: colors.background || (isDark ? "#000000" : "#ffffff"),
         bgHeader,
         bgHeaderHasFocus: colors.muted || (isDark ? "#26262b" : "#f3f4f6"),

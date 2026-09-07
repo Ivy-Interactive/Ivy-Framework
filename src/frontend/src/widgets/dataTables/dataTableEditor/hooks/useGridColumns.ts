@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { getDefaultTheme } from "@glideapps/glide-data-grid";
 import { convertToGridColumns } from "../../utils/columnHelpers";
 import { useColumnGroups } from "../../hooks/useColumnGroups";
 import { DataColumn } from "../../types/types";
 import type { SortOrder } from "@/services/grpcTableService";
+import { getCSSVariable } from "@/lib/theme";
 
 interface UseGridColumnsProps {
   columns: DataColumn[];
@@ -26,8 +26,9 @@ export const useGridColumns = ({
   activeSort,
 }: UseGridColumnsProps) => {
   const headerFont = useMemo(() => {
-    const t = getDefaultTheme();
-    return `${t.headerFontStyle} ${t.fontFamily}`;
+    const rawFontSans = getCSSVariable("--font-sans") || "Geist";
+    const fontSans = rawFontSans.replace(/^["']|["']$/g, "") || "Geist";
+    return `600 13px ${fontSans}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   }, []);
 
   // Convert columns to grid format with proper widths
