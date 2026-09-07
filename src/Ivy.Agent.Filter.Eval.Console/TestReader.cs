@@ -1,4 +1,3 @@
-using Ivy.Agent.Filter;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 

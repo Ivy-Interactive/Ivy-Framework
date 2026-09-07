@@ -1,5 +1,3 @@
-using Ivy.Agent.Filter;
-
 namespace Ivy.Agent.Filter.Eval.Console;
 
 public record TestSuite(
