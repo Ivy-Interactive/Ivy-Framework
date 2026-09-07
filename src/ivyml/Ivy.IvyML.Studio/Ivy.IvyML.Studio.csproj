@@ -14,8 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
-    <ProjectReference Include="..\..\Ivy.Hooks.Pty\Ivy.Hooks.Pty.csproj" />
-    <ProjectReference Include="..\..\widgets\Ivy.Widgets.Xterm\Ivy.Widgets.Xterm.csproj" />
     <ProjectReference Include="..\Ivy.IvyML\Ivy.IvyML.csproj" />
     <ProjectReference Include="..\..\Ivy.XamlBuilder\Ivy.XamlBuilder.csproj" />
     <!-- Reference the dev IvyML console so its built `ivyml.dll` lands in our output dir;

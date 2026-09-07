@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Hooks.Pty\Ivy.Hooks.Pty.csproj" />
+    <ProjectReference Include="..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
 </Project>

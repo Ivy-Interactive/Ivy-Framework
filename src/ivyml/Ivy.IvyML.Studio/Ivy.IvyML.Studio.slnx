@@ -12,12 +12,7 @@
   <Folder Name="/Core/">
     <Project Path="../../Ivy/Ivy.csproj" />
     <Project Path="../../Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
-    <Project Path="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
     <Project Path="../../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
-    <Project Path="../../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
     <Project Path="../../Ivy.Analyser/Ivy.Analyser.csproj" />
-  </Folder>
-  <Folder Name="/Widgets/">
-    <Project Path="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
   </Folder>
 </Solution>
