@@ -34,11 +34,11 @@ The topmost view in an Ivy application is called an [App](https://docs.ivy.app/o
 [App(title: "Customers", icon: Icons.Rocket, group: new[] { "CRM" })]
 public class CustomersApp : ViewBase
 
-- `title` is optional — if omitted, it is derived from the class name (e.g. `CustomersApp` → "Customers").
-- `icon` uses the `Icons` enum — these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
+- `title` is optional: if omitted, it is derived from the class name (e.g. `CustomersApp` -> "Customers").
+- `icon` uses the `Icons` enum: these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
 - `group` groups the app in the navigation sidebar (e.g. `group: new[] { "Apps" }`).
-- There is no `chrome` parameter. Chrome is configured in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`. Always ensure `server.AddAppsFromAssembly()` is called before `UseDefaultApp` — without it, `[App]`-attributed classes are not registered and the server throws at runtime.
-- Use **lowercase** parameter names (`icon:`, `group:`), NOT PascalCase property names (`Icon =`, `Group =`) — PascalCase causes CS0655.
+- There is no `chrome` parameter. Chrome is configured in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`. Always ensure `server.AddAppsFromAssembly()` is called before `UseDefaultApp`: without it, `[App]`-attributed classes are not registered and the server throws at runtime.
+- Use **lowercase** parameter names (`icon:`, `group:`), NOT PascalCase property names (`Icon =`, `Group =`): PascalCase causes CS0655.
 
 An app is built into a tree of widgets. This is what's rendered to the screen.
 
@@ -47,7 +47,7 @@ An app is built into a tree of widgets. This is what's rendered to the screen.
 A typical Ivy project has this folder structure:
 
 MyProject/
-├── Program.cs                  # Entry point — configures and starts the Ivy server
+├── Program.cs                  # Entry point: configures and starts the Ivy server
 ├── MyProject.csproj            # Project file
 ├── Apps/                       # All app classes go here (convention)
 │   ├── DashboardApp.cs
@@ -92,11 +92,11 @@ var myService = UseService<IMyService>();
 
 - Use Layout.Vertical() or Layout.Horizontal() to create stack layouts.
 - Layout.Grid()
-— Layout.Wrap()
+- Layout.Wrap()
 - Add Children: Pipe child elements using the | operator to arrange them top-to-bottom (vertical) or left-to-right (horizontal).
 - Layouts can be customized with methods like .Gap(int number) to set spacing between children. Use .Left(), .Center(), or .Right() methods to control alignment.
 - The number in Gap(int number) works the same as in Tailwind CSS spacing scale (e.g., 1 = 0.25rem, 2 = 0.5rem, etc.).
-- Layouts have a default gap of 4 (1rem). Do NOT add `.Gap(4)` — it is the default and adds unnecessary noise. Only use `.Gap()` when you need a value other than 4.
+- Layouts have a default gap of 4 (1rem). Do NOT add `.Gap(4)`: it is the default and adds unnecessary noise. Only use `.Gap()` when you need a value other than 4.
 - `.Padding()` is rarely needed. Layouts and pages already have appropriate padding by default. Only add `.Padding()` when you need extra inner spacing for a specific design reason.
 
 // Basic Vertical Layout
@@ -160,7 +160,7 @@ Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lim
 All widgets support `.Density(Density.Small)`, `.Density(Density.Medium)`, `.Density(Density.Large)`.
 Convenience methods: `.Small()`, `.Medium()`, `.Large()`.
 Density adjusts the overall visual size of a widget (text, padding, etc.).
-There is no `ButtonSize` enum — use `Density` for all widgets.
+There is no `ButtonSize` enum; use `Density` for all widgets.
 
 ## Size
 
@@ -169,12 +169,12 @@ There is no `ButtonSize` enum — use `Density` for all widgets.
 
 Common Size values:
 
-- Size.Units(n) — Tailwind spacing scale (n × 0.25rem)
-- Size.Full() — 100%
-- Size.Fit() — fit-content
-- Size.Auto() — auto
-- Size.Px(n) — exact pixels
-- Size.Fraction(0.5f) — percentage, Size.Half(), Size.Third()
+- Size.Units(n): Tailwind spacing scale (n x 0.25rem)
+- Size.Full(): 100%
+- Size.Fit(): fit-content
+- Size.Auto(): auto
+- Size.Px(n): exact pixels
+- Size.Fraction(0.5f): percentage, Size.Half(), Size.Third()
 
 Size is NOT the same as Density. Size controls dimensions; Density controls visual density.
 
@@ -210,7 +210,7 @@ UseState hook returns a state object IState<T> that provides:
 - .Value property to read the current state.
 - .Set(newValue) method to update the state in UseEffect or in an event handler.
 
-Always use immutable types (e.g. records) with `UseState` — mutable classes that are modified in-place and passed back via `.Set()` will not trigger a re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
+Always use immutable types (e.g. records) with `UseState`: mutable classes that are modified in-place and passed back via `.Set()` will not trigger a re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
 
 ### UseEffect
 
@@ -242,11 +242,11 @@ if (query.Error is { } error) return Callout.Error(error.Message);
 
 QueryResult<T> properties:
 
-- .Value — the fetched data (default until loaded)
-- .Loading — true during initial fetch (no value yet)
-- .Validating — true during background revalidation
-- .Error — exception if the fetch failed
-- .Mutator — provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
+- .Value: the fetched data (default until loaded)
+- .Loading: true during initial fetch (no value yet)
+- .Validating: true during background revalidation
+- .Error: exception if the fetch failed
+- .Mutator: provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
 
 **Do not combine UseQuery with DataTable for EF Core data.** When a DataTable can receive an EF Core `IQueryable` directly, pass it to `.ToDataTable()` without UseQuery. DataTables handle their own server-side data loading. (API data fetched via UseQuery → `.ToDataTable()` is fine.)
 
@@ -257,10 +257,10 @@ Key conventions:
 
 Common options (QueryOptions):
 
-- KeepPrevious: true — show stale data while revalidating with a new key
-- RevalidateOnMount: false — skip initial fetch when using initialValue
-- RefreshInterval: TimeSpan — poll at an interval
-- Scope: QueryScope.View — isolate cache to the view instance (default is Server)
+- KeepPrevious: true (show stale data while revalidating with a new key)
+- RevalidateOnMount: false (skip initial fetch when using initialValue)
+- RefreshInterval: TimeSpan (poll at an interval)
+- Scope: QueryScope.View (isolate cache to the view instance; default is Server)
 
 Tag-based invalidation (cross-component):
 var queryService = UseService<IQueryService>();
@@ -344,3 +344,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 
 All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
 Add ".md" to the end of any URL to go directly to the Markdown version of the doc. To explore and read documentation, fetch the sitemap or request specific `.md` documentation endpoints directly.
+
+## Writing Style
+
+Never use the em dash character in any output, comments, commit messages, or documentation. Use alternatives like commas, parentheses, colons, or separate sentences instead.
