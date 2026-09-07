@@ -1,11 +1,11 @@
 <Project>
   <!-- Frontend source files for incremental build detection -->
   <ItemGroup Condition="Exists('frontend/package.json')">
-    <FrontendSourceFiles Include="frontend\src\**\*" />
-    <FrontendSourceFiles Include="frontend\package.json" />
-    <FrontendSourceFiles Include="frontend\pnpm-lock.yaml" Condition="Exists('frontend\pnpm-lock.yaml')" />
-    <FrontendSourceFiles Include="frontend\tsconfig.json" Condition="Exists('frontend\tsconfig.json')" />
-    <FrontendSourceFiles Include="frontend\vite.config.*" Condition="Exists('frontend\vite.config.ts') Or Exists('frontend\vite.config.js')" />
+    <FrontendSourceFiles Include="frontend/src/**/*" />
+    <FrontendSourceFiles Include="frontend/package.json" />
+    <FrontendSourceFiles Include="frontend/pnpm-lock.yaml" Condition="Exists('frontend/pnpm-lock.yaml')" />
+    <FrontendSourceFiles Include="frontend/tsconfig.json" Condition="Exists('frontend/tsconfig.json')" />
+    <FrontendSourceFiles Include="frontend/vite.config.*" Condition="Exists('frontend/vite.config.ts') Or Exists('frontend/vite.config.js')" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -13,22 +13,22 @@
   </PropertyGroup>
 
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
-          Inputs="frontend\package.json;frontend\pnpm-lock.yaml"
-          Outputs="frontend\node_modules\.package-lock.json">
+          Inputs="frontend/package.json;frontend/pnpm-lock.yaml"
+          Outputs="frontend/node_modules/.package-lock.json">
     <Exec Command="vp install -- --config.confirmModulesPurge=false" WorkingDirectory="frontend" EnvironmentVariables="CI=$(CI)" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="Exists('frontend/package.json')"
           Inputs="@(FrontendSourceFiles)"
-          Outputs="frontend\dist\.build-stamp">
+          Outputs="frontend/dist/.build-stamp">
     <Exec Command="vp build" WorkingDirectory="frontend" EnvironmentVariables="CI=$(CI)" />
-    <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
+    <Touch Files="frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
   <!-- Add frontend dist as embedded resources AFTER BuildFrontend but BEFORE AssignTargetPaths/SplitResourcesByCulture -->
-  <Target Name="IncludeFrontendDistResources" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildFrontend">
+  <Target Name="IncludeFrontendDistResources" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildFrontend" Condition="Exists('frontend/package.json')">
     <ItemGroup>
-      <EmbeddedResource Include="frontend\dist\**\*" Exclude="frontend\dist\.build-stamp" />
+      <EmbeddedResource Include="frontend/dist/**/*" Exclude="frontend/dist/.build-stamp" />
     </ItemGroup>
   </Target>
 </Project>

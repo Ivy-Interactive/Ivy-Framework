@@ -46,6 +46,11 @@
     <None Include="../Ivy.Docs.Shared/Docs/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
     <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Build/Ivy.targets" Pack="true" PackagePath="build" />
+    <None Include="Build/Ivy.ExternalWidget.targets" Pack="true" PackagePath="build" />
+  </ItemGroup>
   
   <!--
     External widgets live under Widgets/External/<Name>/ and compile into Ivy.dll.
