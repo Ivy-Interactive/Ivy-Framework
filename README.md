@@ -71,15 +71,13 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 ### 🚀 Getting Started
 - **Project Initialization:** Quickly set up new Ivy projects with predefined templates.
 - **AI-Powered App Generation:** Generate applications using AI based on your specifications.
-- **MCP:** Teach any coding agent to use Ivy Framework for building full-stack applications.
 
 ### 🛠️ Developer Tools
 - **In-Browser DevTools:** An interactive widget inspector overlay. Hover to inspect any widget's type and properties, click to open an AI-powered prompt dialog. Enable with `--enable-dev-tools`.
 - **DevTools REST API:** When DevTools are enabled, `GET /ivy/dev-tools/widget-schema` returns a JSON Schema of all registered widgets and their props/events. `GET /ivy/dev-tools/env-info` returns environment details.
-- **Roslyn Analyzer (`Ivy.Analyser`):** Compile-time diagnostics that enforce Rules of Hooks, widget child constraints, constructor requirements, and service injection best practices — with auto-fix code actions.
+- **Roslyn Analyzer (`Ivy.Analyser`):** Compile-time diagnostics that enforce Rules of Hooks, widget child constraints, constructor requirements, and service injection best practices, with auto-fix code actions.
 - **Hot Reload:** Method-level changes are injected instantly without losing state; structural changes trigger automatic rebuild/restart. Enabled by default with `ivy run`.
-- **`ivy ask` :** Q&A over the framework knowledge base. Ask natural-language questions about Ivy APIs, patterns, and best practices.
-- **`ivy docs`:** Browse framework documentation directly in the terminal. Use `ivy docs list` to see all topics.
+- **`ivy docs`:** Launch the interactive framework documentation server locally.
 
 ### 🔌 Integrations
 - **Authentication:** Built-in support for popular authentication providers like Supabase, Auth0, Clerk, and Microsoft Entra.
