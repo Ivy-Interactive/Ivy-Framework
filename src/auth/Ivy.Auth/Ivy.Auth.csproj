@@ -1,15 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+<Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="../../../../Ivy/Directory.Build.props" Condition="Exists('../../../../Ivy/Directory.Build.props')" />
-  
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591</NoWarn>
-    <PackageId>Ivy.Auth.Auth0</PackageId>
+    <PackageId>Ivy.Auth</PackageId>
     <Company>Ivy Interactive</Company>
-    <Description>Build Internal Applications with AI and Pure C#</Description>
+    <Description>Authentication providers for Ivy Framework: Auth0, Authelia, Clerk, GitHub, Google, Microsoft Entra, Sliplane and Supabase</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
@@ -31,12 +31,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="README.md" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <!-- Union of the package references from the eight providers this project replaces -->
   <ItemGroup>
+    <!-- Auth0 -->
     <PackageReference Include="Auth0.AuthenticationApi" Version="7.43.0" />
     <PackageReference Include="Auth0.ManagementApi" Version="7.43.0" />
+    <!-- GitHub, Google -->
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
+    <!-- MicrosoftEntra -->
+    <PackageReference Include="Azure.Identity" Version="1.17.1" />
+    <PackageReference Include="Microsoft.Graph" Version="5.105.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.22.2" />
+    <!-- Supabase -->
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.15.0" />
+    <PackageReference Include="Supabase" Version="1.1.1" />
   </ItemGroup>
 
 </Project>
