@@ -1,0 +1,114 @@
+name: Publish NuGet Packages
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to pack and publish (e.g., 1.4.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Setup Node.js (needed for the frontend and external widget builds in dotnet pack)
+      - uses: voidzero-dev/setup-vp@v1
+
+      # Setup Java (needed for ANTLR4)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # Ivy contains the external widgets, the analyzer and Ivy.Plugin.Abstractions;
+      # Ivy.Auth contains all eight auth providers.
+      - name: Pack packages
+        run: |
+          mkdir -p ./nupkg
+          for project in Ivy/Ivy.csproj auth/Ivy.Auth/Ivy.Auth.csproj Ivy.Desktop/Ivy.Desktop.csproj; do
+            echo "Packing $project..."
+            dotnet pack "$project" --configuration Release --output ./nupkg \
+              /p:Version=${{ steps.version.outputs.version }}
+          done
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: rorychatt-ivy
+
+      - name: Clean NuGet output before signing
+        run: |
+          find ./nupkg -mindepth 1 -maxdepth 1 -not -name "*.nupkg" -exec rm -rf {} +
+          mkdir -p ./nupkg_signed
+
+      - name: Sign NuGet packages
+        uses: sslcom/esigner-codesign@develop
+        with:
+          command: batch_sign
+          username: ${{ secrets.SSL_COM_USERNAME }}
+          password: ${{ secrets.SSL_COM_PASSWORD }}
+          credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
+          totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
+          malware_block: true
+          dir_path: src/nupkg
+          output_path: src/nupkg_signed
+
+      - name: Overwrite origin with signed nuget
+        run: |
+          cp -f ./nupkg_signed/*.nupkg ./nupkg/
+
+      - name: Push to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Publish summary
+        if: always()
+        run: |
+          echo "## 🎉 NuGet Packages Published!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Version: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Packages:" >> $GITHUB_STEP_SUMMARY
+          for package in Ivy Ivy.Auth Ivy.Desktop; do
+            echo "- ✅ [$package](https://www.nuget.org/packages/$package)" >> $GITHUB_STEP_SUMMARY
+          done

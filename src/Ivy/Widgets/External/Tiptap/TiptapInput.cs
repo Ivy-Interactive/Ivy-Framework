@@ -1,0 +1,168 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Ivy.Core;
+using Ivy.Core.Helpers;
+
+namespace Ivy.Widgets.Tiptap;
+
+public interface IAnyTiptapInput : IAnyInput
+{
+}
+
+public abstract record TiptapInputBase : WidgetBase<TiptapInputBase>, IAnyTiptapInput
+{
+    [Prop] public bool Disabled { get; set; }
+
+    [Prop] public string? Placeholder { get; set; }
+
+    [Prop] public string? Invalid { get; set; }
+
+    [Prop] public bool Editable { get; set; } = true;
+
+    [Prop] public bool AutoFocus { get; set; }
+
+    [Prop] public bool ShowToolbar { get; set; } = true;
+
+    [Prop] public bool Nullable { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+
+    public Type[] SupportedStateTypes() => [];
+}
+
+[ExternalWidget("widgets/Tiptap/TiptapInput.js", ExportName = "TiptapInput")]
+public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
+{
+    public TiptapInput(IAnyState state, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        var typedState = state.As<TString>();
+        Value = typedState.Value;
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public TiptapInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        OnChange = onChange?.ToEventHandler();
+        Value = value;
+    }
+
+    public TiptapInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        OnChange = onChange?.ToValueTask().ToEventHandler();
+        Value = value;
+    }
+
+    public TiptapInput(string? placeholder = null, bool disabled = false) : this()
+    {
+        Placeholder = placeholder;
+        Disabled = disabled;
+    }
+
+    internal TiptapInput()
+    {
+    }
+
+    [Prop] public TString Value { get; } = default!;
+
+    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
+
+    [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
+}
+
+[ExternalWidget("widgets/Tiptap/TiptapInput.js", ExportName = "TiptapInput")]
+public record TiptapInput : TiptapInput<string>
+{
+    public TiptapInput(IAnyState state, string? placeholder = null, bool disabled = false)
+        : base(state, placeholder, disabled)
+    {
+    }
+
+    [OverloadResolutionPriority(1)]
+    public TiptapInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false)
+        : base(value, onChange, placeholder, disabled)
+    {
+    }
+
+    public TiptapInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false)
+        : base(value, onChange?.ToValueTask(), placeholder, disabled)
+    {
+    }
+
+    public TiptapInput(string? placeholder = null, bool disabled = false)
+        : base(placeholder, disabled)
+    {
+    }
+}
+
+public static class TiptapInputExtensions
+{
+    public static TiptapInputBase ToTiptapInput(this IAnyState state, string? placeholder = null, bool disabled = false)
+    {
+        var type = state.GetStateType();
+        Type genericType = typeof(TiptapInput<>).MakeGenericType(type);
+        TiptapInputBase input = (TiptapInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled)!;
+        input.Nullable = type.IsNullableType();
+        return input;
+    }
+
+    public static TiptapInputBase Placeholder(this TiptapInputBase widget, string placeholder) =>
+        widget with { Placeholder = placeholder };
+
+    public static TiptapInputBase Disabled(this TiptapInputBase widget, bool disabled = true) =>
+        widget with { Disabled = disabled };
+
+    public static TiptapInputBase Invalid(this TiptapInputBase widget, string? invalid) =>
+        widget with { Invalid = invalid };
+
+    public static TiptapInputBase Editable(this TiptapInputBase widget, bool editable = true) =>
+        widget with { Editable = editable };
+
+    public static TiptapInputBase ReadOnly(this TiptapInputBase widget) =>
+        widget with { Editable = false };
+
+    public static TiptapInputBase AutoFocus(this TiptapInputBase widget, bool autoFocus = true) =>
+        widget with { AutoFocus = autoFocus };
+
+    public static TiptapInputBase ShowToolbar(this TiptapInputBase widget, bool show = true) =>
+        widget with { ShowToolbar = show };
+
+    public static TiptapInputBase HideToolbar(this TiptapInputBase widget) =>
+        widget with { ShowToolbar = false };
+
+    public static TiptapInputBase Nullable(this TiptapInputBase widget, bool? nullable = true)
+    {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
+        return widget with { Nullable = nullable ?? true };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus) =>
+        widget with { OnFocus = new(onFocus) };
+
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Action<Event<IAnyInput>> onFocus) =>
+        widget.OnFocus(onFocus.ToValueTask());
+
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Action handler) =>
+        widget.OnFocus(_ => { handler(); return ValueTask.CompletedTask; });
+
+    [OverloadResolutionPriority(1)]
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
+        widget with { OnBlur = new(onBlur) };
+
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Action<Event<IAnyInput>> onBlur) =>
+        widget.OnBlur(onBlur.ToValueTask());
+
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Action handler) =>
+        widget.OnBlur(_ => { handler(); return ValueTask.CompletedTask; });
+}

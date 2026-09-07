@@ -17,9 +17,7 @@ The DiffView widget displays unified diffs (such as git diff output) in either u
 
 ## Installation
 
-```terminal
-dotnet add package Ivy.Widgets.DiffView
-```
+DiffView is included in the `Ivy` package -- no extra package reference is needed.
 
 ## Basic Usage
 
