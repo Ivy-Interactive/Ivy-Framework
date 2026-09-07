@@ -15,3 +15,13 @@ describe("tableStyles.table.container", () => {
     expect(tableStyles.table.container.flexDirection).toBe("column");
   });
 });
+
+describe("tableStyles.queryEditor.css", () => {
+  it("includes autocomplete dropdown styling with z-index and offsets", () => {
+    expect(tableStyles.queryEditor.css).toContain("z-index: 1000 !important;");
+    expect(tableStyles.queryEditor.css).toContain(".cm-tooltip-autocomplete.cm-tooltip-below");
+    expect(tableStyles.queryEditor.css).toContain("margin-top: 8px !important;");
+    expect(tableStyles.queryEditor.css).toContain(".cm-tooltip-autocomplete.cm-tooltip-above");
+    expect(tableStyles.queryEditor.css).toContain("margin-bottom: 8px !important;");
+  });
+});
