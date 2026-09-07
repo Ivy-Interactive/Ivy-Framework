@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Ivy.Agent.Filter;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -17,7 +16,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         public string TestFile { get; init; } = string.Empty;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         if (!File.Exists(settings.TestFile))
         {
@@ -211,7 +210,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         AnsiConsole.Write(new Rule("[bold yellow]Test Results[/]"));
         AnsiConsole.WriteLine();
 
-        var table = new Table();
+        var table = new Spectre.Console.Table();
         table.AddColumn("Model");
         table.AddColumn("Passed");
         table.AddColumn("Total");
