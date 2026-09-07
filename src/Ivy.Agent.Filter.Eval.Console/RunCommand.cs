@@ -50,7 +50,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         // Initialize cost service
         var httpClient = new HttpClient();
         var costService = new ModelCostService(httpClient);
-        var costsLoaded = await costService.LoadModelCostsFromLiteLLMAsync(apiKey);
+        var costsLoaded = await costService.LoadModelCostsFromLiteLLMAsync(apiKey, cancellationToken);
 
         if (!costsLoaded)
         {
@@ -63,6 +63,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         // Run tests for each model
         foreach (var modelName in testDoc.Models.Where(m => !string.IsNullOrWhiteSpace(m)))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             AnsiConsole.MarkupLine($"\n[bold blue]Testing model:[/] {modelName}");
 
             var chatClient = CreateChatClient(modelName, apiKey, endpoint);
@@ -84,12 +85,14 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
             // Run all tests across all suites
             foreach (var suite in testDoc.Suites)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 AnsiConsole.MarkupLine($"  [dim]Running suite:[/] {suite.Name}");
 
                 foreach (var test in suite.Tests)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var sw = Stopwatch.StartNew();
-                    var result = await agent.Parse(test.Filter, suite.Fields);
+                    var result = await agent.Parse(test.Filter, suite.Fields, cancellationToken);
                     sw.Stop();
 
                     var timeMs = sw.Elapsed.TotalMilliseconds;

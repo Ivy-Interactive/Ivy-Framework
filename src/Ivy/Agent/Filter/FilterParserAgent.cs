@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using YamlDotNet.Serialization;
 
@@ -16,7 +16,7 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
     private readonly IChatClient _chatClient = chatClient
         .AsBuilder().UseFunctionInvocation().Build();
 
-    public async Task<FilterParseResult> Parse(string filterExpression, FieldMeta[] fields)
+    public async Task<FilterParseResult> Parse(string filterExpression, FieldMeta[] fields, CancellationToken cancellationToken = default)
     {
         var fieldsYaml = SerializeFieldsAsYaml(fields);
         var grammarContent = LoadGrammarFile();
@@ -64,11 +64,13 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
         // Try up to MaxRetries times
         for (int attempt = 1; attempt <= MaxRetries; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             logger?.LogDebug("Filter parsing attempt {Attempt}/{MaxRetries}", attempt, MaxRetries);
 
             try
             {
-                var completion = await _chatClient.GetResponseAsync(messages, chatOptions);
+                var completion = await _chatClient.GetResponseAsync(messages, chatOptions, cancellationToken);
 
                 // Track usage
                 if (completion.Usage != null)
@@ -141,6 +143,10 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
                 messages.Add(new ChatMessage(ChatRole.User,
                     $"The filter expression failed to parse with these errors: {errors}\n" +
                     $"Please try again with a corrected expression."));
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
