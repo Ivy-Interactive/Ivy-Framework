@@ -60,6 +60,9 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Build solution
+        run: dotnet build --configuration Release
+
       # Ivy contains the external widgets, the analyzer and Ivy.Plugin.Abstractions;
       # Ivy.Auth contains all eight auth providers.
       - name: Pack packages
