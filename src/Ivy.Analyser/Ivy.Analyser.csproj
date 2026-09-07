@@ -11,7 +11,6 @@
       analyzers/dotnet/cs by the PackIvyAnalyser target in ../Ivy/Ivy.csproj.
     -->
     <IsPackable>false</IsPackable>
-    <Version>1.0.0</Version>
     <Company>Ivy Interactive</Company>
     <Description>Roslyn analyzer for enforcing proper Ivy hook usage</Description>
     <LangVersion>latest</LangVersion>
