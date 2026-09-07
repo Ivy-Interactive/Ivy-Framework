@@ -1,5 +1,3 @@
-using Ivy.Agent.Filter;
-
 namespace Ivy.Agent.Filter.Tests;
 
 /// <summary>
