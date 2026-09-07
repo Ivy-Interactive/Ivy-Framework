@@ -18,19 +18,26 @@
   "devDependencies": {
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
     "autoprefixer": "10.4.23",
     "postcss": "8.5.23",
     "tailwindcss": "3.4.19",
     "typescript": "7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.1",
-    "vite-plus": "0.2.1",
-    "@vitejs/plugin-react": "6.0.1"
+    "vite-plus": "0.2.1"
   },
   "peerDependencies": {
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
+  "packageManager": "pnpm@10.33.0",
   "pnpm": {
+    "peerDependencyRules": {
+      "allowAny": [
+        "typescript",
+        "vite"
+      ]
+    },
     "overrides": {
       "lodash-es": "4.18.1",
       "markdown-it": ">=14.2.0",
@@ -46,6 +53,5 @@
       "@tiptap/extension-bubble-menu": "3.31.3",
       "@tiptap/extension-floating-menu": "3.31.3"
     }
-  },
-  "packageManager": "pnpm@10.33.0"
+  }
 }
