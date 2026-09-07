@@ -344,20 +344,18 @@ A publishable external widget project needs NuGet package metadata in its `.cspr
 ```
 
 Combine this with the frontend build and `EmbeddedResource` items from
-[Standalone widget project](#standalone-widget-project) above — the built assets must be embedded in
+[Standalone widget project](#standalone-widget-project) above: the built assets must be embedded in
 the assembly for `ScriptPath`/`StylePath` to resolve at runtime.
 
-Rather than writing that build logic yourself, you can copy
-`src/Ivy/Build/Ivy.ExternalWidget.targets` from the
-[Ivy Framework repository](https://github.com/Ivy-Interactive/Ivy-Framework) next to your `.csproj`
-and import it:
+When your project references `Ivy` via `<PackageReference Include="Ivy" />`, the package automatically imports build targets that detect `frontend/package.json`. During project compilation, it runs `vp install` and `vp build` in `frontend/` and embeds `frontend/dist/**` under the resource names `ExternalWidgetController` looks for.
+
+If you prefer to manage the frontend build independently, you can opt out of the automatic build targets:
 
 ```xml
-<Import Project="Ivy.ExternalWidget.targets" />
+<PropertyGroup>
+  <IvyEnableExternalWidgets>false</IvyEnableExternalWidgets>
+</PropertyGroup>
 ```
-
-It runs `vp install` / `vp build` in `frontend/` and embeds `frontend/dist/**` under the resource
-names `ExternalWidgetController` looks for.
 
 ### Release Workflow
 
