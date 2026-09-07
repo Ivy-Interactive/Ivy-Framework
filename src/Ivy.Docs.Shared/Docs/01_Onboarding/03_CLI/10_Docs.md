@@ -2,53 +2,30 @@
 searchHints:
   - docs
   - documentation
-  - reference
-  - content
-  - list docs
+  - server
+  - browse
 ---
 
 # ivy docs
 
 <Ingress>
-Access and retrieve Ivy Framework documentation directly from your terminal.
+Launch the interactive Ivy Framework documentation server locally.
 </Ingress>
 
-The `ivy docs` command set provides built-in tools for exploring the comprehensive framework knowledge base. You can either list all available documentation topics or fetch the raw Markdown content for a specific page.
+The `ivy docs` command starts the local interactive documentation web server on port 5002, allowing you to browse documentation, guides, and API references directly in your web browser.
 
-## Commands
-
-### ivy docs list
-
-Lists all available documentation paths natively registered inside the Ivy framework for subsequent manual or automated investigation.
-
-The command outputs a structured YAML representation of all discoverable document titles and relative paths. Use this list to find valid `<path>` arguments for the `ivy docs <path>` sibling command.
-
-#### list Usage
+## Usage
 
 ```terminal
->ivy docs list
+>ivy docs
 ```
 
----
+By default, the documentation server starts and listens on `http://localhost:5002`.
 
-### ivy docs [path]
+### Options
 
-Retrieves the raw Markdown payload of a specific framework documentation page.
-
-This command resolves and standardizes versioning logically, ensuring you always retrieve documentation relevant to the specific framework instantiation you have targeted.
-
-#### path Usage
+`--browse` - Automatically launch your default web browser and navigate to the documentation server.
 
 ```terminal
->ivy docs [path]
-```
-
-#### Arguments
-
-- `<path>`: The relative path or URL slug corresponding to the desired markdown file. You can discover valid paths via the `ivy docs list` command.
-
-#### Example
-
-```terminal
->ivy docs "docs/ApiReference/IvyShared/Colors.md"
+>ivy docs --browse
 ```
