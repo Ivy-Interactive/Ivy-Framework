@@ -336,7 +336,7 @@ If the setup fails:
    - Implement authentication if required (WS-Security, HTTP Basic, etc.)
    - Test the connection with a sample SOAP operation
 
-3. Use `ivy ask "How do I create a SOAP connection?"` or `ivy ask "How do I configure SOAP authentication?"` for API guidance.
+3. Consult the documentation endpoints for API guidance on creating SOAP connections or configuring SOAP authentication.
 
 ## Post-run: Evaluate and Improve
 

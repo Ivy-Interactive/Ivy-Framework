@@ -1,4 +1,4 @@
-﻿# Introduction to the Ivy Framework for LLMs
+# Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
 - In Ivy, you only write one application in pure C# and we don't have a BE and FE distinction.
@@ -328,11 +328,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 - All types are in the `Ivy` namespace
 - `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
 - `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
-- **Nested layouts MUST use parentheses** — `Layout.Vertical() | (Layout.Horizontal() | child1 | child2)` — without parentheses, C# left-to-right `|` evaluation adds children to the outer layout, not the inner one. See the nested layout example in the Layouts section above.
-
-## CLI Commands
-
-Prefer using `ivy cli explain` for command discovery over MCP server tools as it provides a reliable, built-in structural breakdown.
+- **Nested layouts MUST use parentheses**: `Layout.Vertical() | (Layout.Horizontal() | child1 | child2)`: without parentheses, C# left-to-right `|` evaluation adds children to the outer layout, not the inner one. See the nested layout example in the Layouts section above.
 
 ## Further Reading
 
@@ -347,15 +343,4 @@ Prefer using `ivy cli explain` for command discovery over MCP server tools as it
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)
 
 All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
-Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
-
-## Ivy CLI
-
-Use the `ivy` CLI for documentation lookups and framework questions:
-
-| Scenario | Command |
-|---|---|
-| You know the topic and want the full reference page | `ivy docs <path>` |
-| You need to browse what documentation exists | `ivy docs list` |
-| You have a "how do I..." question and need a synthesized answer | `ivy ask "your question"` |
-| You need to understand an existing connection's schema | `ivy cli explain connections/<ConnectionName>` |
+Add ".md" to the end of any URL to go directly to the Markdown version of the doc. To explore and read documentation, fetch the sitemap or request specific `.md` documentation endpoints directly.
