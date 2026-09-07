@@ -1,4 +1,3 @@
-using Ivy.Agent.Filter;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -9,7 +8,7 @@ namespace Ivy.Agent.Filter.Tests;
 
 public class FilterParserAgentTests : IDisposable
 {
-    private readonly IChatClient _chatClient;
+    private readonly IChatClient? _chatClient;
     private readonly ILogger<FilterParserAgent> _logger;
     private readonly FieldMeta[] _testFields;
     private readonly ITestOutputHelper _output;
@@ -23,18 +22,21 @@ public class FilterParserAgentTests : IDisposable
             .AddUserSecrets<FilterParserAgentTests>()
             .Build();
 
-        var endpoint = configuration["OpenAi:Endpoint"] ?? throw new InvalidOperationException("OpenAi:Endpoint not found in user secrets");
-        var apiKey = configuration["OpenAi:ApiKey"] ?? throw new InvalidOperationException("OpenAi:ApiKey not found in user secrets");
+        var endpoint = configuration["OpenAi:Endpoint"];
+        var apiKey = configuration["OpenAi:ApiKey"];
 
-        // Create OpenAI client
-        var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), new OpenAIClientOptions
+        if (!string.IsNullOrEmpty(endpoint) && !string.IsNullOrEmpty(apiKey))
         {
-            Endpoint = new Uri(endpoint)
-        });
+            // Create OpenAI client
+            var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), new OpenAIClientOptions
+            {
+                Endpoint = new Uri(endpoint)
+            });
 
-        // Convert OpenAI ChatClient to IChatClient
-        var openAIChatClient = openAiClient.GetChatClient("gpt-4o");
-        _chatClient = openAIChatClient.AsIChatClient();
+            // Convert OpenAI ChatClient to IChatClient
+            var openAIChatClient = openAiClient.GetChatClient("gpt-4o");
+            _chatClient = openAIChatClient.AsIChatClient();
+        }
 
         // Create logger that outputs to xUnit
         _logger = new XunitLogger<FilterParserAgent>(output);
@@ -57,10 +59,23 @@ public class FilterParserAgentTests : IDisposable
         ];
     }
 
+    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(_chatClient))]
+    private bool EnsureCredentialsOrSkip()
+    {
+        if (_chatClient == null)
+        {
+            _output.WriteLine("OpenAi:Endpoint or OpenAi:ApiKey not found in user secrets. Skipping integration test.");
+            return false;
+        }
+        return true;
+    }
+
     [Fact]
     public async Task Parse_SimpleTextContains_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show me records where name contains John";
 
@@ -87,6 +102,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_SimpleNumberComparison_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find people older than 30";
 
@@ -108,6 +125,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_LogicalAndOperation_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show people over 25 who work in Sales department";
 
@@ -125,6 +144,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_LogicalOrOperation_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find employees from USA or Canada";
 
@@ -142,6 +163,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_ComplexNestedConditions_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show active employees older than 30 from either Sales or Marketing department with salary above 50000";
 
@@ -158,6 +181,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_BetweenOperation_ShouldGenerateComparisonFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find products priced between 100 and 500";
 
@@ -178,6 +203,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_BlankCheck_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show records where email is empty";
 
@@ -194,6 +221,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_NotBlankCheck_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find records with non-empty department";
 
@@ -210,6 +239,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_StartsWithOperation_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find emails that start with admin";
 
@@ -226,6 +257,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_EndsWithOperation_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show names ending with son";
 
@@ -242,6 +275,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_DateComparison_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find records created after January 1st 2024";
 
@@ -258,6 +293,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_EqualityCheck_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show only active status";
 
@@ -274,6 +311,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_NotEqualCheck_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find all except inactive status";
 
@@ -290,6 +329,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_MultipleTextConditions_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show people named John or Jane in the IT department";
 
@@ -306,6 +347,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_NegationWithAnd_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show employees not in USA and age under 40";
 
@@ -322,6 +365,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_BooleanField_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show only active records";
 
@@ -338,6 +383,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_GreaterThanOrEqual_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Find employees with salary of at least 75000";
 
@@ -354,6 +401,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_LessThanOrEqual_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show products priced up to 100";
 
@@ -370,6 +419,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_CategorySelection_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Filter by Electronics or Appliances category";
 
@@ -386,6 +437,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_WithFieldNameInQuery_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Country equals Canada";
 
@@ -402,6 +455,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_InvalidFieldReference_ShouldReturnError()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show records where nonexistent_field equals something";
 
@@ -419,6 +474,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_AmbiguousRequest_ShouldHandleGracefully()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show the good ones";
 
@@ -438,6 +495,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_VeryComplexFilter_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show active employees aged between 25 and 45 from Sales or Marketing department in USA or Canada with salary greater than 60000 and email not empty";
 
@@ -454,6 +513,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_WithNaturalLanguageOperators_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Age greater than or equal to 21 and less than 65";
 
@@ -470,6 +531,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_DateRange_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Created between January 1st 2024 and December 31st 2024";
 
@@ -486,6 +549,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_MultipleRanges_ShouldGenerateValidFilter()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Show employees with age between 30 and 50 and salary between 50000 and 100000";
 
@@ -502,6 +567,8 @@ public class FilterParserAgentTests : IDisposable
     public async Task Parse_CaseSensitiveText_ShouldPreserveCase()
     {
         // Arrange
+        if (!EnsureCredentialsOrSkip()) return;
+
         var agent = new FilterParserAgent(_chatClient, _logger);
         var naturalLanguageFilter = "Department equals IT";
 
