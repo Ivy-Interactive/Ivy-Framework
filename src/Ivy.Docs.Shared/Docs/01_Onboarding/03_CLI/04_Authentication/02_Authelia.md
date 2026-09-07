@@ -40,7 +40,7 @@ You will be prompted to provide your Authelia server URL (e.g., `https://127.0.0
 
 Your configuration will be stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md). Ivy then finishes configuring your application automatically:
 
-1. Adds the `Ivy.Auth.Authelia` package to your project.
+1. Adds the `Ivy.Auth` package to your project.
 2. Adds `server.UseAuth<AutheliaAuthProvider>();` to your [Program.cs](../../02_Concepts/01_Program.md).
 3. Adds `Ivy.Auth.Authelia` to your global usings.
 
