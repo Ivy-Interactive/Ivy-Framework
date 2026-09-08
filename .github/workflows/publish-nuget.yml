@@ -13,6 +13,11 @@ on:
         description: 'Version to pack and publish (e.g., 1.4.0)'
         required: true
         type: string
+      test-mode:
+        description: 'Test mode (dry run: build and upload unsigned artifacts, skip signing and publishing to NuGet)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -75,17 +80,20 @@ jobs:
           done
 
       - name: NuGet login
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.test-mode)
         uses: NuGet/login@v1
         id: login
         with:
           user: rorychatt-ivy
 
       - name: Clean NuGet output before signing
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.test-mode)
         run: |
           find ./nupkg -mindepth 1 -maxdepth 1 -not -name "*.nupkg" -exec rm -rf {} +
           mkdir -p ./nupkg_signed
 
       - name: Sign NuGet packages
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.test-mode)
         uses: sslcom/esigner-codesign@develop
         with:
           command: batch_sign
@@ -98,20 +106,40 @@ jobs:
           output_path: src/nupkg_signed
 
       - name: Overwrite origin with signed nuget
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.test-mode)
         run: |
           cp -f ./nupkg_signed/*.nupkg ./nupkg/
 
+      - name: Upload NuGet Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ivy-nuget-${{ steps.version.outputs.version }}
+          path: src/nupkg/*.nupkg
+
       - name: Push to NuGet
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.test-mode)
         run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Publish summary
         if: always()
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.test-mode }}
         run: |
-          echo "## 🎉 NuGet Packages Published!" >> $GITHUB_STEP_SUMMARY
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "## 🧪 NuGet Packages Built (Test Mode Dry Run)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Signing and publishing to NuGet were skipped. Unsigned packages are attached as the \`ivy-nuget-${{ steps.version.outputs.version }}\` run artifact." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## 🎉 NuGet Packages Published!" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Version: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Packages:" >> $GITHUB_STEP_SUMMARY
           for package in Ivy Ivy.Auth Ivy.Desktop; do
-            echo "- ✅ [$package](https://www.nuget.org/packages/$package)" >> $GITHUB_STEP_SUMMARY
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "- 🧪 $package (built, not published)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ✅ [$package](https://www.nuget.org/packages/$package)" >> $GITHUB_STEP_SUMMARY
+            fi
           done
