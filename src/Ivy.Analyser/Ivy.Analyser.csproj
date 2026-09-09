@@ -6,24 +6,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>CS1591</NoWarn>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <IsPackable>true</IsPackable>
-    <PackageId>Ivy.Analyser</PackageId>
-    <Version>1.0.0</Version>
+    <!--
+      Not published on its own: the built assembly is packed into Ivy.nupkg under
+      analyzers/dotnet/cs by the PackIvyAnalyser target in ../Ivy/Ivy.csproj.
+    -->
+    <IsPackable>false</IsPackable>
     <Company>Ivy Interactive</Company>
     <Description>Roslyn analyzer for enforcing proper Ivy hook usage</Description>
-    <PackageTags>analyzers, roslyn, ivy</PackageTags>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <DevelopmentDependency>true</DevelopmentDependency>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <NoWarn>$(NoWarn);RS2007;RS2008;RS1038</NoWarn>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -34,15 +27,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="tools/*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
-    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

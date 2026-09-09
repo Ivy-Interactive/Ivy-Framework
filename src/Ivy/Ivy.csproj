@@ -46,11 +46,40 @@
     <None Include="../Ivy.Docs.Shared/Docs/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
     <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Build/Ivy.targets" Pack="true" PackagePath="build" />
+    <None Include="Build/Ivy.ExternalWidget.targets" Pack="true" PackagePath="build" />
+  </ItemGroup>
   
+  <!--
+    External widgets live under Widgets/External/<Name>/ and compile into Ivy.dll.
+    Their sample apps and test suites are separate projects and must not be globbed in.
+  -->
+  <ItemGroup>
+    <Compile Remove="Widgets/External/**/.samples/**" />
+    <Compile Remove="Widgets/External/**/Tests/**" />
+    <Compile Remove="Widgets/External/**/frontend/**" />
+    <EmbeddedResource Remove="Widgets/External/**/.samples/**" />
+    <EmbeddedResource Remove="Widgets/External/**/Tests/**" />
+    <None Remove="Widgets/External/**/.samples/**" />
+    <None Remove="Widgets/External/**/Tests/**" />
+    <None Remove="Widgets/External/**/frontend/node_modules/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <Protobuf Include="Protos/datatable.proto" GrpcServices="Server" />
   </ItemGroup>
-  
+
+  <!-- Absorbed from Ivy.Agent.Filter (see Agent/Filter/README.md) -->
+  <ItemGroup>
+    <Antlr4 Include="Agent/Filter/Filters.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Ivy.Agent.Filter.Parser</CustomToolNamespace>
+    </Antlr4>
+    <EmbeddedResource Include="Agent/Filter/Filters.g4" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
     <PackageReference Include="Apache.Arrow" Version="22.1.0" />
@@ -78,6 +107,18 @@
     <PackageReference Include="Ivy.NativeJsonDiff" Version="2.0.0" />
     <PackageReference Include="Ivy.DesignSystem" Version="1.1.32" />
     <PackageReference Include="Microsoft.OpenApi" Version="3.9.0" />
+    <!-- Absorbed from Ivy.Agent.Filter -->
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
+    <!-- Absorbed from Ivy.Hooks.Pty -->
+    <PackageReference Include="Porta.Pty" Version="1.0.6" />
+    <!--
+      Ivy.Plugin.Abstractions.dll ships inside this package (see PackPluginAbstractions below)
+      rather than as a package dependency, so its own dependencies must be declared here.
+    -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
   </ItemGroup>
 
   <ItemGroup>
@@ -87,13 +128,46 @@
     <InternalsVisibleTo Include="Ivy.XamlBuilder.Test" />
     <InternalsVisibleTo Include="Ivy.Integration.Tests" />
     <InternalsVisibleTo Include="Ivy.IvyML" />
+    <InternalsVisibleTo Include="Ivy.Hooks.Pty.Test" />
+    <InternalsVisibleTo Include="Ivy.Agent.Filter.Tests" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <ProjectReference Include="../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
-    <ProjectReference Include="../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
+    <!-- PrivateAssets: the assembly is packed into lib/ below instead of becoming a package dependency -->
+    <ProjectReference Include="../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" PrivateAssets="all" />
+    <!-- Built but not referenced: the output is packed into analyzers/dotnet/cs below -->
+    <ProjectReference Include="../Ivy.Analyser/Ivy.Analyser.csproj"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all"
+                      SkipGetTargetFrameworkProperties="true"
+                      UndefineProperties="TargetFramework" />
   </ItemGroup>
-  
+
+  <!-- Ivy.Plugin.Abstractions is no longer published separately, so ship its assembly in lib/ -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);PackPluginAbstractions</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="PackPluginAbstractions">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)Ivy.Plugin.Abstractions.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)Ivy.Plugin.Abstractions.xml"
+                            Condition="Exists('$(OutputPath)Ivy.Plugin.Abstractions.xml')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Ivy.Analyser is no longer published separately, so ship it as an analyzer inside this package -->
+  <Target Name="PackIvyAnalyser" BeforeTargets="_GetPackageFiles">
+    <PropertyGroup>
+      <_IvyAnalyserDll>$(MSBuildThisFileDirectory)../Ivy.Analyser/bin/$(Configuration)/netstandard2.0/Ivy.Analyser.dll</_IvyAnalyserDll>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_IvyAnalyserDll)')"
+           Text="Ivy.Analyser.dll not found at '$(_IvyAnalyserDll)'. It must be built before packing Ivy." />
+    <ItemGroup>
+      <None Include="$(_IvyAnalyserDll)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
+
   <!-- Frontend source files for incremental build detection -->
   <ItemGroup>
     <FrontendSourceFiles Include="../frontend/src/**/*" />
@@ -124,5 +198,51 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    External widget frontends. Each Widgets/External/<Name>/frontend is an independent vite
+    bundle whose dist is embedded under the logical prefix "Ivy.widgets.<Name>.", matching the
+    "widgets/<Name>/..." ScriptPath/StylePath on each [ExternalWidget] attribute. This mirrors
+    Build/Ivy.ExternalWidget.targets, which remains the contract for third-party widget packages.
+  -->
+  <ItemGroup>
+    <ExternalWidget Include="ActivityHeatmap" />
+    <ExternalWidget Include="AnimatedStatusLabel" />
+    <ExternalWidget Include="DiffView" />
+    <ExternalWidget Include="Leaflet" />
+    <ExternalWidget Include="QRCode" />
+    <ExternalWidget Include="ScreenshotFeedback" />
+    <ExternalWidget Include="Tiptap" />
+    <ExternalWidget Include="Xterm" />
+  </ItemGroup>
+
+  <Target Name="NpmInstallExternalWidgets" BeforeTargets="BuildExternalWidgetFrontends"
+          Inputs="Widgets/External/%(ExternalWidget.Identity)/frontend/package.json;Widgets/External/%(ExternalWidget.Identity)/frontend/pnpm-lock.yaml"
+          Outputs="Widgets/External/%(ExternalWidget.Identity)/frontend/node_modules/.modules.yaml">
+    <Exec Command="vp install -- --config.confirmModulesPurge=false"
+          WorkingDirectory="Widgets/External/%(ExternalWidget.Identity)/frontend"
+          EnvironmentVariables="CI=$(CI)" />
+  </Target>
+
+  <Target Name="BuildExternalWidgetFrontends" BeforeTargets="AssignTargetPaths"
+          Inputs="Widgets/External/%(ExternalWidget.Identity)/frontend/src/**/*;Widgets/External/%(ExternalWidget.Identity)/frontend/package.json;Widgets/External/%(ExternalWidget.Identity)/frontend/pnpm-lock.yaml;Widgets/External/%(ExternalWidget.Identity)/frontend/tsconfig.json;Widgets/External/%(ExternalWidget.Identity)/frontend/vite.config.ts"
+          Outputs="Widgets/External/%(ExternalWidget.Identity)/frontend/dist/.build-stamp">
+    <Exec Command="vp build"
+          WorkingDirectory="Widgets/External/%(ExternalWidget.Identity)/frontend"
+          EnvironmentVariables="CI=$(CI)" />
+    <Touch Files="Widgets/External/%(ExternalWidget.Identity)/frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="EmbedExternalWidgetResources" AfterTargets="BuildExternalWidgetFrontends" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <!-- WidgetName metadata is required: an unqualified %(Filename) below would batch over ExternalWidget, not the glob -->
+      <_ExternalWidgetDistFile Include="Widgets/External/%(ExternalWidget.Identity)/frontend/dist/**/*"
+                               Exclude="Widgets/External/%(ExternalWidget.Identity)/frontend/dist/.build-stamp"
+                               WidgetName="%(ExternalWidget.Identity)" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="@(_ExternalWidgetDistFile)" Visible="false"
+                        LogicalName="Ivy.widgets.%(_ExternalWidgetDistFile.WidgetName).$([System.String]::Copy('%(_ExternalWidgetDistFile.RecursiveDir)').Replace('\','.').Replace('/','.'))%(_ExternalWidgetDistFile.Filename)%(_ExternalWidgetDistFile.Extension)" />
+    </ItemGroup>
+  </Target>
 
 </Project>

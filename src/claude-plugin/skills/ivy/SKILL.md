@@ -4,8 +4,8 @@ description: >
   Master skill for building Ivy Framework applications. Use when the user asks to
   build something with Ivy, create an app, add a feature, fix a bug, or work on
   their Ivy project. Routes to specialized skills for CRUD, dashboards, connections,
-  conversions, themes, widgets, and deployment. Also provides direct access to the
-  Ivy CLI for documentation lookups and framework questions.
+  conversions, themes, widgets, and deployment. Also provides guidance on accessing
+  Ivy documentation.
 allowed-tools: Bash(dotnet:*) Bash(ivy:*) Read Write Edit Glob Grep
 effort: medium
 ---
@@ -24,16 +24,12 @@ If the file `.ivy/learnings/ivy.md` exists in the project directory, read it fir
 
 Read the AGENTS.md reference for any direct implementation work. For specialized tasks, delegate to the appropriate skill below.
 
-## Ivy CLI
+## Documentation
 
-Use the `ivy` CLI for documentation lookups and framework questions:
+Access framework documentation directly via markdown endpoints or inspect the sitemap:
 
-| Scenario | Command |
-|---|---|
-| You know the topic and want the full reference page | `ivy docs <path>` |
-| You need to browse what documentation exists | `ivy docs list` |
-| You have a "how do I..." question and need a synthesized answer | `ivy ask "your question"` |
-| You need to understand an existing connection's schema | `ivy cli explain connections/<ConnectionName>` |
+- Sitemap listing all pages: <https://docs.ivy.app/sitemap.xml>
+- Direct Markdown endpoint: append `.md` to any documentation URL (e.g. `https://docs.ivy.app/widgets/advanced/data-table.md`)
 
 ## Skill Router
 

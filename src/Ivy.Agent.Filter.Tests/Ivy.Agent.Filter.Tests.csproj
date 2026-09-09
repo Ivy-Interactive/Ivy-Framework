@@ -29,7 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Agent.Filter\Ivy.Agent.Filter.csproj" />
+    <ProjectReference Include="..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\Ivy.Agent.Filter.Eval.Console\Ivy.Agent.Filter.Eval.Console.csproj" />
   </ItemGroup>
 
 </Project>

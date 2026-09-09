@@ -36,6 +36,16 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
         [Description("Path to an IvyML file.")]
         public string? FilePath { get; init; }
 
+        [CommandOption("--theme <PATH|NAME>")]
+        [Description("Theme YAML file, or a built-in theme name. Defaults to a theme.yaml next to "
+                     + "the IvyML file, if there is one. Pass 'none' to ignore that.")]
+        public string? Theme { get; init; }
+
+        [CommandOption("--no-theme")]
+        [Description("Turn theming off: ignore --theme and any neighbouring theme.yaml.")]
+        [DefaultValue(false)]
+        public bool NoTheme { get; init; }
+
         [CommandOption("-d|--debug")]
         [Description("Draw debug overlays showing widget bounds, sizes, and padding.")]
         [DefaultValue(false)]
@@ -97,8 +107,19 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
             return 1;
         }
 
+        Theme? theme;
+        try
+        {
+            theme = ThemeResolver.Resolve(settings.Theme, settings.FilePath, settings.NoTheme);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or YamlDotNet.Core.YamlException)
+        {
+            System.Console.Error.WriteLine($"Error: {ex.Message}");
+            return 1;
+        }
+
         var service = new IvyScreenshotService();
-        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath, settings.Debug, settings.Timeout);
+        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath, settings.Debug, settings.Timeout, theme);
         var result = await service.CaptureAsync(ivyml, options, ct);
 
         if (result.Success)

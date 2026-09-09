@@ -51,6 +51,9 @@ public class ThemeService : IThemeService
         var sb = new StringBuilder();
         sb.AppendLine("<style id=\"ivy-custom-theme\">");
 
+        // Font faces first: the variables below may name one of these families.
+        AppendFontFaces(sb);
+
         // Generate :root (light theme) variables
         sb.AppendLine(":root {");
         AppendThemeColors(sb, _currentTheme.Colors.Light, ThemeColors.DefaultLight);
@@ -531,7 +534,13 @@ public class ThemeService : IThemeService
     private void AppendOtherThemeProperties(StringBuilder sb)
     {
         if (!string.IsNullOrEmpty(_currentTheme.FontFamily))
-            sb.AppendLine($"  --font-sans: {_currentTheme.FontFamily};");
+            sb.AppendLine($"  --font-sans: {Escape(_currentTheme.FontFamily)};");
+
+        if (!string.IsNullOrEmpty(_currentTheme.FontFamilyMono))
+            sb.AppendLine($"  --font-mono: {Escape(_currentTheme.FontFamilyMono)};");
+
+        if (!string.IsNullOrEmpty(_currentTheme.FontFamilySerif))
+            sb.AppendLine($"  --font-serif: {Escape(_currentTheme.FontFamilySerif)};");
 
         if (!string.IsNullOrEmpty(_currentTheme.FontSize))
             sb.AppendLine($"  --text-body: {_currentTheme.FontSize};");
@@ -555,6 +564,84 @@ public class ThemeService : IThemeService
         sb.AppendLine($"  --shadow-md: {IvyFrameworkShadowTokens.Shadow.Md};");
         sb.AppendLine($"  --shadow-lg: {IvyFrameworkShadowTokens.Shadow.Lg};");
     }
+
+    private void AppendFontFaces(StringBuilder sb)
+    {
+        foreach (var face in _currentTheme.FontFaces)
+        {
+            if (string.IsNullOrWhiteSpace(face.Family) || string.IsNullOrWhiteSpace(face.Src))
+                continue;
+
+            sb.AppendLine("@font-face {");
+            sb.AppendLine($"  font-family: {Escape(QuoteFamily(face.Family))};");
+            sb.AppendLine($"  src: {Escape(ResolveFontSrc(face.Src))};");
+            if (!string.IsNullOrWhiteSpace(face.Weight))
+                sb.AppendLine($"  font-weight: {Escape(face.Weight)};");
+            if (!string.IsNullOrWhiteSpace(face.Style))
+                sb.AppendLine($"  font-style: {Escape(face.Style)};");
+            if (!string.IsNullOrWhiteSpace(face.UnicodeRange))
+                sb.AppendLine($"  unicode-range: {Escape(face.UnicodeRange)};");
+            sb.AppendLine($"  font-display: {Escape(face.Display ?? "swap")};");
+            sb.AppendLine("}");
+        }
+    }
+
+    private static string QuoteFamily(string family)
+    {
+        var trimmed = family.Trim();
+        if (trimmed.StartsWith('\'') || trimmed.StartsWith('"'))
+            return trimmed;
+        return $"'{trimmed}'";
+    }
+
+    /// <summary>
+    /// Accepts a full CSS <c>src</c> value as-is, and wraps a bare URL or data URI in
+    /// <c>url()</c> with a <c>format()</c> hint inferred from the extension or MIME type.
+    /// </summary>
+    private static string ResolveFontSrc(string src)
+    {
+        var trimmed = src.Trim();
+        if (trimmed.Contains("url(", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("local(", StringComparison.OrdinalIgnoreCase))
+            return trimmed;
+
+        var format = InferFontFormat(trimmed);
+        return format is null ? $"url({trimmed})" : $"url({trimmed}) format('{format}')";
+    }
+
+    private static string? InferFontFormat(string url)
+    {
+        var probe = url;
+
+        // A data URI carries the type in its MIME part; a plain URL carries it in the extension,
+        // which may sit in front of a query string.
+        if (probe.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+        {
+            var comma = probe.IndexOf(',');
+            if (comma > 0) probe = probe[..comma];
+        }
+        else
+        {
+            var query = probe.IndexOfAny(['?', '#']);
+            if (query >= 0) probe = probe[..query];
+        }
+
+        if (probe.EndsWith("woff2", StringComparison.OrdinalIgnoreCase)) return "woff2";
+        if (probe.EndsWith("woff", StringComparison.OrdinalIgnoreCase)) return "woff";
+        if (probe.EndsWith("ttf", StringComparison.OrdinalIgnoreCase)
+            || probe.Contains("truetype", StringComparison.OrdinalIgnoreCase)) return "truetype";
+        if (probe.EndsWith("otf", StringComparison.OrdinalIgnoreCase)
+            || probe.Contains("opentype", StringComparison.OrdinalIgnoreCase)) return "opentype";
+        return null;
+    }
+
+    /// <summary>
+    /// The generated <c>&lt;style&gt;</c> block is re-parsed as XML by the HTML pipeline, so any
+    /// markup-significant character coming from theme values has to be escaped first. Font URLs with
+    /// query strings are the realistic case.
+    /// </summary>
+    private static string Escape(string value) =>
+        value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
     private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)
     {

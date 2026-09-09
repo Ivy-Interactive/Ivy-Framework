@@ -5,7 +5,7 @@ searchHints:
 - note
 - sketch
 - prototype
-- balsamiq
+- sketch
 - brainstorm
 - postit
 ---
@@ -13,7 +13,7 @@ searchHints:
 # WireframeNote
 
 <Ingress>
-A hand-drawn sticky note widget for wireframing, brainstorming, and low-fidelity prototyping with a Balsamiq-style aesthetic.
+A hand-drawn sticky note widget for wireframing, brainstorming, and low-fidelity prototyping with a hand-drawn, low-fidelity aesthetic.
 </Ingress>
 
 The `WireframeNote` widget renders as a sticky note with a folded corner, drop shadow, slight rotation, and hand-drawn font. It is designed for sketching ideas, annotating layouts, and building low-fidelity prototypes.

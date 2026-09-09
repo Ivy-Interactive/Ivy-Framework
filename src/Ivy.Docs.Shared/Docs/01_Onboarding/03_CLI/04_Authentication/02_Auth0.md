@@ -221,7 +221,7 @@ When users authenticate via OAuth providers like Google or GitHub, Auth0 manages
 
 In addition to enabling Management API access, you must have a registered token handler for each OAuth provider you want to use. Without a registered handler, the provider won't appear in brokered sessions.
 
-**Built-in handlers** - Add the NuGet package to your project:
+**Built-in handlers** - Add the `Ivy.Auth` package to your project, then import the namespace you need:
 - `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
 - `Ivy.Auth.GitHub` - For GitHub OAuth tokens
 
@@ -294,7 +294,7 @@ Your credentials will be stored securely in [.NET user secrets](../../02_Concept
 
 Ivy then finishes configuring your application automatically:
 
-1. Adds the `Ivy.Auth.Auth0` package to your project.
+1. Adds the `Ivy.Auth` package to your project.
 2. Dynamically generates and adds the appropriate `UseAuth<Auth0AuthProvider>()` call to your [Program.cs](../../02_Concepts/01_Program.md) based on your selected options (e.g., if you select Email/Password and Google, it generates: `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());`).
 3. Adds `Ivy.Auth.Auth0` to your global usings.
 

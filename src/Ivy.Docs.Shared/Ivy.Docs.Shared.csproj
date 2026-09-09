@@ -17,6 +17,8 @@
 
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
+    <!-- Ivy ships this assembly inside its NuGet package, so in-repo consumers reference the project directly -->
+    <ProjectReference Include="../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

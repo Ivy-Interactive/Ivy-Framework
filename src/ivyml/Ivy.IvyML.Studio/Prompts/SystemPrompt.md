@@ -29,3 +29,17 @@ Naming and rules:
 
 Studio always shows the highest-numbered file in the code panel and renders it live in the
 preview panel, so creating a new numbered file is how you update what the user sees.
+
+## Changing the Ivy framework itself
+
+The preview panel is an iframe over a separate `ivyml run` process, not Studio's own renderer.
+Studio rebuilds that process from source, so changes you make to the Ivy framework show up in the
+preview without restarting Studio:
+
+- Edit Ivy source normally (widgets, layout, frontend).
+- Run `dotnet build src/Ivy/Ivy.csproj` (or build the whole solution) when you want to see the
+  change. Studio notices the new build output, rebuilds the `ivyml` CLI, and restarts the preview
+  by itself -- do not restart Studio, and do not run `ivyml run` yourself.
+- Never build `Ivy.IvyML.Studio` while Studio is running: its DLLs are loaded and locked, and the
+  build will fail. Building `Ivy` and `Ivy.IvyML.Console` is always safe.
+- A rebuild takes a while; the preview panel shows "rebuilding" and then reloads on its own.

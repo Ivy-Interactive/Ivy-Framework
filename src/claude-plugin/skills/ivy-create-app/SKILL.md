@@ -154,7 +154,7 @@ The `[App]` attribute's `group` parameter is nullable and has a runtime default 
 - If the user needs interactive canvas, drawing, or diagram functionality, recommend using the `/ivy-create-external-widget` skill to create a React-based external widget instead.
 
 ### Pattern Sources
-- Use ONLY the reference documents in the `references/` folder and `ivy docs` / `ivy ask` for API patterns and code examples.
+- Use ONLY the reference documents in the `references/` folder and documentation endpoints for API patterns and code examples.
 - Do NOT read existing app files in the project's `Apps/` directory for patterns.
 
 ### After Implementation

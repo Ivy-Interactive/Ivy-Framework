@@ -21,6 +21,8 @@ jobs:
 
       # Setup Node.js (needed for integrated frontend build in dotnet build)
       - uses: voidzero-dev/setup-vp@v1
+        with:
+          run-install: false
 
       # Setup Java (needed for ANTLR4)
       - name: Setup Java
@@ -51,11 +53,13 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release
 
-      # Plugin API compatibility check (runs EnablePackageValidation against baseline)
+      # Plugin API compatibility check (runs EnablePackageValidation against baseline).
+      # Ivy.Plugin.Abstractions sets IsPackable=false to protect its retired package ID, and
+      # package validation only runs when IsPackable is true, so this step re-enables it here.
       - name: Check plugin API compatibility
         run: |
           dotnet pack Ivy/Ivy.csproj --configuration Release --output ./nupkg /p:Version=99.0.0
-          dotnet pack Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release --output ./nupkg /p:Version=99.0.0
+          dotnet pack Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release --output ./nupkg /p:Version=99.0.0 /p:IsPackable=true
 
       # Run tests
       - name: Run tests

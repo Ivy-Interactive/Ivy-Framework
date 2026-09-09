@@ -28,11 +28,12 @@ That is the whole of what the framework defines. A plugin's capabilities — wha
 
 ## What the Framework Provides
 
-Two packages, split by whether they need the Ivy framework itself.
+Two assemblies, split by whether they need the Ivy framework itself. Both ship inside the `Ivy`
+NuGet package, so a single `dotnet add package Ivy` gives you both.
 
 ### Ivy.Plugin.Abstractions
 
-The base abstractions package. It does **not** reference `Ivy` — only `Microsoft.Extensions.DependencyInjection` and `Microsoft.Extensions.Logging.Abstractions`. It covers six concerns:
+The base abstractions assembly. It does **not** reference `Ivy` — only `Microsoft.Extensions.DependencyInjection` and `Microsoft.Extensions.Logging.Abstractions` — so a plugin can be written against it without touching framework types. It covers six concerns:
 
 | Concern | Key types |
 |---------|-----------|
@@ -55,9 +56,9 @@ public interface IIvyPluginContext
 
 Almost everything a plugin contributes, it contributes through a contract *you* define on top of this.
 
-### The Ivy Package
+### The Ivy Assembly
 
-Plugins that choose to bring in the `Ivy` package, either directly or indirectly, gain access to three additional APIs which require the framework:
+Plugins that use types from the `Ivy` assembly itself, either directly or indirectly, gain access to three additional APIs which require the framework:
 
 ```csharp
 public interface IIvyExtendedPluginContext : IIvyPluginContext
@@ -93,7 +94,7 @@ Plugin support in the framework is intended to be treated only as a foundation f
 The framework stops where it does because a plugin contract is domain-specific. A messaging app wants channels; a CI tool wants build steps; a CRM wants record enrichers. Any contract rich enough to be useful to one of them would be wrong for the others. So the framework owns the parts that are genuinely universal (isolation, lifecycle, configuration, version gating) and hands you the rest.
 
 <Callout Type="info">
-This means for most practical purposes, your host should ship its own abstractions package(s), and plugin authors then reference *those*, not `Ivy.Plugin.Abstractions` directly. See [Host Abstractions](./03_HostAbstractions.md).
+This means for most practical purposes, your host should ship its own abstractions package(s), and plugin authors then reference *those*, not `Ivy` directly. See [Host Abstractions](./03_HostAbstractions.md).
 </Callout>
 
 ## How the Pieces Reference Each Other

@@ -1,5 +1,6 @@
 import { getHeight, getWidth } from "@/lib/styles";
 import { getWireframePalette } from "./wireframeColors";
+import { Densities } from "@/types/density";
 import React from "react";
 
 interface WireframeNoteWidgetProps {
@@ -8,6 +9,7 @@ interface WireframeNoteWidgetProps {
   color?: string;
   width?: string;
   height?: string;
+  density?: Densities;
 }
 
 const FOLD_SIZE = 24;
@@ -17,8 +19,28 @@ export const WireframeNoteWidget: React.FC<WireframeNoteWidgetProps> = ({
   color,
   width,
   height,
+  density = Densities.Medium,
 }) => {
   const palette = getWireframePalette(color);
+
+  let padding = "14px 16px 13px 14px";
+  let fontSize = 12;
+  let minHeight = 48;
+
+  switch (density) {
+    case Densities.Small:
+      padding = "11px 13px 10px 11px";
+      fontSize = 10;
+      minHeight = 38;
+      break;
+    case Densities.Large:
+      padding = "18px 20px 16px 18px";
+      fontSize = 15;
+      minHeight = 60;
+      break;
+    default:
+      break;
+  }
 
   const style: React.CSSProperties = {
     ...getWidth(width),
@@ -26,7 +48,7 @@ export const WireframeNoteWidget: React.FC<WireframeNoteWidgetProps> = ({
     position: "relative",
     display: "inline-flex",
     flexDirection: "column",
-    filter: `drop-shadow(3px 4px 6px ${palette.shadow})`,
+    filter: `drop-shadow(2px 3px 5px ${palette.shadow})`,
     transform: "rotate(-1.2deg)",
   };
 
@@ -67,14 +89,14 @@ export const WireframeNoteWidget: React.FC<WireframeNoteWidgetProps> = ({
       <div
         style={{
           position: "relative",
-          padding: "18px 20px 16px 18px",
+          padding,
           color: palette.text,
           fontFamily: "'Comic Sans MS', 'Segoe Print', 'Bradley Hand', cursive",
-          fontSize: "15px",
+          fontSize: `${fontSize}px`,
           lineHeight: "1.5",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
-          minHeight: "60px",
+          minHeight: `${minHeight}px`,
         }}
       >
         {text}

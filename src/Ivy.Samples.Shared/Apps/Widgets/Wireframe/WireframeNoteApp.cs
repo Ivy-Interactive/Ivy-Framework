@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Wireframe;
 
-[App(icon: Icons.StickyNote, group: ["Widgets", "Wireframe"], searchHints: ["wireframe", "sticky", "note", "sketch", "prototype", "balsamiq", "brainstorm", "postit"])]
+[App(icon: Icons.StickyNote, group: ["Widgets", "Wireframe"], searchHints: ["wireframe", "sticky", "note", "sketch", "prototype", "sketch", "brainstorm", "postit"])]
 public class WireframeNoteApp : SampleBase
 {
     protected override object? BuildSample()

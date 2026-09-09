@@ -283,7 +283,7 @@ public class [PluralName]App : ViewBase
 - `.Remove()` the parent FK and ID fields that shouldn't be editable.
 
 ### Pattern Sources
-- Use ONLY the reference documents in the `references/` folder and `ivy docs` / `ivy ask` for API patterns and code examples.
+- Use ONLY the reference documents in the `references/` folder and documentation endpoints for API patterns and code examples.
 - Do NOT read existing app files in the project's `Apps/` directory for patterns.
 
 ### Critical Code Generation Rules

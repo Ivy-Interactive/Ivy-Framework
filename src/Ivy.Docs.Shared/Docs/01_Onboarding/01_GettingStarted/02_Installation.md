@@ -145,15 +145,13 @@ The primary Ivy Framework package is installed via NuGet and provides the founda
 
 Extend Ivy's functionality with official extension packages for authentication and data management.
 
-| Package                          | Purpose                                                                                       |
-| :------------------------------- | :-------------------------------------------------------------------------------------------- |
-| `Ivy.Auth.Supabase`              | Identity management via [Supabase](../03_CLI/04_Authentication/02_Supabase.md)                |
-| `Ivy.Auth.Authelia`              | Single Sign-On and 2FA via [Authelia](../03_CLI/04_Authentication/02_Authelia.md)             |
-| `Ivy.Auth.Entra`                 | Microsoft [Entra](../03_CLI/04_Authentication/02_MicrosoftEntra.md) ID (Azure AD) integration |
-| `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation                                           |
+| Package                          | Purpose                                                                                                                                                                                                   |
+| :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Ivy.Auth`                       | Every authentication provider: [Supabase](../03_CLI/04_Authentication/02_Supabase.md), [Authelia](../03_CLI/04_Authentication/02_Authelia.md), [Microsoft Entra](../03_CLI/04_Authentication/02_MicrosoftEntra.md) ID, Auth0, Clerk, GitHub, Google and Sliplane |
+| `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation                                                                                                                                                       |
 
 ```terminal
->dotnet add package Ivy.Auth.Supabase
+>dotnet add package Ivy.Auth
 >dotnet add package Ivy.Database.Generator.Toolkit
 ```
 

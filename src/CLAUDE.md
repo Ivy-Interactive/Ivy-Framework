@@ -8,6 +8,21 @@ A signature change can cause `MissingMethodException` for deployed plugins.
 API compatibility is enforced in CI via `EnablePackageValidation`. If your change breaks the API
 surface, the pack step will fail. See "Handling intentional breaks" below.
 
+`Ivy.Plugin.Abstractions` is no longer published as its own NuGet package: its assembly ships
+inside `Ivy.nupkg` under `lib/net10.0/`. The project sets `IsPackable=false` to protect this retired
+package ID from an incidental solution-wide `dotnet pack`, but keeps its own
+`PackageValidationBaselineVersion` and is still packed in CI purely to run that API-compat check, so
+both projects below must be packed when regenerating suppressions, and packing
+`Ivy.Plugin.Abstractions` for that purpose needs `/p:IsPackable=true`.
+
+Because `Ivy.csproj` sets `PrivateAssets="all"` on its reference to `Ivy.Plugin.Abstractions` (to avoid emitting an external package dependency), `Ivy.Plugin.Abstractions.dll` does not flow transitively through in-repo `ProjectReference` chains. Any in-repo project consuming types from the `Ivy.Plugins` namespace (e.g. plugin hosts, test suites, example apps) must include an explicit project reference:
+
+```xml
+<ProjectReference Include="../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
+```
+
+External NuGet consumers referencing `<PackageReference Include="Ivy" />` are unaffected because the assembly is packaged directly inside `Ivy.nupkg` under `lib/net10.0/`.
+
 ## Rules
 
 ### NEVER (binary-breaking for deployed plugins):
@@ -80,7 +95,7 @@ If a breaking change is truly necessary:
 1. Regenerate `CompatibilitySuppressions.xml` by running pack with the suppression flag:
    ```bash
    GITHUB_ACTIONS=true dotnet pack src/Ivy/Ivy.csproj --configuration Release /p:ApiCompatGenerateSuppressionFile=true /p:Version=99.0.0
-   GITHUB_ACTIONS=true dotnet pack src/Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release /p:ApiCompatGenerateSuppressionFile=true /p:Version=99.0.0
+   GITHUB_ACTIONS=true dotnet pack src/Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj --configuration Release /p:ApiCompatGenerateSuppressionFile=true /p:Version=99.0.0 /p:IsPackable=true
    ```
    `GITHUB_ACTIONS=true` matches CI's `GenerateAssemblyInfo` behavior; `/p:Version=99.0.0` ensures
    the assembly version exceeds the baseline (required by CP0003). Only run for project(s) you changed.

@@ -101,7 +101,7 @@ dotnet user-secrets set "Auth0:Domain" "your-tenant.auth0.com"
 dotnet user-secrets set "Auth0:ClientId" "your-client-id"
 ```
 
-7. Use `ivy docs` or `ivy ask` to look up the specific auth provider documentation if you need details about the NuGet package name, the provider class name, or the `Program.cs` registration pattern for the chosen provider.
+7. Consult the specific auth provider documentation (via `https://docs.ivy.app/sitemap.xml` or documentation markdown endpoints) if you need details about the NuGet package name, the provider class name, or the `Program.cs` registration pattern for the chosen provider.
 
 ## Step 5: Verify
 
@@ -125,7 +125,7 @@ If the setup fails:
 
 2. After fixing the underlying issue, either retry using the `/ivy-create-auth-connection` skill from scratch, or manually create the auth provider class and register it in `Program.cs`.
 
-3. Use `ivy ask "How do I configure [ProviderName] authentication?"` for provider-specific guidance.
+3. Consult the provider documentation endpoints for provider-specific guidance.
 
 ## Post-run: Evaluate and Improve
 

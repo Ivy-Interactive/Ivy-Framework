@@ -316,96 +316,80 @@ Alternatively use explicit removes: `<Compile Remove="Widgets/MyWidget/**/*.cs" 
 
 ## Publishing External Widgets to NuGet
 
-External widgets in the Ivy Framework repository (`src/widgets/Ivy.Widgets.*`) can be published to NuGet for distribution and reuse across projects.
+An external widget project can be published as its own NuGet package for distribution and reuse
+across projects.
+
+> **Note:** The widgets that ship with Ivy (`Leaflet`, `Xterm`, `Tiptap`, `QRCode`, `DiffView`,
+> `ScreenshotFeedback`, `AnimatedStatusLabel`, `ActivityHeatmap`) are compiled into `Ivy.dll` itself
+> and are not separate packages. They live in `src/Ivy/Widgets/External/<Name>/` and their frontends
+> are built and embedded by `src/Ivy/Ivy.csproj`. Nothing needs to be installed to use them.
 
 ### NuGet Package Configuration
 
-Each external widget project must include NuGet package metadata in its `.csproj` file:
+A publishable external widget project needs NuGet package metadata in its `.csproj` file:
 
 ```xml
 <PropertyGroup>
-  <PackageId>Ivy.Widgets.MyWidget</PackageId>
+  <PackageId>Acme.Widgets.MyWidget</PackageId>
+  <Version>1.0.0</Version>
   <Description>Widget for Ivy Framework</Description>
-  <Authors>Ivy Interactive</Authors>
+  <Authors>Acme</Authors>
   <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-  <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</PackageProjectUrl>
-  <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</RepositoryUrl>
   <PackageReadmeFile>README.md</PackageReadmeFile>
 </PropertyGroup>
 
 <ItemGroup>
   <None Include="README.md" Pack="true" PackagePath="" />
 </ItemGroup>
-
-<Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
 ```
 
-The `Ivy.ExternalWidget.targets` import provides shared build logic for external widgets, including frontend build integration and embedded resource configuration.
+Combine this with the frontend build and `EmbeddedResource` items from
+[Standalone widget project](#standalone-widget-project) above: the built assets must be embedded in
+the assembly for `ScriptPath`/`StylePath` to resolve at runtime.
 
-### Version Management
+When your project references `Ivy` via `<PackageReference Include="Ivy" />`, the package automatically imports build targets that detect `frontend/package.json`. During project compilation, it runs `vp install` and `vp build` in `frontend/` and embeds `frontend/dist/**` under the resource names `ExternalWidgetController` looks for.
 
-Widget versions are centrally managed in `src/widgets/Directory.Build.props`:
+If you prefer to manage the frontend build independently, you can opt out of the automatic build targets:
 
 ```xml
-<Project>
-  <PropertyGroup>
-    <Version>1.0.0</Version>
-  </PropertyGroup>
-</Project>
+<PropertyGroup>
+  <IvyEnableExternalWidgets>false</IvyEnableExternalWidgets>
+</PropertyGroup>
 ```
-
-Update this version before triggering a release to publish all external widgets with the new version number.
 
 ### Release Workflow
 
-External widgets are published using the `publish-external-widgets.yml` GitHub Actions workflow:
+Pack and publish like any other NuGet package:
 
-**Triggering a release:**
+```bash
+dotnet pack MyWidget.csproj --configuration Release --output ./nupkg
+dotnet nuget push ./nupkg/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+```
 
-1. **Tag-based release (all widgets):**
-   ```bash
-   git tag widgets/v1.0.0
-   git push origin widgets/v1.0.0
-   ```
-   This publishes all external widgets in `src/widgets/Ivy.Widgets.*` with the version from `Directory.Build.props`.
-
-2. **Manual release (specific widget):**
-   - Go to Actions → "Publish External Widgets" → Run workflow
-   - Enter the widget name (e.g., `Xterm` for `Ivy.Widgets.Xterm`)
-   - The workflow builds, signs, and publishes only that widget
-
-**Workflow steps:**
-
-1. Restores .NET dependencies
-2. Builds the frontend (`pnpm install && pnpm run build`) if a `frontend/` directory exists
-3. Packs the NuGet package with embedded frontend assets
-4. Signs the package using SSL.com code signing
-5. Publishes to NuGet.org
-6. Creates a GitHub release (for tag-based triggers)
+The pack step runs the widget's frontend build, so a Node toolchain must be available on the machine
+or CI runner doing the packing.
 
 ### Consuming External Widget Packages
 
 Install the widget package in your Ivy Framework project:
 
 ```bash
-dotnet add package Ivy.Widgets.Xterm
+dotnet add package Acme.Widgets.MyWidget
 ```
 
 Then use the widget in your app:
 
 ```csharp
-using Ivy.Widgets.Xterm;
+using Acme.Widgets.MyWidget;
 
 public class MyApp : AppBase<MyApp>
 {
-    public override Widget View() => new Terminal()
-        .Rows(24)
-        .Cols(80)
-        .OnInput(async e => await HandleInput(e.Args));
+    public override Widget View() => new MyWidget();
 }
 ```
 
-The widget's embedded frontend assets (JavaScript and CSS) are automatically loaded by the Ivy Framework runtime.
+The widget's embedded frontend assets (JavaScript and CSS) are automatically loaded by the Ivy
+Framework runtime.
 
 ### Shipping an External Widget in a Plugin
 
