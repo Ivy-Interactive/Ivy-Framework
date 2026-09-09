@@ -21,6 +21,8 @@ jobs:
 
       # Setup Node.js (needed for integrated frontend build in dotnet build)
       - uses: voidzero-dev/setup-vp@v1
+        with:
+          run-install: false
 
       # Setup Java (needed for ANTLR4)
       - name: Setup Java
