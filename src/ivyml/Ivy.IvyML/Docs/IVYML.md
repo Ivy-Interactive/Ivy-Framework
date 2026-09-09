@@ -135,8 +135,79 @@ ivyml parse -f <FILE>
 | `-w`, `--width` | Viewport width in pixels                             | 300     |
 | `-h`, `--height`| Viewport height in pixels                            | 200     |
 | `-d`, `--debug` | Draw debug overlays showing layout bounds and sizes  | false   |
+| `--theme`       | Theme YAML file or built-in theme name (see Theming) | theme.yaml |
+| `--no-theme`    | Turn theming off entirely                            | false      |
 
 Provide markup via `-i` (inline string) or `-f` (file path), but not both. If `-o` is omitted, the screenshot is saved to a temp file and the path is printed to stdout.
+
+Rendering needs headless Chromium. If Playwright has not been provisioned on the machine, `draw` downloads it automatically on first use (roughly 145 MB, once) and then continues -- no manual `playwright install` step.
+
+### Running a file
+
+To serve a file as a live Ivy application instead of capturing a single image, use `run`. It hosts the widget tree until you stop it with Ctrl+C:
+
+```
+ivyml run <FILE> [-p <PORT>] [--browse]
+```
+
+| Option          | Description                                            | Default |
+|-----------------|--------------------------------------------------------|---------|
+| `-p`, `--port`  | Port to listen on; the next free port is used if taken | 5010    |
+| `-b`, `--browse`| Open the app in the default browser once listening     | false   |
+| `--theme`       | Theme YAML file or built-in theme name (see Theming)   | theme.yaml |
+| `--no-theme`    | Turn theming off entirely                              | false      |
+
+The file is parsed before the server starts, so invalid markup fails immediately with the same error `parse` would print.
+
+### Theming
+
+`draw` and `run` accept `--theme`, which takes either a path to a YAML file or the name of a theme built into the CLI:
+
+```
+ivyml draw -f wireframe.ivyml --theme wireframes
+ivyml draw -f wireframe.ivyml --no-theme
+ivyml draw -f wireframe.ivyml --theme ./my-theme.yaml
+```
+
+Built-in themes: `wireframes` -- sets the whole page in the same handwriting stack the `Wireframe*` widgets use for their own labels, so the output reads as a sketch rather than a finished screen.
+
+If `--theme` is omitted, a `theme.yaml` (or `theme.yml`) sitting next to the IvyML file is used automatically, so a folder of wireframes can carry its own look without repeating the option.
+
+To turn theming off, pass `--no-theme`. It suppresses both `--theme` and the `theme.yaml` convention, so a themed command can be re-run unthemed without editing it -- useful for seeing what a wireframe looks like with and without the theme. (`--theme none` does the same and still works.)
+
+A theme file only states what it changes -- everything it leaves out keeps the Ivy default. Keys are matched case-insensitively and ignoring `-`/`_`, so `fontFamily`, `font-family` and `font_family` are the same key.
+
+```yaml
+extends: wireframes         # optional: start from a built-in theme, then override
+
+name: Sketch
+fontFamily: "'Architects Daughter', 'Segoe Print', cursive"
+fontFamilyMono: "'Geist Mono', monospace"
+fontSize: 16px
+
+fontFaces:                  # emitted as @font-face, so fontFamily can name a web font
+  - family: Architects Daughter
+    src: https://fonts.gstatic.com/s/architectsdaughter/v20/KtkxAKiDZI_td1Lkx62xHZHDtgO_Y-bvTYlg4w.woff2
+    weight: 400
+    style: normal
+
+borderRadius: 12px          # or a mapping: { boxes:, fields:, selectors: }
+shadows: false              # or a mapping: { boxes:, fields:, selectors: }
+
+colors:
+  light:
+    background: "#fdfcf8"
+    foreground: "#1f1d1a"
+    primary: "#1f1d1a"
+    primaryForeground: "#fdfcf8"
+    border: "#3a372f"
+  dark:
+    background: "#1b1a17"
+```
+
+Under `colors`, `light` and `dark` accept any of the Ivy theme colors: `primary`, `primaryForeground`, `secondary`, `secondaryForeground`, `background`, `foreground`, `destructive`, `destructiveForeground`, `success`, `successForeground`, `warning`, `warningForeground`, `info`, `infoForeground`, `border`, `input`, `ring`, `muted`, `mutedForeground`, `accent`, `accentForeground`, `card`, `cardForeground`, `popover`, `popoverForeground`.
+
+A `fontFaces` entry's `src` may be a URL, a `data:` URI, a full CSS `src` value, or a path to a local `.woff2`/`.woff`/`.ttf`/`.otf` file relative to the theme file -- a local file is inlined as a data URI so the theme renders without network access.
 
 ### Debug Mode
 
@@ -210,7 +281,7 @@ Attached props are resolved automatically -- the child doesn't need to know abou
 
 ## Wireframe Widgets
 
-Wireframe widgets have a hand-drawn, Balsamiq-style appearance for sketching and prototyping.
+Wireframe widgets have a hand-drawn, sketch-style appearance for sketching and prototyping.
 
 ### WireframeNote
 
@@ -239,6 +310,210 @@ A hand-drawn numbered circle for annotations and step markers.
 |---------|-------------------|----------|-------------------------------------------------|
 | `Label` | string            |          | Short text shown inside the circle.             |
 | `Color` | Colors            | Yellow   | Any color from the Colors enum                  |
+
+### WireframePlaceholder
+
+A hand-drawn box crossed by two diagonals, standing in for an image, map, chart, or
+video that has not been designed yet. Size it with `Width` and `Height`.
+
+```xml
+<WireframePlaceholder Text="Image Placeholder" />
+<WireframePlaceholder Text="Hero image" Width="Full" Height="200px" Color="Sky" />
+<WireframePlaceholder Width="120px" Height="120px" />
+```
+
+| Prop    | Type              | Default  | Values                                          |
+|---------|-------------------|----------|-------------------------------------------------|
+| `Text`  | string            |          | Optional centered caption. Omit for a bare box. |
+| `Color` | Colors            | Violet   | Any color from the Colors enum                  |
+
+Defaults to 240x140 when no `Width`/`Height` is given.
+
+### WireframeScratchOut
+
+A dense marker scribble, for striking through an area that is being removed or
+reworked. Size it with `Width` and `Height`.
+
+```xml
+<WireframeScratchOut />
+<WireframeScratchOut Color="Red" Width="180px" Height="60px" />
+```
+
+| Prop    | Type              | Default  | Values                                          |
+|---------|-------------------|----------|-------------------------------------------------|
+| `Color` | Colors            | Black    | Any color from the Colors enum                  |
+
+Defaults to 200x100 when no `Width`/`Height` is given. `Density` sets the pen weight.
+
+### WireframeRedX
+
+Two tapered brush strokes crossing corner to corner, for marking something as wrong,
+rejected, or removed. Size it with `Width` and `Height`.
+
+```xml
+<WireframeRedX />
+<WireframeRedX Color="Slate" Width="120px" Height="120px" />
+```
+
+| Prop    | Type              | Default  | Values                                          |
+|---------|-------------------|----------|-------------------------------------------------|
+| `Color` | Colors            | Red      | Any color from the Colors enum                  |
+
+Defaults to 200x100 when no `Width`/`Height` is given. `Density` sets the brush weight.
+
+### WireframeArrow
+
+A hand-drawn arrow spanning its box. Point it with `Direction`, put heads on either or
+both ends, bend it to one side, and dash it.
+
+```xml
+<WireframeArrow />
+<WireframeArrow Direction="DownRight" Heads="Both" Width="200px" Height="120px" />
+<WireframeArrow Bend="Left" Dashed="true" Color="Red" />
+```
+
+| Prop        | Type           | Default | Values                                                              |
+|-------------|----------------|---------|---------------------------------------------------------------------|
+| `Direction` | ArrowDirection | Right   | Right, Left, Up, Down, UpLeft, UpRight, DownLeft, DownRight         |
+| `Heads`     | ArrowHeads     | End     | None, Start, End, Both                                              |
+| `Bend`      | ArrowBend      | None    | None, Left, Right                                                   |
+| `Dashed`    | bool           | false   | Draws the shaft as hand-measured dashes                             |
+| `Color`     | Colors         | Black   | Any color from the Colors enum                                      |
+
+Defaults to 160x60 when no `Width`/`Height` is given. `Density` sets the line weight and
+head size. The arrow runs across its box, so `Width` and `Height` set both its length and
+its slope -- a tall box with `Direction="Down"` gives a long vertical arrow.
+
+### WireframeCurlyBrace
+
+A hand-drawn curly brace for grouping or labelling a run of content.
+
+```xml
+<WireframeCurlyBrace Height="180px" />
+<WireframeCurlyBrace Variant="Vertical" Width="240px" />
+```
+
+| Prop      | Type              | Default    | Values                                     |
+|-----------|-------------------|------------|--------------------------------------------|
+| `Variant` | CurlyBraceVariant | Horizontal | Horizontal, Vertical                       |
+| `Color`   | Colors            | Black      | Any color from the Colors enum             |
+
+`Variant` names the direction the brace's centre nub **points**, not the direction it
+spans -- the convention the widget is modelled on:
+
+- `Horizontal` is the familiar `{`. It spans downwards, nub pointing left. Put it to the
+  left of the rows it groups. Defaults to 26x140.
+- `Vertical` is that shape turned a quarter. It spans across, nub pointing up. Put it
+  above the columns it groups. Defaults to 140x26.
+
+`Width` and `Height` set the span and the depth: for a `Horizontal` brace the height is
+how far it reaches and the width is how deep the nub cuts. `Density` sets the pen weight.
+
+### WireframeShape
+
+A hand-drawn shape. Every shape is inscribed in the widget's box, so `Width` and `Height`
+stretch it -- an `Ellipse` in a wide box is a wide ellipse.
+
+```xml
+<WireframeShape Shape="Ellipse" Text="Start" Filled="true" Color="Green" />
+<WireframeShape Shape="Diamond" Text="Valid?" Width="120px" Height="90px" />
+<WireframeShape Sides="7" />
+```
+
+| Prop     | Type               | Default   | Values                                                |
+|----------|--------------------|-----------|-------------------------------------------------------|
+| `Shape`  | WireframeShapeKind | Rectangle | Rectangle, Ellipse, Triangle, Diamond, Pentagon, Hexagon, Octagon, Star, Cross, Parallelogram |
+| `Sides`  | int                | 0         | 3 or more draws a regular polygon and ignores `Shape` |
+| `Text`   | string             |           | Optional centered label                                |
+| `Filled` | bool               | false     | Washes the interior with the color                     |
+| `Color`  | Colors             | Black     | Any color from the Colors enum                         |
+
+Defaults to 140x100. `Density` sets the pen weight and label size. Use `Sides` for the
+shapes the enum does not name -- a heptagon is `Sides="7"`, and a high count reads as a
+hand-drawn circle.
+
+### WireframeMockup
+
+A hand-drawn device or browser frame that **wraps real content**. Unlike the other
+wireframe widgets it takes children, and lays them out inside the frame's screen area.
+
+```xml
+<WireframeMockup Variant="Mobile">
+  <StackLayout Padding="3">
+    <TextBlock Variant="H4">Inbox</TextBlock>
+    <Button Title="Compose" Width="Full" />
+  </StackLayout>
+</WireframeMockup>
+
+<WireframeMockup Variant="Website" Url="https://example.com">
+  <TextBlock Variant="H3">Product Name</TextBlock>
+</WireframeMockup>
+
+<WireframeMockup Variant="Desktop" Title="Finder">
+  <TextBlock Variant="H4">Dashboard</TextBlock>
+</WireframeMockup>
+```
+
+| Prop      | Type          | Default | Values                                            |
+|-----------|---------------|---------|---------------------------------------------------|
+| `Variant` | MockupVariant | Mobile  | Mobile, Website, Tablet, Desktop                  |
+| `Title`   | string        |         | Window title, Desktop variant only                |
+| `Url`     | string        |         | Address bar text, Website variant only            |
+| `Color`   | Colors        | Black   | Any color from the Colors enum                    |
+
+`Desktop` is a macOS-style application window -- rounded shell, title bar with traffic
+lights, content directly beneath. `Website` is a browser window: toolbar with back,
+forward, reload and an address pill, no tab strip.
+
+Default sizes: Mobile 300x600, Tablet 520x700, Desktop 660x500, Website 660x460. Override
+with `Width`/`Height`; the screen area shrinks with the frame. Content that overflows the
+screen is clipped, exactly as it would be on the device.
+
+### WireframeTransform
+
+Renders its children under a transform. Takes children like `WireframeMockup` does.
+
+```xml
+<WireframeTransform Rotate="-4">
+  <WireframeNote Text="Pinned at an angle" />
+</WireframeTransform>
+
+<WireframeTransform Scale="0.5" Origin="TopLeft">
+  <WireframeMockup Variant="Mobile" />
+</WireframeTransform>
+```
+
+| Prop             | Type            | Default | Notes                                        |
+|------------------|-----------------|---------|----------------------------------------------|
+| `Rotate`         | double          | 0       | Clockwise degrees                            |
+| `Scale`          | double          | 1       | Uniform scale                                |
+| `ScaleX`         | double          |         | Overrides `Scale` horizontally               |
+| `ScaleY`         | double          |         | Overrides `Scale` vertically                 |
+| `SkewX`, `SkewY` | double          | 0       | Skew in degrees                              |
+| `OffsetX`, `OffsetY` | double      | 0       | Nudge in pixels                              |
+| `FlipHorizontal` | bool            | false   | Mirrors horizontally                         |
+| `FlipVertical`   | bool            | false   | Mirrors vertically                           |
+| `Origin`         | TransformOrigin | Center  | Center, TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight |
+| `Fit`            | bool            | false   | Shrink the layout box to the transformed bounds |
+| `Opacity`        | double          | 1       | Fades the children                           |
+
+Transforms are applied in the order translate, rotate, scale, skew.
+
+**The transform is visual only.** Children keep the layout box they started with, so a
+rotated or scaled child does not push its neighbours around and may overlap them. Put the
+transform on a `CanvasLayout`, or leave room around it, when the transformed bounds matter.
+
+Or set `Fit="true"`, which sizes the widget to the transformed bounds so it takes up the
+room it visually occupies and flows normally in a layout. That is usually what you want
+when scaling a mockup down to sit inline:
+
+```xml
+<WireframeTransform Scale="0.5" Fit="true">
+  <WireframeMockup Variant="Mobile" />
+</WireframeTransform>
+```
+
+With `Fit` on, `Origin` no longer changes anything -- the bounds are recentred either way.
 
 ### CanvasLayout
 

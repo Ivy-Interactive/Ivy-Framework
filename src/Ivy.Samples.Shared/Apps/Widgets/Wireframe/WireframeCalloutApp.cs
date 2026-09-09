@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Wireframe;
 
-[App(icon: Icons.Circle, group: ["Widgets", "Wireframe"], searchHints: ["wireframe", "callout", "annotation", "number", "circle", "marker", "balsamiq"])]
+[App(icon: Icons.Circle, group: ["Widgets", "Wireframe"], searchHints: ["wireframe", "callout", "annotation", "number", "circle", "marker", "sketch"])]
 public class WireframeCalloutApp : SampleBase
 {
     protected override object? BuildSample()

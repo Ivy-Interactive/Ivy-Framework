@@ -6,13 +6,13 @@ searchHints:
 - number
 - circle
 - marker
-- balsamiq
+- sketch
 ---
 
 # WireframeCallout
 
 <Ingress>
-A hand-drawn numbered circle widget for annotations, step markers, and low-fidelity callouts with a Balsamiq-style aesthetic.
+A hand-drawn numbered circle widget for annotations, step markers, and low-fidelity callouts with a hand-drawn, low-fidelity aesthetic.
 </Ingress>
 
 The `WireframeCallout` widget renders as a wobbly hand-drawn circle with a bold centered label. It is designed for numbering steps, annotating diagrams, and adding visual markers to wireframe sketches.

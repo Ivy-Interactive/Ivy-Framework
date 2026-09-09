@@ -15,6 +15,17 @@ public class Theme
 
     public string? FontFamily { get; set; }
 
+    public string? FontFamilyMono { get; set; }
+
+    public string? FontFamilySerif { get; set; }
+
+    /// <summary>
+    /// Web fonts to make available to the page. Each entry becomes an <c>@font-face</c> rule that is
+    /// emitted ahead of the theme variables, so a <see cref="FontFamily"/> naming one of these
+    /// families resolves without the host app having to ship its own stylesheet.
+    /// </summary>
+    public List<ThemeFontFace> FontFaces { get; set; } = [];
+
     public string? FontSize { get; set; }
 
     public string? BorderRadiusBoxes { get; set; }
@@ -34,6 +45,7 @@ public class Theme
         Name = "Default",
         Colors = ThemeColorScheme.Default,
         FontFamily = "Geist",
+        FontFamilyMono = "Geist Mono",
         FontSize = "16px",
         BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
@@ -42,6 +54,27 @@ public class Theme
         ShadowFields = true,
         ShadowSelectors = true
     };
+}
+
+/// <summary>
+/// A single <c>@font-face</c> declaration. <see cref="Src"/> accepts either a complete CSS
+/// <c>src</c> value (<c>url(...) format('woff2')</c>, <c>local(...)</c>) or a bare URL / data URI,
+/// in which case the <c>url()</c> wrapper and the <c>format()</c> hint are inferred.
+/// </summary>
+public class ThemeFontFace
+{
+    public string Family { get; set; } = "";
+
+    public string Src { get; set; } = "";
+
+    public string? Weight { get; set; }
+
+    public string? Style { get; set; }
+
+    /// <summary>Defaults to <c>swap</c> so text is never invisible while the font loads.</summary>
+    public string? Display { get; set; }
+
+    public string? UnicodeRange { get; set; }
 }
 
 public class ThemeColorScheme
