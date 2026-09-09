@@ -20,6 +20,8 @@ jobs:
 
       # Setup Node.js
       - uses: voidzero-dev/setup-vp@v1
+        with:
+          run-install: false
 
       - name: Install dependencies
         working-directory: ./src/frontend
