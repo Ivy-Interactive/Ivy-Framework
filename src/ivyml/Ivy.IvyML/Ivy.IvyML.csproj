@@ -15,6 +15,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Docs\IVYML.md" LogicalName="Ivy.IvyML.Docs.IVYML.md" />
     <EmbeddedResource Include="DebugOverlay.js" LogicalName="Ivy.IvyML.DebugOverlay.js" />
+    <EmbeddedResource Include="Themes\*.yaml" LogicalName="Ivy.IvyML.Themes.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IvyPackageVersion)' != ''">

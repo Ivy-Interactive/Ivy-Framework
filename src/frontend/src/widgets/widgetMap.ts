@@ -58,6 +58,14 @@ import { IvyLogoWidget } from "@/widgets/primitives/IvyLogoWidget";
 import { SpacerWidget } from "@/widgets/primitives/SpacerWidget";
 import { WireframeNoteWidget } from "@/widgets/wireframe/WireframeNoteWidget";
 import { WireframeCalloutWidget } from "@/widgets/wireframe/WireframeCalloutWidget";
+import { WireframePlaceholderWidget } from "@/widgets/wireframe/WireframePlaceholderWidget";
+import { WireframeScratchOutWidget } from "@/widgets/wireframe/WireframeScratchOutWidget";
+import { WireframeRedXWidget } from "@/widgets/wireframe/WireframeRedXWidget";
+import { WireframeArrowWidget } from "@/widgets/wireframe/WireframeArrowWidget";
+import { WireframeCurlyBraceWidget } from "@/widgets/wireframe/WireframeCurlyBraceWidget";
+import { WireframeShapeWidget } from "@/widgets/wireframe/WireframeShapeWidget";
+import { WireframeMockupWidget } from "@/widgets/wireframe/WireframeMockupWidget";
+import { WireframeTransformWidget } from "@/widgets/wireframe/WireframeTransformWidget";
 import { LoadingWidget } from "@/widgets/primitives/LoadingWidget";
 import { LogoLoadingWidget } from "@/widgets/primitives/LogoLoadingWidget";
 import { AppHostWidget } from "@/widgets/primitives/AppHostWidget";
@@ -309,6 +317,14 @@ export const widgetMap = {
   // Wireframe
   "Ivy.WireframeNote": WireframeNoteWidget,
   "Ivy.WireframeCallout": WireframeCalloutWidget,
+  "Ivy.WireframePlaceholder": WireframePlaceholderWidget,
+  "Ivy.WireframeScratchOut": WireframeScratchOutWidget,
+  "Ivy.WireframeRedX": WireframeRedXWidget,
+  "Ivy.WireframeArrow": WireframeArrowWidget,
+  "Ivy.WireframeCurlyBrace": WireframeCurlyBraceWidget,
+  "Ivy.WireframeShape": WireframeShapeWidget,
+  "Ivy.WireframeMockup": WireframeMockupWidget,
+  "Ivy.WireframeTransform": WireframeTransformWidget,
 
   // Effects
   "Ivy.Confetti": lazyWithRetry(() => import("@/widgets/effects/ConfettiWidget")),

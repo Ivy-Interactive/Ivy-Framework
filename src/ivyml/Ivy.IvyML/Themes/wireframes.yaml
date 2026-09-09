@@ -1,0 +1,41 @@
+# Wireframes -- makes a wireframe read as a sketch rather than a finished screen.
+#
+# Use it with:  ivyml draw -f wireframe.ivyml --theme wireframes
+#
+# This theme only changes typography. Everything it does not mention keeps Ivy's
+# default value, so colors, radii and shadows are untouched -- see the commented
+# sections at the bottom for how to take it further.
+
+name: Wireframes
+
+# The exact stack the Wireframe* widgets use for their own labels (see
+# src/frontend/src/widgets/wireframe/), so themed text and widget text match
+# instead of sitting next to each other in two different hands. All three faces
+# ship with Windows or macOS, so nothing has to be fetched to render.
+fontFamily: "'Comic Sans MS', 'Segoe Print', 'Bradley Hand', cursive"
+
+# Everything below is what a fuller sketch theme would add. Uncomment to try it.
+#
+# fontSize: 16px
+# borderRadius: 12px        # or: { boxes: 12px, fields: 10px, selectors: 999px }
+# shadows: false            # or: { boxes: true, fields: false, selectors: false }
+#
+# A web font, if you would rather not depend on what the machine has installed.
+# `src` also takes a local .woff2/.ttf path, inlined so it works offline.
+#
+# fontFamily: "'Architects Daughter', 'Segoe Print', cursive"
+# fontFaces:
+#   - family: Architects Daughter
+#     src: https://fonts.gstatic.com/s/architectsdaughter/v20/KtkxAKiDZI_td1Lkx62xHZHDtgO_Y-bvTYlg4w.woff2
+#     weight: 400
+#     style: normal
+#
+# colors:
+#   light:
+#     background: "#fdfcf8"
+#     foreground: "#1f1d1a"
+#     primary: "#1f1d1a"
+#     primaryForeground: "#fdfcf8"
+#     border: "#3a372f"
+#     muted: "#f0ede3"
+#     mutedForeground: "#6b675c"

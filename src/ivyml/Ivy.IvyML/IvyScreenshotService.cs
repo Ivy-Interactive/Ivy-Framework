@@ -26,6 +26,41 @@ public class IvyScreenshotService
 
     public static bool IsSupportedFormat(string ext) => FormatMap.ContainsKey(ext);
 
+    private static readonly BrowserTypeLaunchOptions LaunchOptions = new() { Headless = true };
+
+    /// <summary>
+    /// Launches headless Chromium, downloading it first if Playwright has not been provisioned on
+    /// this machine. Without this the very first <c>ivyml draw</c> on a clean checkout fails with
+    /// Playwright's "Executable doesn't exist" message and a shell command to run by hand.
+    /// </summary>
+    private static async Task<IBrowser> LaunchChromiumAsync(IPlaywright playwright, CancellationToken ct)
+    {
+        try
+        {
+            return await playwright.Chromium.LaunchAsync(LaunchOptions);
+        }
+        catch (PlaywrightException ex) when (IsBrowserMissing(ex))
+        {
+            Console.Error.WriteLine("Chromium is not installed for Playwright. Downloading it now (one-time setup)...");
+
+            var exitCode = await Task.Run(() => Microsoft.Playwright.Program.Main(["install", "chromium"]), ct);
+            if (exitCode != 0)
+                throw new PlaywrightException(
+                    $"Automatic Chromium download failed (exit code {exitCode}). "
+                    + "Install it manually with: pwsh playwright.ps1 install chromium", ex);
+
+            return await playwright.Chromium.LaunchAsync(LaunchOptions);
+        }
+    }
+
+    /// <summary>
+    /// Playwright reports a missing browser as a generic <see cref="PlaywrightException"/>, so the
+    /// message is the only thing that distinguishes it from a real launch failure.
+    /// </summary>
+    private static bool IsBrowserMissing(PlaywrightException ex) =>
+        ex.Message.Contains("Executable doesn't exist", StringComparison.OrdinalIgnoreCase)
+        || ex.Message.Contains("playwright.ps1 install", StringComparison.OrdinalIgnoreCase);
+
     public async Task<ScreenshotResult> CaptureAsync(
         string ivyml,
         ScreenshotOptions options,
@@ -47,6 +82,10 @@ public class IvyScreenshotService
             Silent = true,
             Host = "127.0.0.1"
         });
+
+        if (options.Theme is { } theme)
+            server.UseTheme(theme);
+
         server.AddApp(new AppDescriptor
         {
             Id = AppIds.Default,
@@ -66,10 +105,7 @@ public class IvyScreenshotService
         try
         {
             using var playwright = await Playwright.CreateAsync();
-            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
+            await using var browser = await LaunchChromiumAsync(playwright, ct);
 
             var page = await browser.NewPageAsync(new BrowserNewPageOptions
             {
