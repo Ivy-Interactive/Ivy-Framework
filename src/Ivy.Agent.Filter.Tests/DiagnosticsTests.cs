@@ -1,4 +1,3 @@
-using Ivy.Agent.Filter;
 using Antlr4.Runtime;
 
 namespace Ivy.Agent.Filter.Tests;

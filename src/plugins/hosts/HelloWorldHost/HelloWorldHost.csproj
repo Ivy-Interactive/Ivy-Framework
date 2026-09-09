@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../Ivy/Ivy.csproj" />
+    <!-- Ivy ships this assembly inside its NuGet package, so in-repo consumers reference the project directly -->
+    <ProjectReference Include="../../../Ivy.Plugin.Abstractions/Ivy.Plugin.Abstractions.csproj" />
     <ProjectReference Include="../../abstractions/Ivy.Plugin.HelloWorld.Abstractions/Ivy.Plugin.HelloWorld.Abstractions.csproj" />
   </ItemGroup>
 

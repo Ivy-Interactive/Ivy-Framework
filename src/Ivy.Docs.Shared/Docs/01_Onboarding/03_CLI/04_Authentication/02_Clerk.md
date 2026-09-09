@@ -179,7 +179,7 @@ Your credentials will be stored securely in [.NET user secrets](../../02_Concept
 
 Ivy then finishes configuring your application automatically:
 
-1. Adds the `Ivy.Auth.Clerk` package to your project
+1. Adds the `Ivy.Auth` package to your project
 2. Adds `server.UseAuth<ClerkAuthProvider>()` to your [Program.cs](../../02_Concepts/01_Program.md)
 3. Adds `Ivy.Auth.Clerk` to your global usings
 
@@ -247,7 +247,7 @@ Clerk fetches provider tokens via its Backend API using your Secret Key. No addi
 
 For an OAuth provider to appear in brokered sessions, you must have a registered token handler. Without a registered handler, the provider won't appear in brokered sessions even though Clerk has the tokens.
 
-**Built-in handlers** - Add the NuGet package to your project:
+**Built-in handlers** - Add the `Ivy.Auth` package to your project, then import the namespace you need:
 - `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
 - `Ivy.Auth.GitHub` - For GitHub OAuth tokens
 
@@ -282,7 +282,7 @@ if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) =
 
 **Provider not appearing in brokered sessions**
 - Verify the OAuth provider is enabled in Clerk Dashboard under SSO connections
-- Ensure you have added the appropriate token handler package (`Ivy.Auth.Google`, `Ivy.Auth.GitHub`) or registered a custom handler
+- Ensure you have added the appropriate token handler (`Ivy.Auth.Google`, `Ivy.Auth.GitHub`) or registered a custom handler
 - Check that the user actually authenticated via that OAuth provider
 
 **Token retrieval fails**

@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { EditorState, Extension } from "@codemirror/state";
-import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
+import { EditorView, keymap, ViewUpdate, tooltips } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { startCompletion } from "@codemirror/autocomplete";
 import { ColumnDef } from "../types/column";
@@ -75,6 +75,7 @@ export function useCodeMirror({
 
     // Create extensions array
     const extensions: Extension[] = [
+      tooltips({ parent: typeof document !== "undefined" ? document.body : undefined }),
       // Basic setup
       history(),
       keymap.of([

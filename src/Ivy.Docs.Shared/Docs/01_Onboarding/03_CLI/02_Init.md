@@ -78,18 +78,6 @@ This command will:
 >ivy init --select-template
 ```
 
-`--cursor` - Install Cursor MCP integration after project creation.
-
-```terminal
->ivy init --cursor
-```
-
-`--claude` - Install Claude Code MCP integration after project creation.
-
-```terminal
->ivy init --claude
-```
-
 `--ignore-git` - Skip Git checks and commit during initialization.
 
 ```terminal

@@ -13,10 +13,12 @@ public class ModelCostService
         _httpClient = httpClient;
     }
 
-    public async Task<bool> LoadModelCostsFromLiteLLMAsync(string apiKey)
+    public async Task<bool> LoadModelCostsFromLiteLLMAsync(string apiKey, CancellationToken cancellationToken = default)
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (string.IsNullOrEmpty(apiKey))
             {
                 return false;
@@ -26,13 +28,13 @@ public class ModelCostService
             _httpClient.DefaultRequestHeaders.Add("accept", "application/json");
             _httpClient.DefaultRequestHeaders.Add("x-litellm-api-key", apiKey);
 
-            var response = await _httpClient.GetAsync("https://llmproxy.ivy.app/model_group/info");
+            var response = await _httpClient.GetAsync("https://llmproxy.ivy.app/model_group/info", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 return false;
             }
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var result = JsonSerializer.Deserialize<LiteLLMResponse>(content);
 
             if (result?.Data != null)
@@ -52,6 +54,10 @@ public class ModelCostService
             }
 
             return false;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {

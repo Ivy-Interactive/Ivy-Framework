@@ -1,4 +1,3 @@
-using Ivy.Agent.Filter;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -12,7 +11,7 @@ public class VerifyCommand : Command<VerifyCommand.Settings>
         public string TestFile { get; init; } = string.Empty;
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         if (!File.Exists(settings.TestFile))
         {
@@ -90,7 +89,7 @@ public class VerifyCommand : Command<VerifyCommand.Settings>
         AnsiConsole.Write(new Rule("[bold yellow]Verification Summary[/]"));
         AnsiConsole.WriteLine();
 
-        var table = new Table();
+        var table = new Spectre.Console.Table();
         table.AddColumn("Metric");
         table.AddColumn("Count");
 

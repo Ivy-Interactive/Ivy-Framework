@@ -1,4 +1,3 @@
-using Ivy.Agent.Filter;
 using System.Text.Json;
 
 namespace Ivy.Agent.Filter.Tests;

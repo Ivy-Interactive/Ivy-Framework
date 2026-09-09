@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     
     steps:
 
@@ -41,3 +42,9 @@ jobs:
           tag_name: v${{ github.event.inputs.version }}
           generate_release_notes: true
           make_latest: true
+
+      - name: Trigger publish-nuget workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run publish-nuget.yml -f version="${{ github.event.inputs.version }}"

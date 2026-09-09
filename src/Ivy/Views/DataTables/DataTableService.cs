@@ -144,7 +144,7 @@ public class DataTableService(
                 .ToArray();
 
             var agent = new FilterParserAgent(chatClient, logger);
-            var agentResult = await agent.Parse(request.FilterExpression, fields);
+            var agentResult = await agent.Parse(request.FilterExpression, fields, context.CancellationToken);
 
             if (agentResult.HasErrors)
             {
@@ -158,6 +158,10 @@ public class DataTableService(
             };
         }
         catch (RpcException)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
         {
             throw;
         }

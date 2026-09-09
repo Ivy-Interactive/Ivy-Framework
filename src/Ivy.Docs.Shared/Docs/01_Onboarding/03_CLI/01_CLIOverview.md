@@ -89,7 +89,6 @@ See [Program](../02_Concepts/01_Program.md) for the entry point, [Apps](../02_Co
 
 - Use `ivy --help` for general help
 - Use `ivy [command] --help` for command-specific help
-- Use `ivy cli explain` for a reliable, built-in structural breakdown of all available CLI commands (preferred over MCP tools)
 - Use `ivy docs` to open documentation
 - Use `ivy samples` to see example projects
 
@@ -114,5 +113,4 @@ For detailed information on each feature, see the specific documentation files:
 - [Database Integration](05_DatabaseIntegration/01_DatabaseOverview.md)
 - [Authentication Setup](04_Authentication/01_AuthenticationOverview.md)
 - [Deployment Guide](06_Deployment/01_DeploymentOverview.md)
-- [Framework Information](09_Question.md)
-- [Documentation Index](10_Docs.md)
+- [Documentation](10_Docs.md)

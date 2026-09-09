@@ -7,6 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591;CS1573</NoWarn>
+    <!--
+      Retired package ID: the built assembly is packed into Ivy.nupkg under lib/net10.0
+      by the PackPluginAbstractions target in ../Ivy/Ivy.csproj. Not packable by default so
+      a solution-wide `dotnet pack` cannot rebuild and republish the retired ID. The NuGet
+      metadata below stays because the plugin API compatibility step in
+      .github/workflows/backend-checks-linux.yml packs this project with /p:IsPackable=true
+      to run EnablePackageValidation against the baseline (PackageValidationBaselineName
+      defaults to PackageId, so PackageId must remain).
+    -->
+    <IsPackable>false</IsPackable>
     <PackageId>Ivy.Plugin.Abstractions</PackageId>
     <Company>Ivy</Company>
     <Description>Abstractions for Ivy plugins</Description>

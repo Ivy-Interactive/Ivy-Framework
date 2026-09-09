@@ -82,7 +82,7 @@ dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:[ConnectionName]" "[connection-string]"
 ```
 
-10. Use `ivy docs` or `ivy ask` to look up provider-specific guidance if you need details about the EF Core provider package name, scaffolding options, or connection registration pattern.
+10. Consult the provider documentation (via `https://docs.ivy.app/sitemap.xml` or documentation markdown endpoints) if you need details about the EF Core provider package name, scaffolding options, or connection registration pattern.
 
 Expected directory structure after completion:
 
@@ -130,7 +130,7 @@ If the setup fails:
    - Register the connection in Program.cs
    - Test the connection with a simple query
 
-3. Use `ivy ask "How do I create a DbContext?"` or `ivy ask "How do I register a database connection?"` for API guidance.
+3. Consult the documentation endpoints for API guidance on creating a DbContext or registering database connections.
 
 ## Post-run: Evaluate and Improve
 
