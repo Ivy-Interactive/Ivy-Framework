@@ -102,6 +102,9 @@ public class AppHub(
                 Context.ConnectionId));
             appServices.AddSingleton<IClientProvider>(clientProvider);
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
+            appServices.AddSingleton<IWebMcpToolService>(new WebMcpToolService(
+                clientProvider,
+                enabled: server.ServiceProvider?.GetService<WebMcpOptions>() != null));
 
             var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
             appServices.AddSingleton(tunneledHttpHandler);
@@ -1010,6 +1013,80 @@ public class AppHub(
                 var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
                 exceptionHandler.HandleException(e);
             }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Invoked by the browser to say whether it exposes <c>document.modelContext</c>, so a view can
+    /// render a fallback rather than silently registering tools nobody can call.
+    /// </summary>
+    public void WebMcpReport(bool available)
+    {
+        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession)) return;
+        appSession.AppServices.GetService<IWebMcpToolService>()?.ReportAvailability(available);
+    }
+
+    /// <summary>
+    /// Invoked by the browser when an AI agent calls a tool registered through <c>UseWebMcpTool</c>.
+    /// </summary>
+    /// <remarks>
+    /// Returns as soon as the call is queued rather than awaiting the handler. SignalR's
+    /// <c>MaximumParallelInvocationsPerClient</c> is 1, so awaiting here would stall every other
+    /// invocation on the connection — including UI events — for the duration of the tool call. The
+    /// result comes back out-of-band as a <c>WebMcpToolResult</c> message correlated by
+    /// <paramref name="callId"/>.
+    /// </remarks>
+    public Task WebMcpToolCall(string callId, string toolId, string? argumentsJson)
+    {
+        logger.LogDebug("WebMcpToolCall received: {ToolId} ConnectionId={ConnectionId}", toolId, Context.ConnectionId);
+
+        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
+        {
+            logger.LogDebug("WebMcpToolCall: {ToolId} [AppSession Not Found] ConnectionId={ConnectionId}", toolId, Context.ConnectionId);
+            return Task.CompletedTask;
+        }
+
+        if (appSession.EventQueue == null)
+        {
+            logger.LogWarning("WebMcpToolCall: {ToolId} [EventQueue is null!]", toolId);
+            return Task.CompletedTask;
+        }
+
+        var client = appSession.AppServices.GetService<IClientProvider>();
+        var toolService = appSession.AppServices.GetService<IWebMcpToolService>();
+        if (client == null || toolService == null)
+        {
+            logger.LogWarning("WebMcpToolCall: {ToolId} [WebMCP services unavailable]", toolId);
+            return Task.CompletedTask;
+        }
+
+        // Sharing the UI event queue serializes agent actions with human clicks, so a tool that
+        // mutates state re-renders through the normal widget diff.
+        appSession.EventQueue.Enqueue(async () =>
+        {
+            appSession.LastInteraction = DateTime.UtcNow;
+
+            WebMcpToolResult result;
+            try
+            {
+                result = await toolService.InvokeAsync(toolId, argumentsJson);
+            }
+            catch (Exception e)
+            {
+                appSession.AppServices.GetService<IExceptionHandler>()?.HandleException(e);
+                result = WebMcpToolResult.Error(ExceptionHelper.GetInnerMostException(e).Message);
+            }
+
+            client.Sender.Send("WebMcpToolResult", new Dictionary<string, object?>
+            {
+                ["callId"] = callId,
+                ["isError"] = result.IsError,
+                ["content"] = result.Content
+                    .Select(c => new Dictionary<string, object?> { ["type"] = c.Type, ["text"] = c.Text })
+                    .ToArray()
+            });
         });
 
         return Task.CompletedTask;
