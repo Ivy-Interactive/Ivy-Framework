@@ -97,6 +97,8 @@ const mapCursorStyle = (style?: CursorStyle): "block" | "underline" | "bar" => {
   }
 };
 
+const isMac = typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+
 export const Terminal: React.FC<TerminalProps> = ({
   id,
   width = "Full",
@@ -171,7 +173,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (!isReadOnlyRef.current && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnInput", id, [data]);
-        } catch { }
+        } catch {}
       }
     },
     [id],
@@ -182,7 +184,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       if (eventsRef.current.includes("OnResize") && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnResize", id, [{ cols: size.cols, rows: size.rows }]);
-        } catch { }
+        } catch {}
       }
     },
     [id],
@@ -190,8 +192,9 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   const handleLinkClick = useCallback(
     (event: MouseEvent, uri: string) => {
-      // Only activate link if CTRL is held
-      if (!event.ctrlKey) return;
+      // Only activate link if modifier key is held (Ctrl, or Cmd on macOS)
+      const isModifierActive = event.ctrlKey || (isMac && event.metaKey);
+      if (!isModifierActive) return;
 
       if (
         eventsRef.current.includes("OnLinkClick") &&
@@ -269,7 +272,9 @@ export const Terminal: React.FC<TerminalProps> = ({
     if (background) {
       const bg = `var(--${background.toLowerCase()})`;
       container.style.setProperty("--background", bg);
-      const computedBg = getComputedStyle(container).getPropertyValue("--" + background.toLowerCase()).trim();
+      const computedBg = getComputedStyle(container)
+        .getPropertyValue("--" + background.toLowerCase())
+        .trim();
       if (computedBg) mergedTheme.background = computedBg;
     } else {
       container.style.setProperty("--background", mergedTheme.background || "#000000");
@@ -277,7 +282,9 @@ export const Terminal: React.FC<TerminalProps> = ({
     if (foreground) {
       const fg = `var(--${foreground.toLowerCase()})`;
       container.style.setProperty("--foreground", fg);
-      const computedFg = getComputedStyle(container).getPropertyValue("--" + foreground.toLowerCase()).trim();
+      const computedFg = getComputedStyle(container)
+        .getPropertyValue("--" + foreground.toLowerCase())
+        .trim();
       if (computedFg) mergedTheme.foreground = computedFg;
     } else {
       container.style.setProperty("--foreground", mergedTheme.foreground || "#d4d4d4");
@@ -321,7 +328,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border: 1px solid #e0e0e0;
     `;
-    tooltip.textContent = "Ctrl+Click to Follow Link";
+    tooltip.textContent = isMac ? "Cmd+Click to Follow Link" : "Ctrl+Click to Follow Link";
     document.body.appendChild(tooltip);
 
     // Load WebLinks addon with custom handler and hover
