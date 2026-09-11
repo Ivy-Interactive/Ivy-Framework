@@ -26,6 +26,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Ivy.Test" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
