@@ -430,23 +430,20 @@ public class DesktopWindow(Server server)
 
             if (!args.Cancel && Uri.TryCreate(e.Url, UriKind.Absolute, out var uri))
             {
-                if (uri.Scheme == "http" || uri.Scheme == "https")
+                if ((uri.Scheme == "http" || uri.Scheme == "https") && !IsInternalUrl(uri, server.Args.Port))
                 {
-                    if (uri.Host != "localhost" && uri.Host != "127.0.0.1")
+                    args.Cancel = true;
+                    try
                     {
-                        args.Cancel = true;
-                        try
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                         {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = e.Url,
-                                UseShellExecute = true
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine($"[Ivy.Desktop] Failed to open external link: {ex.Message}");
-                        }
+                            FileName = e.Url,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[Ivy.Desktop] Failed to open external link: {ex.Message}");
                     }
                 }
             }
@@ -622,5 +619,14 @@ public class DesktopWindow(Server server)
         var logicalWidth = (int)Math.Round(width / scale, MidpointRounding.AwayFromZero);
         var logicalHeight = (int)Math.Round(height / scale, MidpointRounding.AwayFromZero);
         return (logicalWidth, logicalHeight);
+    }
+
+    internal static bool IsInternalUrl(Uri uri, int internalPort)
+    {
+        if (uri.Scheme != "http" && uri.Scheme != "https")
+            return false;
+
+        var isLoopback = uri.IsLoopback || uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+        return isLoopback && uri.Port == internalPort;
     }
 }
