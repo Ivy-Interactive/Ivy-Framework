@@ -25,11 +25,11 @@ function mount(element: React.ReactElement) {
 }
 
 function getCommandInput(): HTMLInputElement | null {
-  return document.body.querySelector('[cmdk-input]') as HTMLInputElement;
+  return document.body.querySelector("[cmdk-input]") as HTMLInputElement;
 }
 
 function getCommandItems(): HTMLElement[] {
-  return Array.from(document.body.querySelectorAll('[cmdk-item]'));
+  return Array.from(document.body.querySelectorAll("[cmdk-item]"));
 }
 
 function openPopover() {
@@ -44,7 +44,11 @@ function typeInInput(text: string) {
   const input = getCommandInput();
   if (!input) throw new Error("Command input not found");
   act(() => {
-    input.value = text;
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value",
+    )?.set;
+    nativeInputValueSetter?.call(input, text);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
@@ -116,7 +120,9 @@ describe("MultipleSelector filtering and highlighting", () => {
 
     const items = getCommandItems();
     expect(items).toHaveLength(1);
-    const highlighted = items[0].getAttribute("aria-selected") === "true" || items[0].getAttribute("data-selected") === "true";
+    const highlighted =
+      items[0].getAttribute("aria-selected") === "true" ||
+      items[0].getAttribute("data-selected") === "true";
     expect(highlighted).toBe(true);
   });
 
