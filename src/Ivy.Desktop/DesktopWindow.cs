@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using Ivy.Core.Server;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Rustino.NET;
@@ -269,11 +270,13 @@ public class DesktopWindow(Server server)
             ivyTlsEnv = "true";
         }
 
+        // The block above already applied the Windows and macOS default, so an empty value here means
+        // the process is neither: no TLS.
+        var useTls = TlsPolicy.IsEnabled(ivyTlsEnv, fallback: false);
+
         // Configure Kestrel HTTPS defaults using UseWebApplicationBuilder
         server.UseWebApplicationBuilder(builder =>
         {
-            var currentIvyTls = Environment.GetEnvironmentVariable("IVY_TLS");
-            var useTls = !string.IsNullOrEmpty(currentIvyTls) && currentIvyTls.ToLowerInvariant() is "1" or "true" or "yes" or "on";
             if (useTls)
             {
                 builder.WebHost.ConfigureKestrel(options =>
@@ -295,9 +298,6 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
-            ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-            : OperatingSystem.IsWindows() || OperatingSystem.IsMacOS(); // Default to true on Windows and macOS
         var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Show splash while the server starts
