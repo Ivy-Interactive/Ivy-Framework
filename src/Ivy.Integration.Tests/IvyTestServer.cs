@@ -18,7 +18,11 @@ public class IvyTestServer : IAsyncDisposable
         BaseUrl = baseUrl;
     }
 
-    public static async Task<IvyTestServer> CreateAsync()
+    /// <param name="configure">
+    /// Optional hook applied to the <see cref="Server"/> before the web application is built, for
+    /// tests that need builder methods such as <c>AllowHosts</c> or <c>DangerouslyAllowLocalFiles</c>.
+    /// </param>
+    public static async Task<IvyTestServer> CreateAsync(Action<Server>? configure = null)
     {
         var sessionStore = new AppSessionStore();
         var server = new Server(new ServerArgs { Port = 0, Silent = true, Host = "127.0.0.1" });
@@ -30,6 +34,8 @@ public class IvyTestServer : IAsyncDisposable
             Group = [],
             IsVisible = true
         });
+
+        configure?.Invoke(server);
 
         var app = server.BuildWebApplication(sessionStore)!;
         await app.StartAsync();
