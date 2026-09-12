@@ -54,7 +54,10 @@ public class AppSession : IAsyncDisposable
         _isDisposed = true;
         EventQueue?.Dispose();
         _disposables.Dispose();
-        await WidgetTree.DisposeAsync();
+        if (WidgetTree != null)
+        {
+            await WidgetTree.DisposeAsync();
+        }
     }
 
     public bool IsDisposed() => _isDisposed;

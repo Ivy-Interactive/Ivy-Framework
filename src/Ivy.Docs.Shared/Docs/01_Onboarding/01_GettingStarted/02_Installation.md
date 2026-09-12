@@ -58,7 +58,7 @@ Ivy Framework strictly requires the following toolchains to develop applications
 Ivy uses Rust-compiled native libraries under the hood for high-performance JSON diffing and document processing. These ship as precompiled NuGet packages — no Rust installation required.
 </Callout>
 
-Ivy serves over HTTPS in local development. On macOS and Windows, run the following once to trust the development certificate:
+Ivy defaults to HTTPS for local development on Windows. On macOS and Linux, HTTPS applies when you set `IVY_TLS=true`, or on macOS when running through `Ivy.Desktop`. To use HTTPS, run the following once to trust the development certificate (on macOS and Windows):
 
 ```terminal
 >dotnet dev-certs https --trust
@@ -199,7 +199,7 @@ The server automatically optimizes its behavior based on the current environment
 | **Caching**         | Disabled for immediate changes  | Aggressive ETag & compression    |
 | **Logging**         | Debug & Information             | Warning & Error only             |
 | **Port Management** | Conflict detection & auto-shift | Strict port binding              |
-| **HTTPS** | Dev certificate (`dotnet dev-certs https --trust`) | Reverse proxy handles TLS |
+| **HTTPS** | Dev certificate (Windows default, or when `IVY_TLS=true`) | Reverse proxy handles TLS |
 
 ### Troubleshooting "command not found"
 

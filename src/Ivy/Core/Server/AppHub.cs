@@ -786,7 +786,12 @@ public class AppHub(
 
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
     {
-        var session = sessionStore.Sessions[connectionId];
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            logger.LogWarning("AuthRefreshLoop: Session not found for {ConnectionId}, exiting loop.", connectionId);
+            return;
+        }
+
         var authService = session.AppServices.GetRequiredService<IAuthService>();
         var authSession = authService.GetAuthSession();
 

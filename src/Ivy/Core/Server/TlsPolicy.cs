@@ -1,26 +1,17 @@
 namespace Ivy.Core.Server;
 
 /// <summary>
-/// Decides whether the server binds https or http. Explicit configuration wins over the ambient
-/// environment, which is what lets a test harness pin a scheme without writing a process wide variable
-/// that every other test in the assembly would observe.
+/// Reads the IVY_TLS environment variable. The accepted token set is shared by the server and by
+/// the desktop host, which each supply their own default for an unset value.
 /// </summary>
 internal static class TlsPolicy
 {
     /// <summary>
-    /// Resolves the scheme. <paramref name="explicitUseTls"/> is <c>ServerArgs.UseTls</c> and wins
-    /// outright. IVY_TLS is consulted next, where an empty value counts as unset. Otherwise TLS is on
-    /// for local development on Windows only, since containers and hosted environments terminate TLS at
-    /// a proxy.
+    /// True when the value asks for TLS. An unset or empty value yields
+    /// <paramref name="fallback"/>; any other unrecognized value is off, not a fallback.
     /// </summary>
-    internal static bool Resolve(bool? explicitUseTls, string? ivyTlsEnv, bool isContainer, bool hasPortEnv, bool isWindows)
-    {
-        if (explicitUseTls.HasValue)
-            return explicitUseTls.Value;
-
-        if (!string.IsNullOrEmpty(ivyTlsEnv))
-            return ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on";
-
-        return !isContainer && !hasPortEnv && isWindows;
-    }
+    internal static bool IsEnabled(string? value, bool fallback) =>
+        string.IsNullOrEmpty(value)
+            ? fallback
+            : value.ToLowerInvariant() is "1" or "true" or "yes" or "on";
 }

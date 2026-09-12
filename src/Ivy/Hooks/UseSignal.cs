@@ -65,6 +65,13 @@ internal class SignalHandle<TInput, TOutput>(
     public IDisposable Receive(Func<TInput, TOutput> callback) => signal.ReceiveWithId(receiverId, callback);
 }
 
+internal class NullSignal<TInput, TOutput> : ISignal<TInput, TOutput>
+{
+    public Task<TOutput[]> Send(TInput input) => Task.FromResult(Array.Empty<TOutput>());
+
+    public IDisposable Receive(Func<TInput, TOutput> callback) => Disposable.Empty;
+}
+
 public static class UseSignalExtensions
 {
     public static ISignal<TInput, Unit> UseSignal<T, TInput>(this IViewContext context) where T : AbstractSignal<TInput, Unit>
@@ -76,7 +83,10 @@ public static class UseSignalExtensions
         var signalType = typeof(T);
         var appContext = context.UseService<AppContext>();
         var sessionStore = context.UseService<AppSessionStore>();
-        var session = sessionStore.Sessions[appContext.ConnectionId];
+        if (!sessionStore.Sessions.TryGetValue(appContext.ConnectionId, out var session) || session.IsDisposed())
+        {
+            return new NullSignal<TInput, TOutput>();
+        }
         var signal = (T)session.Signals.GetOrAdd(signalType, _ => Activator.CreateInstance(signalType)!);
 
         if (signalType.GetBroadcastType() is { } broadcastType)
@@ -136,18 +146,30 @@ public class SignalRouter(AppSessionStore sessionStore)
     {
         public async Task<TOutput[]> Send(TInput input)
         {
-            var session = store.Sessions[connectionId];
-            var sessions = GetTargetSessions(broadcastType, session, store);
-            var signals = sessions.Select(s => (TSignal)GetOrAddSignal(signalType, s));
-            var tasks = signals.Select(signal => signal.Send(input));
-            var results = await Task.WhenAll(tasks);
-            return results.SelectMany(r => r).ToArray();
+            try
+            {
+                if (!store.Sessions.TryGetValue(connectionId, out var session) || session.IsDisposed())
+                {
+                    return [];
+                }
+                var sessions = GetTargetSessions(broadcastType, session, store);
+                var signals = sessions.Select(s => (TSignal)GetOrAddSignal(signalType, s));
+                var tasks = signals.Select(signal => signal.Send(input));
+                var results = await Task.WhenAll(tasks);
+                return results.SelectMany(r => r).ToArray();
+            }
+            catch (Exception)
+            {
+                return [];
+            }
         }
 
         public IDisposable Receive(Func<TInput, TOutput> callback)
         {
-            var session = store.Sessions.TryGetValue(connectionId, out var s) ? s
-                : throw new InvalidOperationException("Session not found.");
+            if (!store.Sessions.TryGetValue(connectionId, out var session) || session.IsDisposed())
+            {
+                return Disposable.Empty;
+            }
             var signal = (TSignal)GetOrAddSignal(signalType, session);
             return signal.ReceiveWithId(receiverId, callback);
         }
@@ -159,9 +181,9 @@ public class SignalRouter(AppSessionStore sessionStore)
                 BroadcastType.Server =>
                     store.Sessions.Values.Where(s => !s.IsDisposed()).ToList(),
                 BroadcastType.User =>
-                    store.Sessions.Values.Where(s => !s.IsDisposed() && s.MachineId == store.Sessions[session.ConnectionId].MachineId).ToList(),
+                    store.Sessions.Values.Where(s => !s.IsDisposed() && s.MachineId == session.MachineId).ToList(),
                 BroadcastType.App =>
-                    store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == store.Sessions[session.ConnectionId].AppId).ToList(),
+                    store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == session.AppId).ToList(),
                 BroadcastType.AppShell =>
                     store.FindAppShell(session) is { } appShell ? [appShell] : [],
                 _ => []
@@ -169,4 +191,5 @@ public class SignalRouter(AppSessionStore sessionStore)
         }
     }
 }
+
 

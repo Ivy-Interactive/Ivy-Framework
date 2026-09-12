@@ -4,47 +4,21 @@ namespace Ivy.Test;
 
 public class TlsPolicyTests
 {
-    #region Explicit value wins
-
     [Theory]
-    [InlineData("0", true, false, false)]
-    [InlineData("0", false, false, false)]
-    [InlineData("0", true, true, false)]
-    [InlineData("0", false, true, true)]
-    public void Resolve_ExplicitTrue_WinsOverEnvironmentAndDefaults(string ivyTlsEnv, bool isContainer, bool hasPortEnv, bool isWindows)
+    [InlineData("1", true)]
+    [InlineData("true", true)]
+    [InlineData("yes", true)]
+    [InlineData("on", true)]
+    [InlineData("True", true)]
+    [InlineData("TRUE", true)]
+    [InlineData("Yes", true)]
+    [InlineData("YES", true)]
+    [InlineData("On", true)]
+    [InlineData("ON", true)]
+    public void IsEnabled_AcceptedTokens_ReturnsTrue(string value, bool expected)
     {
-        var result = TlsPolicy.Resolve(explicitUseTls: true, ivyTlsEnv, isContainer, hasPortEnv, isWindows);
-
-        Assert.True(result);
-    }
-
-    [Theory]
-    [InlineData("1", true, false, false)]
-    [InlineData("1", false, false, false)]
-    [InlineData("1", true, true, false)]
-    [InlineData("1", false, true, true)]
-    public void Resolve_ExplicitFalse_WinsOverEnvironmentAndDefaults(string ivyTlsEnv, bool isContainer, bool hasPortEnv, bool isWindows)
-    {
-        var result = TlsPolicy.Resolve(explicitUseTls: false, ivyTlsEnv, isContainer, hasPortEnv, isWindows);
-
-        Assert.False(result);
-    }
-
-    #endregion
-
-    #region Environment variable parsing
-
-    [Theory]
-    [InlineData("1")]
-    [InlineData("true")]
-    [InlineData("TRUE")]
-    [InlineData("yes")]
-    [InlineData("on")]
-    public void Resolve_TruthyEnvironmentVariable_ReturnsTrue(string ivyTlsEnv)
-    {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv, isContainer: true, hasPortEnv: false, isWindows: false);
-
-        Assert.True(result);
+        Assert.Equal(expected, TlsPolicy.IsEnabled(value, fallback: false));
+        Assert.Equal(expected, TlsPolicy.IsEnabled(value, fallback: true));
     }
 
     [Theory]
@@ -52,63 +26,39 @@ public class TlsPolicyTests
     [InlineData("false")]
     [InlineData("no")]
     [InlineData("off")]
-    [InlineData("unrecognized")]
-    public void Resolve_FalsyOrUnrecognizedEnvironmentVariable_ReturnsFalse(string ivyTlsEnv)
+    [InlineData("False")]
+    [InlineData("NO")]
+    [InlineData("OFF")]
+    public void IsEnabled_RejectedTokens_ReturnsFalse(string value)
     {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv, isContainer: false, hasPortEnv: false, isWindows: true);
-
-        Assert.False(result);
+        Assert.False(TlsPolicy.IsEnabled(value, fallback: false));
+        Assert.False(TlsPolicy.IsEnabled(value, fallback: true));
     }
-
-    #endregion
-
-    #region Null and empty environment fall through to default
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public void Resolve_NullOrEmptyEnvironment_FallsThroughToDefault(string? ivyTlsEnv)
+    [InlineData("banana")]
+    [InlineData("maybe")]
+    [InlineData("1.0")]
+    [InlineData("yes please")]
+    [InlineData(" true")]
+    [InlineData("true ")]
+    public void IsEnabled_UnrecognizedValue_ReturnsFalse_EvenWithTrueFallback(string value)
     {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv, isContainer: false, hasPortEnv: false, isWindows: true);
-
-        Assert.True(result);
-    }
-
-    #endregion
-
-    #region Default matrix
-
-    [Fact]
-    public void Resolve_WindowsLocalDevelopment_ReturnsTrue()
-    {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv: null, isContainer: false, hasPortEnv: false, isWindows: true);
-
-        Assert.True(result);
+        Assert.False(TlsPolicy.IsEnabled(value, fallback: false));
+        Assert.False(TlsPolicy.IsEnabled(value, fallback: true));
     }
 
     [Fact]
-    public void Resolve_Container_ReturnsFalse()
+    public void IsEnabled_NullValue_ReturnsFallback()
     {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv: null, isContainer: true, hasPortEnv: false, isWindows: true);
-
-        Assert.False(result);
+        Assert.False(TlsPolicy.IsEnabled(null, fallback: false));
+        Assert.True(TlsPolicy.IsEnabled(null, fallback: true));
     }
 
     [Fact]
-    public void Resolve_HasPortEnvironment_ReturnsFalse()
+    public void IsEnabled_EmptyString_ReturnsFallback()
     {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv: null, isContainer: false, hasPortEnv: true, isWindows: true);
-
-        Assert.False(result);
+        Assert.False(TlsPolicy.IsEnabled("", fallback: false));
+        Assert.True(TlsPolicy.IsEnabled("", fallback: true));
     }
-
-    [Fact]
-    public void Resolve_NonWindows_ReturnsFalse()
-    {
-        var result = TlsPolicy.Resolve(explicitUseTls: null, ivyTlsEnv: null, isContainer: false, hasPortEnv: false, isWindows: false);
-
-        Assert.False(result);
-    }
-
-    #endregion
 }

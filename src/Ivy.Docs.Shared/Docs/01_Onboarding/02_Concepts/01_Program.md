@@ -172,10 +172,17 @@ The server automatically reads configuration from environment variables:
 - `PORT` - Override the default port
 - `BASE_PATH` - Serve the app from a URL prefix
 - `VERBOSE` - Enable verbose logging
-- `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS). Applied only when `ServerArgs.UseTls` is unset.
+- `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, the default is HTTPS for local development on Windows only. On macOS and Linux, the default is HTTP unless you set `IVY_TLS=true` after generating a dev certificate with `dotnet dev-certs https`. In containers (`DOTNET_RUNNING_IN_CONTAINER=true`) or when `PORT` is set, the default is always HTTP on every OS, as a reverse proxy typically handles TLS in those environments. `Ivy.Desktop` behaves differently: it defaults `IVY_TLS` to `true` on Windows and macOS, and supplies its own certificate (falling back to a self-signed one under `~/.ivy/certs` when no ASP.NET Core dev certificate is present). Applied only when `ServerArgs.UseTls` is unset.
 - `IVY_CORS_ORIGINS` - Comma- or semicolon-separated list of origins the default CORS policy allows (for example `https://app.example.com,https://admin.example.com`). Applied only when `AllowedCorsOrigins` is empty.
 - `AllowedHosts` - Standard ASP.NET Core key, semicolon separated, e.g. `localhost;127.0.0.1`. Setting
   it (including to `*`) overrides the loopback default described under CORS and Host Filtering.
+
+The table below summarizes the default scheme by entry point and platform:
+
+| Entry point | Windows | macOS | Linux | Container, or `PORT` set |
+| --- | --- | --- | --- | --- |
+| `dotnet run` | HTTPS | HTTP | HTTP | HTTP |
+| `Ivy.Desktop` | HTTPS | HTTPS | HTTP | not applicable |
 
 When `BasePath` is set (via `ServerArgs`, CLI, or environment variable), Ivy applies ASP.NET Core `UsePathBase()` middleware to ensure routing and link generation work correctly under that prefix.
 
