@@ -13,6 +13,31 @@ export function filterOptionsLikeCmdk(
   return options.filter((o) => defaultFilter(o.label, term, []) > 0);
 }
 
+export type SelectSearchMode = "CaseInsensitive" | "CaseSensitive" | "Fuzzy";
+
+/** Filter options by a typed search term, matching on label. Empty term returns the input unchanged. */
+export function filterOptionsBySearch<T extends { label?: string; value: unknown }>(
+  options: T[],
+  search: string,
+  mode: SelectSearchMode = "CaseInsensitive",
+): T[] {
+  if (!search) return options;
+  const caseSensitive = mode === "CaseSensitive";
+  const term = caseSensitive ? search : search.toLowerCase();
+  return options.filter((option) => {
+    const raw = option.label ?? String(option.value ?? "");
+    const label = caseSensitive ? raw : raw.toLowerCase();
+    if (mode === "Fuzzy") {
+      let i = 0;
+      for (let j = 0; i < term.length && j < label.length; j++) {
+        if (term[i] === label[j]) i++;
+      }
+      return i === term.length;
+    }
+    return label.includes(term);
+  });
+}
+
 /** Merge current selection with all enabled options in `visibleOptions`, preserving selections outside that set; cap with `maxSelections`. */
 export function computeSelectAllValues(
   selectedValues: (string | number)[],

@@ -3,6 +3,7 @@ import {
   computeSelectAllValues,
   computeClearAllValues,
   convertValuesToOriginalType,
+  filterOptionsBySearch,
 } from "../select-utils";
 
 // ---------------------------------------------------------------------------
@@ -155,5 +156,79 @@ describe("convertValuesToOriginalType", () => {
   it("returns empty array for empty stringValues with undefined original (selectMany)", () => {
     const result = convertValuesToOriginalType([], undefined, stringOptions, true);
     expect(result).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterOptionsBySearch
+// ---------------------------------------------------------------------------
+
+describe("filterOptionsBySearch", () => {
+  const options = [
+    { label: "rorychatt", value: "rorychatt" },
+    { label: "ArtemKhvorostianyi", value: "artem" },
+    { label: "pavel", value: "pavel" },
+    { label: "mikael", value: "mikael" },
+  ];
+
+  it("returns all options when search term is empty", () => {
+    const result = filterOptionsBySearch(options, "");
+    expect(result).toEqual(options);
+    expect(result).toBe(options);
+  });
+
+  it("filters case insensitively by default", () => {
+    const result = filterOptionsBySearch(options, "ror");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("rorychatt");
+  });
+
+  it("matches uppercase search term case insensitively", () => {
+    const result = filterOptionsBySearch(options, "ROR");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("rorychatt");
+  });
+
+  it("matches with CaseSensitive mode", () => {
+    const result = filterOptionsBySearch(options, "Artem", "CaseSensitive");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("ArtemKhvorostianyi");
+  });
+
+  it("rejects mismatched case with CaseSensitive mode", () => {
+    const result = filterOptionsBySearch(options, "artem", "CaseSensitive");
+    expect(result).toHaveLength(0);
+  });
+
+  it("matches non-contiguous subsequence with Fuzzy mode", () => {
+    const result = filterOptionsBySearch(options, "akv", "Fuzzy");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("ArtemKhvorostianyi");
+  });
+
+  it("rejects out-of-order term with Fuzzy mode", () => {
+    const result = filterOptionsBySearch(options, "vka", "Fuzzy");
+    expect(result).toHaveLength(0);
+  });
+
+  it("returns empty array when no options match", () => {
+    const result = filterOptionsBySearch(options, "xyz");
+    expect(result).toEqual([]);
+  });
+
+  it("falls back to value when label is missing", () => {
+    const optionsNoLabel = [
+      { value: "rorychatt" },
+      { value: "artem" },
+    ];
+    const result = filterOptionsBySearch(optionsNoLabel, "ror");
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe("rorychatt");
+  });
+
+  it("matches substring in the middle of label", () => {
+    const result = filterOptionsBySearch(options, "khvo");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("ArtemKhvorostianyi");
   });
 });

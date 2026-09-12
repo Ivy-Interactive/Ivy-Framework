@@ -1,7 +1,7 @@
 import * as React from "react";
 import { X, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
@@ -10,6 +10,8 @@ import {
   computeClearAllValues,
   computeSelectAllValues,
   filterOptionsLikeCmdk,
+  filterOptionsBySearch,
+  SelectSearchMode,
 } from "@/widgets/inputs/select-utils";
 import { cva } from "class-variance-authority";
 import { Densities } from "@/types/density";
@@ -78,6 +80,8 @@ interface MultipleSelectorProps {
   onNullableClear?: () => void;
   autoFocus?: boolean;
   rightSlot?: React.ReactNode;
+  searchable?: boolean | null;
+  searchMode?: SelectSearchMode;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -107,6 +111,8 @@ const MultipleSelector = React.forwardRef<
       onNullableClear,
       autoFocus = false,
       rightSlot,
+      searchable,
+      searchMode = "CaseInsensitive",
     },
     ref,
   ) => {
@@ -284,6 +290,15 @@ const MultipleSelector = React.forwardRef<
       }));
       return filterOptionsLikeCmdk(labeled, inputValue);
     }, [defaultOptions, inputValue]);
+
+    const filterEnabled = searchable !== false;
+    const visibleOptions = React.useMemo(
+      () =>
+        filterEnabled
+          ? filterOptionsBySearch(defaultOptions, inputValue, searchMode)
+          : defaultOptions,
+      [defaultOptions, inputValue, filterEnabled, searchMode],
+    );
 
     const visibleEnabledForBulk = React.useMemo(() => {
       const set = new Set(filteredForBulk.map((f) => f.value));
@@ -528,65 +543,78 @@ const MultipleSelector = React.forwardRef<
           >
             {defaultOptions.length > 0 ? (
               <>
-                <CommandGroup
-                  className="h-full overflow-auto slim-scrollbar"
+                <CommandList
+                  className="h-full overflow-auto slim-scrollbar max-h-none"
                   style={{ maxHeight: "min(300px, var(--radix-popover-content-available-height))" }}
                 >
-                  {defaultOptions.map((option) => {
-                    const selected = isSelected(option);
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onSelect={() => {
-                          setInputValue("");
-                          toggleOption(option);
-                        }}
-                        className={cn(
-                          menuItemVariant({ density }),
-                          "flex items-center justify-between",
-                        )}
-                        disabled={option.disable}
-                      >
-                        {option.tooltip ? (
-                          <TooltipProvider>
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center justify-between w-full">
-                                  <span>{option.label}</span>
-                                  {selected && (
-                                    <X
-                                      className={cn(
-                                        xIconVariant({ density }),
-                                        "text-muted-foreground hover:text-foreground",
-                                      )}
-                                    />
-                                  )}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>{option.tooltip}</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          <>
-                            <span>{option.label}</span>
-                            {selected && (
-                              <X
-                                className={cn(
-                                  xIconVariant({ density }),
-                                  "text-muted-foreground hover:text-foreground",
-                                )}
-                              />
+                  <CommandGroup>
+                    {visibleOptions.length > 0 ? (
+                      visibleOptions.map((option) => {
+                        const selected = isSelected(option);
+                        return (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onSelect={() => {
+                              setInputValue("");
+                              toggleOption(option);
+                            }}
+                            className={cn(
+                              menuItemVariant({ density }),
+                              "flex items-center justify-between",
                             )}
-                          </>
-                        )}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
+                            disabled={option.disable}
+                          >
+                            {option.tooltip ? (
+                              <TooltipProvider>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center justify-between w-full">
+                                      <span>{option.label}</span>
+                                      {selected && (
+                                        <X
+                                          className={cn(
+                                            xIconVariant({ density }),
+                                            "text-muted-foreground hover:text-foreground",
+                                          )}
+                                        />
+                                      )}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{option.tooltip}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              <>
+                                <span>{option.label}</span>
+                                {selected && (
+                                  <X
+                                    className={cn(
+                                      xIconVariant({ density }),
+                                      "text-muted-foreground hover:text-foreground",
+                                    )}
+                                  />
+                                )}
+                              </>
+                            )}
+                          </CommandItem>
+                        );
+                      })
+                    ) : emptyIndicator ? (
+                      <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                        {emptyIndicator}
+                      </div>
+                    ) : (
+                      <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                        No matches
+                      </div>
+                    )}
+                  </CommandGroup>
+                </CommandList>
                 {showActions && (
                   <div
                     className="border-t border-border p-2 flex justify-between items-center gap-2 text-sm shrink-0"
