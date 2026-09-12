@@ -778,9 +778,13 @@ public class Server
         var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
         var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
 
+        // A CLI-only command binds loopback below whatever `host` asks for, so the CORS and host
+        // filtering defaults have to key off the address actually bound, not off the intent.
+        var bindHost = _args.IsCliCommand ? "localhost" : host;
+
         if (_args.IsCliCommand)
         {
-            builder.WebHost.UseUrls("http://localhost:0");
+            builder.WebHost.UseUrls($"http://{bindHost}:0");
         }
         else
         {
@@ -851,7 +855,7 @@ public class Server
         // Ivy serves its own frontend, so production traffic is same-origin and never consults CORS.
         // The dev loop (Vite on another port) is loopback on both sides, so reflect loopback origins
         // only when the server itself binds loopback; anything else has to be configured explicitly.
-        var allowLoopbackOrigins = CorsOriginPolicy.IsLoopbackBound(host);
+        var allowLoopbackOrigins = CorsOriginPolicy.IsLoopbackBound(bindHost);
         var allowedCorsOrigins = _args.AllowedCorsOrigins;
         builder.Services.AddCors(options =>
         {
@@ -871,7 +875,7 @@ public class Server
         // unconditionally would clobber an app's own "AllowedHosts" configuration key.
         var allowedHosts = _allowedHosts.Length > 0
             ? _allowedHosts
-            : HostFilterPolicy.ResolveDefaultAllowedHosts(host, builder.Configuration["AllowedHosts"]);
+            : HostFilterPolicy.ResolveDefaultAllowedHosts(bindHost, builder.Configuration["AllowedHosts"]);
 
         if (allowedHosts is { Length: > 0 })
         {
