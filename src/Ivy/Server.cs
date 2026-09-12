@@ -14,6 +14,7 @@ using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
@@ -57,6 +58,25 @@ public record ServerArgs
     public Assembly? AssetAssembly { get; set; } = null;
     public bool EnableDevTools { get; set; } = false;
     public bool DangerouslyAllowLocalFiles { get; set; } = false;
+
+    /// <summary>
+    /// Directories that <c>GET /ivy/local-file</c> may serve from. Empty (the default) means any
+    /// readable file on the machine is served — see <see cref="Server.DangerouslyAllowLocalFiles(string[])"/>.
+    /// </summary>
+    public string[] LocalFileRoots { get; set; } = [];
+
+    /// <summary>
+    /// File extensions that <c>GET /ivy/local-file</c> may serve, e.g. ".png". Empty (the default)
+    /// means any extension.
+    /// </summary>
+    public string[] LocalFileExtensions { get; set; } = [];
+
+    /// <summary>
+    /// Cross-origin origins the default CORS policy reflects, e.g. "https://app.example.com". Empty
+    /// (the default) allows loopback origins only, and only when the server itself binds loopback.
+    /// </summary>
+    public string[] AllowedCorsOrigins { get; set; } = [];
+
 #if DEBUG
     public bool FindAvailablePort { get; set; } = true;
 #else
@@ -110,6 +130,7 @@ public class Server
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
     private bool _presetsLoaded;
+    private string[] _allowedHosts = [];
 
     public Server(ServerArgs? args = null)
     {
@@ -132,6 +153,16 @@ public class Server
         if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
         {
             _args = _args with { BasePath = "/" + basePath.TrimStart('/') };
+        }
+
+        if (_args.AllowedCorsOrigins.Length == 0 &&
+            Environment.GetEnvironmentVariable("IVY_CORS_ORIGINS") is { } corsOrigins)
+        {
+            _args = _args with
+            {
+                AllowedCorsOrigins = CorsOriginPolicy.NormalizeOrigins(
+                    corsOrigins.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            };
         }
 
         _args = _args with
@@ -531,9 +562,71 @@ public class Server
         return this;
     }
 
+    /// <summary>
+    /// Enables <c>GET /ivy/local-file</c> for <b>any readable file on the machine</b>. Prefer the
+    /// overload that takes roots, which confines the endpoint to the directories you name.
+    /// </summary>
     public Server DangerouslyAllowLocalFiles()
     {
         _args = _args with { DangerouslyAllowLocalFiles = true };
+        return this;
+    }
+
+    /// <summary>
+    /// Enables <c>GET /ivy/local-file</c> and confines it to <paramref name="roots"/>. Anything
+    /// resolving outside them answers 404. Repeated calls add to the set.
+    /// </summary>
+    public Server DangerouslyAllowLocalFiles(params string[] roots)
+    {
+        _args = _args with
+        {
+            DangerouslyAllowLocalFiles = true,
+            LocalFileRoots = LocalFileAccessPolicy.NormalizeRoots([.. _args.LocalFileRoots, .. roots])
+        };
+        return this;
+    }
+
+    /// <summary>
+    /// Narrows <c>GET /ivy/local-file</c> to the given file extensions (with or without the leading
+    /// dot). Anything else — including an extensionless path — answers 404. Repeated calls add to
+    /// the set.
+    /// </summary>
+    public Server AllowLocalFileExtensions(params string[] extensions)
+    {
+        _args = _args with
+        {
+            LocalFileExtensions = LocalFileAccessPolicy.NormalizeExtensions([.. _args.LocalFileExtensions, .. extensions])
+        };
+        return this;
+    }
+
+    /// <summary>
+    /// Adds cross-origin origins to the default CORS policy, e.g. "https://app.example.com".
+    /// Loopback origins are already allowed when the server itself binds loopback, so this is only
+    /// needed for a genuinely cross-origin consumer. Also settable via <c>IVY_CORS_ORIGINS</c>.
+    /// </summary>
+    public Server AllowCorsOrigins(params string[] origins)
+    {
+        _args = _args with
+        {
+            AllowedCorsOrigins = CorsOriginPolicy.NormalizeOrigins([.. _args.AllowedCorsOrigins, .. origins])
+        };
+        return this;
+    }
+
+    /// <summary>
+    /// Restricts the <c>Host</c> header to the given hosts, answering 400 for anything else. This is
+    /// the DNS rebinding mitigation, which CORS cannot substitute for: a page on a hostname rebound
+    /// to 127.0.0.1 is same-origin with the server, so no CORS check runs. Off by default, because
+    /// reverse proxies and tunnels forward their own public hostname.
+    /// </summary>
+    public Server AllowHosts(params string[] hosts)
+    {
+        _allowedHosts =
+        [
+            .. _allowedHosts,
+            .. hosts.Where(host => !string.IsNullOrWhiteSpace(host)).Select(host => host.Trim())
+        ];
         return this;
     }
 
@@ -752,16 +845,33 @@ public class Server
             builder.Services.Add(service);
         }
 
+        // Ivy serves its own frontend, so production traffic is same-origin and never consults CORS.
+        // The dev loop (Vite on another port) is loopback on both sides, so reflect loopback origins
+        // only when the server itself binds loopback; anything else has to be configured explicitly.
+        var allowLoopbackOrigins = CorsOriginPolicy.IsLoopbackBound(host);
+        var allowedCorsOrigins = _args.AllowedCorsOrigins;
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.SetIsOriginAllowed(_ => true)
+                policy.SetIsOriginAllowed(origin =>
+                        CorsOriginPolicy.IsOriginAllowed(origin, allowedCorsOrigins, allowLoopbackOrigins))
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials(); // Required for SignalR
             });
         });
+
+        // WebApplication.CreateBuilder already registers HostFilteringStartupFilter, whose
+        // PostConfigure falls back to "*" only while AllowedHosts is empty — so setting it here wins
+        // and no extra middleware is needed.
+        if (_allowedHosts.Length > 0)
+        {
+            builder.Services.Configure<HostFilteringOptions>(options =>
+            {
+                options.AllowedHosts = [.. _allowedHosts];
+            });
+        }
 
         if (_useHttpRedirection)
         {
@@ -852,6 +962,12 @@ public class Server
         {
             Console.WriteLine($"Using base path: {_args.BasePath}");
             app.UsePathBase(_args.BasePath);
+        }
+
+        if (_args.DangerouslyAllowLocalFiles && _args.LocalFileRoots.Length == 0 && !_args.Silent)
+        {
+            Console.WriteLine("[WARNING] DangerouslyAllowLocalFiles() with no roots serves any readable file on this machine over");
+            Console.WriteLine("          GET /ivy/local-file. Pass roots, e.g. DangerouslyAllowLocalFiles(\"C:/Users/me/Photos\").");
         }
 
         app.Use(async (context, next) =>
