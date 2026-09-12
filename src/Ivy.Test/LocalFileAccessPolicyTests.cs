@@ -19,6 +19,25 @@ public class LocalFileAccessPolicyTests : IDisposable
     {
         if (Directory.Exists(_baseDirectory))
         {
+            // Delete directory links (junctions/symlinks) first, as Directory.Delete with recursive=true
+            // fails when encountering them on some platforms.
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(_baseDirectory, "*", SearchOption.AllDirectories))
+                {
+                    var info = new DirectoryInfo(dir);
+                    if (info.LinkTarget != null || info.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    {
+                        // This is a link; delete it without recursing into its target.
+                        Directory.Delete(dir, recursive: false);
+                    }
+                }
+            }
+            catch
+            {
+                // Best effort; continue with the main cleanup.
+            }
+
             Directory.Delete(_baseDirectory, true);
         }
     }
