@@ -617,8 +617,11 @@ public class Server
     /// <summary>
     /// Restricts the <c>Host</c> header to the given hosts, answering 400 for anything else. This is
     /// the DNS rebinding mitigation, which CORS cannot substitute for: a page on a hostname rebound
-    /// to 127.0.0.1 is same-origin with the server, so no CORS check runs. Off by default, because
-    /// reverse proxies and tunnels forward their own public hostname.
+    /// to 127.0.0.1 is same-origin with the server, so no CORS check runs. A loopback bind validates
+    /// the loopback names by default (see <see cref="Core.Server.HostFilterPolicy"/>); a server that
+    /// binds "*" or a public address validates nothing until this method names the hosts, because a
+    /// reverse proxy or tunnel in front of it forwards its own public hostname. The list replaces the
+    /// default rather than extending it, so include the loopback names when you still want them.
     /// </summary>
     public Server AllowHosts(params string[] hosts)
     {
@@ -862,14 +865,19 @@ public class Server
             });
         });
 
-        // WebApplication.CreateBuilder already registers HostFilteringStartupFilter, whose
-        // PostConfigure falls back to "*" only while AllowedHosts is empty — so setting it here wins
-        // and no extra middleware is needed.
-        if (_allowedHosts.Length > 0)
+        // WebApplication.CreateBuilder already registers HostFilteringStartupFilter, whose PostConfigure
+        // falls back to "*" only while AllowedHosts is empty, so setting it here wins and no extra
+        // middleware is needed. That is also why the default is conditional: filling the option
+        // unconditionally would clobber an app's own "AllowedHosts" configuration key.
+        var allowedHosts = _allowedHosts.Length > 0
+            ? _allowedHosts
+            : HostFilterPolicy.ResolveDefaultAllowedHosts(host, builder.Configuration["AllowedHosts"]);
+
+        if (allowedHosts is { Length: > 0 })
         {
             builder.Services.Configure<HostFilteringOptions>(options =>
             {
-                options.AllowedHosts = [.. _allowedHosts];
+                options.AllowedHosts = [.. allowedHosts];
             });
         }
 
