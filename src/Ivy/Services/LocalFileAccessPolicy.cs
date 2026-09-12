@@ -107,6 +107,21 @@ internal static class LocalFileAccessPolicy
     }
 
     /// <summary>
+    /// The startup warning for an enabled but unconfined endpoint, or null when the configuration
+    /// needs no warning.
+    /// </summary>
+    internal static string? DescribeUnconfinedAccess(ServerArgs args)
+    {
+        if (!args.DangerouslyAllowLocalFiles || args.LocalFileRoots.Length > 0)
+            return null;
+
+        return "[WARNING] DangerouslyAllowLocalFiles() with no roots serves any readable file on this machine over\n" +
+               "          the unauthenticated GET /ivy/local-file endpoint. Pass roots to confine it, e.g.\n" +
+               "          DangerouslyAllowLocalFiles(\"C:/Users/me/Photos\"), or call AllowLocalFileExtensions(...)\n" +
+               "          to narrow it further when the roots are not known ahead of time.";
+    }
+
+    /// <summary>
     /// Resolves every link in <paramref name="fullPath"/>, not only its final component, by walking the
     /// path from its root and following any segment that turns out to be a symlink or a junction. A
     /// directory link in the middle of the path is what a leaf-only resolver misses.

@@ -313,6 +313,79 @@ public class LocalFileControllerTests : IDisposable
         Assert.IsType<NotFoundResult>(result);
     }
 
+    [Fact]
+    public void DescribeUnconfinedAccess_WithNoArgumentOverload_ReturnsWarning()
+    {
+        // Arrange
+        var args = new ServerArgs { DangerouslyAllowLocalFiles = true };
+
+        // Act
+        var warning = LocalFileAccessPolicy.DescribeUnconfinedAccess(args);
+
+        // Assert
+        Assert.NotNull(warning);
+    }
+
+    [Fact]
+    public void DescribeUnconfinedAccess_WithRoots_ReturnsNull()
+    {
+        // Arrange
+        var server = new Server(new ServerArgs());
+        server.DangerouslyAllowLocalFiles("C:/Test");
+        var args = server.Args;
+
+        // Act
+        var warning = LocalFileAccessPolicy.DescribeUnconfinedAccess(args);
+
+        // Assert
+        Assert.Null(warning);
+    }
+
+    [Fact]
+    public void DescribeUnconfinedAccess_WhenFlagIsOff_ReturnsNull()
+    {
+        // Arrange
+        var args = new ServerArgs { DangerouslyAllowLocalFiles = false };
+
+        // Act
+        var warning = LocalFileAccessPolicy.DescribeUnconfinedAccess(args);
+
+        // Assert
+        Assert.Null(warning);
+    }
+
+    [Fact]
+    public void DescribeUnconfinedAccess_WithSilentTrue_StillReturnsWarning()
+    {
+        // Arrange — this is the regression this plan exists to prevent
+        var args = new ServerArgs
+        {
+            DangerouslyAllowLocalFiles = true,
+            Silent = true
+        };
+
+        // Act
+        var warning = LocalFileAccessPolicy.DescribeUnconfinedAccess(args);
+
+        // Assert
+        Assert.NotNull(warning);
+    }
+
+    [Fact]
+    public void DescribeUnconfinedAccess_WarningMentionsKeyDetails()
+    {
+        // Arrange
+        var args = new ServerArgs { DangerouslyAllowLocalFiles = true };
+
+        // Act
+        var warning = LocalFileAccessPolicy.DescribeUnconfinedAccess(args);
+
+        // Assert
+        Assert.Contains("/ivy/local-file", warning);
+        Assert.Contains("roots", warning);
+        Assert.Contains("AllowLocalFileExtensions", warning);
+    }
+
     private string CreateTempFile(string fileName, string content)
     {
         var filePath = Path.Combine(_tempDirectory, fileName);
