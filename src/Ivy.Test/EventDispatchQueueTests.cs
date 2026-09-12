@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using Ivy.Core;
 using Ivy.Core.Server;
 using Microsoft.Extensions.Logging;
-using Xunit;
 
 namespace Ivy.Test;
 
