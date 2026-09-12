@@ -19,6 +19,25 @@ public class LocalFileAccessPolicyTests : IDisposable
     {
         if (Directory.Exists(_baseDirectory))
         {
+            // Delete directory links (junctions/symlinks) first, as Directory.Delete with recursive=true
+            // fails when encountering them on some platforms.
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(_baseDirectory, "*", SearchOption.AllDirectories))
+                {
+                    var info = new DirectoryInfo(dir);
+                    if (info.LinkTarget != null || info.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    {
+                        // This is a link; delete it without recursing into its target.
+                        Directory.Delete(dir, recursive: false);
+                    }
+                }
+            }
+            catch
+            {
+                // Best effort; continue with the main cleanup.
+            }
+
             Directory.Delete(_baseDirectory, true);
         }
     }
@@ -127,6 +146,89 @@ public class LocalFileAccessPolicyTests : IDisposable
         Assert.False(LocalFileAccessPolicy.TryResolve(link, roots, [], out _));
     }
 
+    [Fact]
+    public void TryResolve_MidPathDirectoryLinkPointingOutsideRoot_IsRejected()
+    {
+        var target = CreateFile(_outside, "id_rsa");
+        var link = Path.Combine(_root, "link");
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root]);
+
+        // The non-link half of the assertion always runs, so the test is never vacuous.
+        Assert.True(LocalFileAccessPolicy.TryResolve(CreateFile(_root, "photo.png"), roots, [], out _));
+
+        if (!TryCreateDirectoryLink(link, _outside))
+            return; // Directory link creation not permitted here; skip the escape half.
+
+        var pathThroughLink = Path.Combine(link, "id_rsa");
+        Assert.True(File.Exists(pathThroughLink), "Link should allow access to target file");
+        Assert.False(LocalFileAccessPolicy.TryResolve(pathThroughLink, roots, [], out _));
+    }
+
+    [Fact]
+    public void TryResolve_RootReachedThroughADirectoryLink_StillConfines()
+    {
+        var real = Directory.CreateDirectory(Path.Combine(_baseDirectory, "real")).FullName;
+        var inside = CreateFile(real, "inside.png");
+        var outside = CreateFile(_outside, "secret.txt");
+        var link = Path.Combine(_baseDirectory, "link");
+
+        if (!TryCreateDirectoryLink(link, real))
+        {
+            // No directory link support; assert the real path works.
+            var roots = LocalFileAccessPolicy.NormalizeRoots([real]);
+            Assert.True(LocalFileAccessPolicy.TryResolve(inside, roots, [], out _));
+            Assert.False(LocalFileAccessPolicy.TryResolve(outside, roots, [], out _));
+            return;
+        }
+
+        // Configure the root as the link path.
+        var roots2 = LocalFileAccessPolicy.NormalizeRoots([link]);
+
+        // File inside root is accepted by both its link path and its real path.
+        Assert.True(LocalFileAccessPolicy.TryResolve(Path.Combine(link, "inside.png"), roots2, [], out _));
+        Assert.True(LocalFileAccessPolicy.TryResolve(inside, roots2, [], out _));
+
+        // File outside is still rejected.
+        Assert.False(LocalFileAccessPolicy.TryResolve(outside, roots2, [], out _));
+    }
+
+    [Fact]
+    public void TryResolve_MidPathLinkChainPointingOutsideRoot_IsRejected()
+    {
+        var intermediate = Directory.CreateDirectory(Path.Combine(_baseDirectory, "intermediate")).FullName;
+        var target = CreateFile(_outside, "secret.txt");
+        var link1 = Path.Combine(_root, "link1");
+        var link2 = Path.Combine(intermediate, "link2");
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root]);
+
+        if (!TryCreateDirectoryLink(link1, intermediate) || !TryCreateDirectoryLink(link2, _outside))
+            return; // Directory link creation not permitted here.
+
+        var pathThroughChain = Path.Combine(link1, "link2", "secret.txt");
+        Assert.True(File.Exists(pathThroughChain), "Link chain should allow access to target file");
+        Assert.False(LocalFileAccessPolicy.TryResolve(pathThroughChain, roots, [], out _));
+    }
+
+    [Fact]
+    public void TryResolve_MidPathDirectoryLinkStayingInsideRoot_IsAccepted()
+    {
+        var subdir = Directory.CreateDirectory(Path.Combine(_root, "subdir")).FullName;
+        var target = CreateFile(subdir, "photo.png");
+        var link = Path.Combine(_root, "link");
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root]);
+
+        if (!TryCreateDirectoryLink(link, subdir))
+        {
+            // No directory link support; assert the real path works.
+            Assert.True(LocalFileAccessPolicy.TryResolve(target, roots, [], out _));
+            return;
+        }
+
+        var pathThroughLink = Path.Combine(link, "photo.png");
+        Assert.True(File.Exists(pathThroughLink), "Link should allow access to target file");
+        Assert.True(LocalFileAccessPolicy.TryResolve(pathThroughLink, roots, [], out _));
+    }
+
     #endregion
 
     #region Extensions
@@ -204,7 +306,15 @@ public class LocalFileAccessPolicyTests : IDisposable
             ""
         ]);
 
-        Assert.Equal(new[] { _root }, roots);
+        // Assert the contract rather than the exact string, since on macOS the temp path itself may
+        // contain a symlink (e.g. /var -> /private/var).
+        Assert.Single(roots);
+        Assert.False(roots[0].EndsWith(Path.DirectorySeparatorChar));
+        Assert.False(roots[0].EndsWith(Path.AltDirectorySeparatorChar));
+
+        // A file created under the original root path should resolve as inside it.
+        var file = CreateFile(_root, "test.txt");
+        Assert.True(LocalFileAccessPolicy.TryResolve(file, roots, [], out _));
     }
 
     [Fact]
@@ -242,5 +352,51 @@ public class LocalFileAccessPolicyTests : IDisposable
         var path = Path.Combine(directory, fileName);
         File.WriteAllText(path, "content");
         return path;
+    }
+
+    /// <summary>
+    /// Creates a directory link, preferring a symlink and falling back to a Windows junction, which needs
+    /// no SeCreateSymbolicLinkPrivilege. Returns false when neither is available, so a caller can skip the
+    /// link half of its assertion rather than fail.
+    /// </summary>
+    private static bool TryCreateDirectoryLink(string link, string target)
+    {
+        try
+        {
+            Directory.CreateSymbolicLink(link, target);
+            return true;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
+        {
+            // Symlink creation not permitted; try a Windows junction.
+        }
+
+        if (!OperatingSystem.IsWindows())
+            return false;
+
+        try
+        {
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c mklink /J \"{link}\" \"{target}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            process.WaitForExit(5000);
+
+            return Directory.Exists(link);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

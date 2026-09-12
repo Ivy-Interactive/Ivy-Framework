@@ -9,9 +9,9 @@ namespace Ivy;
 internal static class LocalFileAccessPolicy
 {
     /// <summary>
-    /// Normalizes configured roots to full paths without a trailing separator. Each root's own leaf
-    /// link is resolved here, at configure time, so a symlinked root directory cannot cause a false
-    /// mismatch against an already-resolved request path.
+    /// Normalizes configured roots to full paths without a trailing separator. The whole root path is
+    /// canonicalized at configure time, so a root reached through a directory link still matches request
+    /// paths canonicalized the same way.
     /// </summary>
     internal static string[] NormalizeRoots(IEnumerable<string>? roots)
     {
@@ -20,7 +20,7 @@ internal static class LocalFileAccessPolicy
 
         return roots
             .Where(root => !string.IsNullOrWhiteSpace(root))
-            .Select(root => Path.TrimEndingDirectorySeparator(ResolveLeafLink(Path.GetFullPath(root.Trim()))))
+            .Select(root => Path.TrimEndingDirectorySeparator(ResolveFullPath(Path.GetFullPath(root.Trim()))))
             .Where(root => root.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
@@ -80,8 +80,17 @@ internal static class LocalFileAccessPolicy
         if (roots.Count == 0)
             return true;
 
-        // A symlink inside a root that points outside it is deliberately rejected.
-        var resolved = ResolveLeafLink(fullPath);
+        // A link inside a root that points outside it is deliberately rejected, wherever in the path it sits.
+        var resolved = ResolveFullPath(fullPath);
+
+        // Check extension allowlist against resolved path too, so a symlink cannot rename the extension.
+        if (extensions.Count > 0)
+        {
+            var resolvedExtension = Path.GetExtension(resolved);
+            if (string.IsNullOrEmpty(resolvedExtension) || !extensions.Contains(resolvedExtension, StringComparer.OrdinalIgnoreCase))
+                return false;
+        }
+
         return roots.Any(root => IsWithin(resolved, root));
     }
 
@@ -112,17 +121,50 @@ internal static class LocalFileAccessPolicy
                "          to narrow it further when the roots are not known ahead of time.";
     }
 
-    private static string ResolveLeafLink(string fullPath)
+    /// <summary>
+    /// Resolves every link in <paramref name="fullPath"/>, not only its final component, by walking the
+    /// path from its root and following any segment that turns out to be a symlink or a junction. A
+    /// directory link in the middle of the path is what a leaf-only resolver misses.
+    /// </summary>
+    private static string ResolveFullPath(string fullPath)
+    {
+        var pathRoot = Path.GetPathRoot(fullPath);
+        if (string.IsNullOrEmpty(pathRoot))
+            return fullPath;
+
+        var current = pathRoot;
+
+        foreach (var segment in fullPath[pathRoot.Length..].Split(
+                     [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+                     StringSplitOptions.RemoveEmptyEntries))
+        {
+            var candidate = Path.Join(current, segment);
+            current = ResolveLink(candidate) ?? candidate;
+        }
+
+        return current;
+    }
+
+    private static string? ResolveLink(string candidate)
     {
         try
         {
-            return new FileInfo(fullPath).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? fullPath;
+            // FileInfo resolves a directory link too, so one call covers both segment kinds, and
+            // returnFinalTarget follows a chain of links in a single step.
+            var target = new FileInfo(candidate).ResolveLinkTarget(returnFinalTarget: true);
+            if (target == null)
+                return null;
+
+            // A relative link target belongs to the link's own directory, never to the process working
+            // directory. GetFullPath ignores the base when the target is already rooted.
+            return Path.GetFullPath(target.FullName, Path.GetDirectoryName(candidate) ?? candidate);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            // Nothing there to resolve (or nothing we may read); fall back to the literal path,
-            // which the caller's File.Exists check rejects.
-            return fullPath;
+            // The segment does not exist, or is an unresolvable link such as a cycle. Treat it as a
+            // literal name: a path we cannot resolve cannot be opened either, so the caller's
+            // File.Exists check rejects it for the same reason.
+            return null;
         }
     }
 }

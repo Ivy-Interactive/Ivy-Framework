@@ -220,7 +220,8 @@ server.AllowLocalFileExtensions(".png", ".jpg", ".webp");
 ```
 
 Both are additive, so repeated calls extend the sets. Every rejection is a 404 rather than a 403, so the
-endpoint never reveals whether a path exists.
+endpoint never reveals whether a path exists. Symlinks and junctions are resolved along the whole path, so a
+link inside a root that points outside it answers 404.
 
 ### CORS and Host Filtering
 
