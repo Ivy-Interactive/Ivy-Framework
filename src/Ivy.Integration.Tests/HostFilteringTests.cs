@@ -65,10 +65,9 @@ public class HostFilteringTests
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/ivy/health");
 
-        // A bracketed IPv6 literal does not survive the typed Host setter's validation, and the
-        // header has to reach the server verbatim for HostString to match it.
-        if (!request.Headers.TryAddWithoutValidation("Host", host))
-            request.Headers.Host = host;
+        // Set verbatim rather than through the typed Host setter, so the value under test reaches
+        // the server exactly as written and it is the server's parsing that is measured here.
+        request.Headers.TryAddWithoutValidation("Host", host);
 
         return request;
     }
