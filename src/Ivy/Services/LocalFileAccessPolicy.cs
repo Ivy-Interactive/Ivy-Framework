@@ -97,6 +97,21 @@ internal static class LocalFileAccessPolicy
                 || fullPath[root.Length] == Path.AltDirectorySeparatorChar);
     }
 
+    /// <summary>
+    /// The startup warning for an enabled but unconfined endpoint, or null when the configuration
+    /// needs no warning.
+    /// </summary>
+    internal static string? DescribeUnconfinedAccess(ServerArgs args)
+    {
+        if (!args.DangerouslyAllowLocalFiles || args.LocalFileRoots.Length > 0)
+            return null;
+
+        return "[WARNING] DangerouslyAllowLocalFiles() with no roots serves any readable file on this machine over\n" +
+               "          the unauthenticated GET /ivy/local-file endpoint. Pass roots to confine it, e.g.\n" +
+               "          DangerouslyAllowLocalFiles(\"C:/Users/me/Photos\"), or call AllowLocalFileExtensions(...)\n" +
+               "          to narrow it further when the roots are not known ahead of time.";
+    }
+
     private static string ResolveLeafLink(string fullPath)
     {
         try
