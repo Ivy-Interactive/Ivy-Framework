@@ -85,6 +85,12 @@ public record ServerArgs
     public string? Host { get; set; } = null;
 
     /// <summary>
+    /// Forces HTTPS on (true) or off (false) for this server. Null, the default, falls back to the
+    /// IVY_TLS environment variable and then to the local development default.
+    /// </summary>
+    public bool? UseTls { get; set; } = null;
+
+    /// <summary>
     /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
     /// </summary>
     public string? BasePath { get; set; } = null;
@@ -788,10 +794,12 @@ public class Server
         }
         else
         {
-            var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
-            var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
-                ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-                : !isContainer && !hasPortEnv && OperatingSystem.IsWindows(); // default: TLS for local dev only on Windows
+            var useTls = TlsPolicy.Resolve(
+                _args.UseTls,
+                Environment.GetEnvironmentVariable("IVY_TLS"),
+                isContainer,
+                hasPortEnv,
+                OperatingSystem.IsWindows());
             var scheme = useTls ? "https" : "http";
             builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
         }
