@@ -85,6 +85,12 @@ public record ServerArgs
     public string? Host { get; set; } = null;
 
     /// <summary>
+    /// Forces HTTPS on (true) or off (false) for this server. Null, the default, falls back to the
+    /// IVY_TLS environment variable and then to the local development default.
+    /// </summary>
+    public bool? UseTls { get; set; } = null;
+
+    /// <summary>
     /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
     /// </summary>
     public string? BasePath { get; set; } = null;
@@ -772,7 +778,7 @@ public class Server
         // Everything that keys off the bound address (the URL, the CORS default, the host filtering
         // default) comes from one place. BindEnvironment.FromProcess() is the only environment read here
         // and BindHostPolicy.Resolve is pure, so the whole matrix is unit-tested.
-        var bindAddress = BindHostPolicy.Resolve(BindEnvironment.FromProcess(), _args.Host, _args.Port, _args.IsCliCommand);
+        var bindAddress = BindHostPolicy.Resolve(BindEnvironment.FromProcess(), _args.Host, _args.Port, _args.IsCliCommand, _args.UseTls);
         builder.WebHost.UseUrls(bindAddress.Url);
 
         builder.Services.AddSignalR(options =>

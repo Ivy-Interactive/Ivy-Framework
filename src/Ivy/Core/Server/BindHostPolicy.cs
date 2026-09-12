@@ -30,7 +30,7 @@ internal static class BindHostPolicy
     /// Firewall prompt), wildcard in containers so health probes can reach the app; hosted
     /// environments such as Sliplane set PORT and need 0.0.0.0. An explicit host always wins.
     /// </summary>
-    internal static BindAddress Resolve(BindEnvironment environment, string? argsHost, int argsPort, bool isCliCommand)
+    internal static BindAddress Resolve(BindEnvironment environment, string? argsHost, int argsPort, bool isCliCommand, bool? argsUseTls)
     {
         // A CLI-only command needs DI but never calls app.StartAsync(), so it binds loopback on
         // port 0 whatever the requested host is, and never negotiates TLS.
@@ -39,13 +39,18 @@ internal static class BindHostPolicy
 
         var host = argsHost ?? (environment.IsContainer || environment.HasPortEnv ? "*" : "localhost");
 
-        return new BindAddress(UseTls(environment) ? "https" : "http", host, argsPort);
+        return new BindAddress(UseTls(environment, argsUseTls) ? "https" : "http", host, argsPort);
     }
 
     /// <summary>
-    /// True when the server should negotiate TLS. IVY_TLS decides when set; otherwise the default
-    /// is TLS for local dev on Windows only.
+    /// True when the server should negotiate TLS. Explicit configuration wins over IVY_TLS, which
+    /// decides when set; otherwise the default is TLS for local dev on Windows only.
     /// </summary>
-    internal static bool UseTls(BindEnvironment environment) =>
-        TlsPolicy.IsEnabled(environment.IvyTls, fallback: !environment.IsContainer && !environment.HasPortEnv && environment.IsWindows);
+    internal static bool UseTls(BindEnvironment environment, bool? argsUseTls)
+    {
+        if (argsUseTls.HasValue)
+            return argsUseTls.Value;
+
+        return TlsPolicy.IsEnabled(environment.IvyTls, fallback: !environment.IsContainer && !environment.HasPortEnv && environment.IsWindows);
+    }
 }

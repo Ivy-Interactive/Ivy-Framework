@@ -15,7 +15,8 @@ public class DevToolsEndpointTests : IAsyncLifetime
             Port = 0,
             Silent = true,
             Host = "127.0.0.1",
-            EnableDevTools = true
+            EnableDevTools = true,
+            UseTls = false
         });
         _app = server.BuildWebApplication();
         if (_app == null)

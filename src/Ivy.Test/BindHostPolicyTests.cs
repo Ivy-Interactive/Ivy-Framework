@@ -17,7 +17,7 @@ public class BindHostPolicyTests
     public void Resolve_NonCli_ReturnsExpectedHost(string? argsHost, bool isContainer, bool hasPortEnv, string expectedHost)
     {
         var environment = new BindEnvironment(isContainer, hasPortEnv, null, false);
-        var result = BindHostPolicy.Resolve(environment, argsHost, 5010, isCliCommand: false);
+        var result = BindHostPolicy.Resolve(environment, argsHost, 5010, isCliCommand: false, argsUseTls: null);
 
         Assert.Equal(expectedHost, result.Host);
     }
@@ -36,7 +36,7 @@ public class BindHostPolicyTests
             IvyTls: "1",
             IsWindows: true);
 
-        var result = BindHostPolicy.Resolve(environment, argsHost: "*", argsPort: 5010, isCliCommand: true);
+        var result = BindHostPolicy.Resolve(environment, argsHost: "*", argsPort: 5010, isCliCommand: true, argsUseTls: null);
 
         Assert.Equal(new BindAddress("http", "localhost", 0), result);
     }
@@ -55,7 +55,7 @@ public class BindHostPolicyTests
         bool isWindows)
     {
         var environment = new BindEnvironment(isContainer, hasPortEnv, ivyTls, isWindows);
-        var result = BindHostPolicy.Resolve(environment, argsHost, argsPort, isCliCommand: true);
+        var result = BindHostPolicy.Resolve(environment, argsHost, argsPort, isCliCommand: true, argsUseTls: null);
 
         Assert.Equal("http", result.Scheme);
         Assert.Equal("localhost", result.Host);
@@ -82,14 +82,14 @@ public class BindHostPolicyTests
         string expectedScheme)
     {
         var environment = new BindEnvironment(isContainer, hasPortEnv, ivyTls, isWindows);
-        var useTls = BindHostPolicy.UseTls(environment);
+        var useTls = BindHostPolicy.UseTls(environment, argsUseTls: null);
 
         Assert.True(useTls);
 
         // Also verify via Resolve for one representative case
         if (ivyTls == "1")
         {
-            var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false);
+            var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false, argsUseTls: null);
             Assert.Equal(expectedScheme, result.Scheme);
         }
     }
@@ -109,14 +109,14 @@ public class BindHostPolicyTests
     {
         // These values should result in http even on Windows with no container/PORT
         var environment = new BindEnvironment(false, hasPortEnv, ivyTls, isWindows);
-        var useTls = BindHostPolicy.UseTls(environment);
+        var useTls = BindHostPolicy.UseTls(environment, argsUseTls: null);
 
         Assert.False(useTls);
 
         // Verify via Resolve for one representative case
         if (ivyTls == "0")
         {
-            var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false);
+            var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false, argsUseTls: null);
             Assert.Equal(expectedScheme, result.Scheme);
         }
     }
@@ -141,7 +141,7 @@ public class BindHostPolicyTests
         string expectedScheme)
     {
         var environment = new BindEnvironment(isContainer, hasPortEnv, ivyTls, isWindows);
-        var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false);
+        var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false, argsUseTls: null);
 
         Assert.Equal(expectedScheme, result.Scheme);
     }
@@ -161,7 +161,7 @@ public class BindHostPolicyTests
     public void Resolve_CliCommand_ComposesCorrectUrl()
     {
         var environment = new BindEnvironment(false, false, null, false);
-        var result = BindHostPolicy.Resolve(environment, null, 0, isCliCommand: true);
+        var result = BindHostPolicy.Resolve(environment, null, 0, isCliCommand: true, argsUseTls: null);
 
         Assert.Equal("http://localhost:0", result.Url);
     }
@@ -175,7 +175,7 @@ public class BindHostPolicyTests
     {
         // CLI command should always result in loopback binding
         var environment = new BindEnvironment(true, true, null, false);
-        var result = BindHostPolicy.Resolve(environment, "*", 5010, isCliCommand: true);
+        var result = BindHostPolicy.Resolve(environment, "*", 5010, isCliCommand: true, argsUseTls: null);
 
         var isLoopback = CorsOriginPolicy.IsLoopbackBound(result.Host);
         Assert.True(isLoopback);
@@ -186,10 +186,70 @@ public class BindHostPolicyTests
     {
         // Non-CLI with wildcard host should not bind loopback
         var environment = new BindEnvironment(true, true, null, false);
-        var result = BindHostPolicy.Resolve(environment, "*", 5010, isCliCommand: false);
+        var result = BindHostPolicy.Resolve(environment, "*", 5010, isCliCommand: false, argsUseTls: null);
 
         var isLoopback = CorsOriginPolicy.IsLoopbackBound(result.Host);
         Assert.False(isLoopback);
+    }
+
+    #endregion
+}
+
+    #region Scheme / TLS - Explicit ServerArgs.UseTls
+
+    [Theory]
+    [InlineData("0", true, false, false)]
+    [InlineData("0", false, false, false)]
+    [InlineData("0", true, true, false)]
+    [InlineData("0", false, true, true)]
+    public void UseTls_ArgsExplicitTrue_WinsOverEnvironmentAndDefaults(string ivyTls, bool isContainer, bool hasPortEnv, bool isWindows)
+    {
+        var environment = new BindEnvironment(isContainer, hasPortEnv, ivyTls, isWindows);
+        var useTls = BindHostPolicy.UseTls(environment, argsUseTls: true);
+
+        Assert.True(useTls);
+
+        var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false, argsUseTls: true);
+        Assert.Equal("https", result.Scheme);
+    }
+
+    [Theory]
+    [InlineData("1", true, false, false)]
+    [InlineData("1", false, false, false)]
+    [InlineData("1", true, true, false)]
+    [InlineData("1", false, true, true)]
+    [InlineData(null, false, false, true)] // Windows default
+    public void UseTls_ArgsExplicitFalse_WinsOverEnvironmentAndDefaults(string? ivyTls, bool isContainer, bool hasPortEnv, bool isWindows)
+    {
+        var environment = new BindEnvironment(isContainer, hasPortEnv, ivyTls, isWindows);
+        var useTls = BindHostPolicy.UseTls(environment, argsUseTls: false);
+
+        Assert.False(useTls);
+
+        var result = BindHostPolicy.Resolve(environment, null, 5010, isCliCommand: false, argsUseTls: false);
+        Assert.Equal("http", result.Scheme);
+    }
+
+    [Theory]
+    [InlineData("1", true)]
+    [InlineData("0", false)]
+    [InlineData(null, false)]
+    public void UseTls_ArgsNull_DefersToEnvironment(string? ivyTls, bool expectedUseTls)
+    {
+        var environment = new BindEnvironment(isContainer: false, hasPortEnv: false, ivyTls, isWindows: false);
+        var useTls = BindHostPolicy.UseTls(environment, argsUseTls: null);
+
+        Assert.Equal(expectedUseTls, useTls);
+    }
+
+    [Fact]
+    public void Resolve_CliCommand_StaysHttpEvenWithExplicitUseTlsTrue()
+    {
+        // CLI command should return http even when UseTls is explicitly true
+        var environment = new BindEnvironment(false, false, null, true);
+        var result = BindHostPolicy.Resolve(environment, argsHost: null, argsPort: 5010, isCliCommand: true, argsUseTls: true);
+
+        Assert.Equal("http", result.Scheme);
     }
 
     #endregion
