@@ -220,6 +220,99 @@ public class LocalFileControllerTests : IDisposable
         Assert.Contains($"filename=\"{fileName}\"", contentDisposition);
     }
 
+    [Fact]
+    public void GetFile_WithConfiguredRoot_ServesFileInsideIt()
+    {
+        // Arrange
+        var filePath = CreateTempFile("photo.png", "Fake PNG content");
+        var controller = CreateController(allowLocalFiles: true, roots: [_tempDirectory]);
+
+        // Act
+        var result = controller.GetFile(filePath);
+
+        // Assert
+        Assert.IsType<PhysicalFileResult>(result);
+    }
+
+    [Fact]
+    public void GetFile_WithConfiguredRoot_ReturnsNotFoundForFileOutsideIt()
+    {
+        // Arrange
+        var root = Directory.CreateDirectory(Path.Combine(_tempDirectory, "root")).FullName;
+        var filePath = CreateTempFile("secret.txt", "Content");
+        var controller = CreateController(allowLocalFiles: true, roots: [root]);
+
+        // Act
+        var result = controller.GetFile(filePath);
+
+        // Assert — never 403, so the endpoint is not an existence oracle
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public void GetFile_WithConfiguredRoot_ReturnsNotFoundForTraversalOutOfIt()
+    {
+        // Arrange
+        var root = Directory.CreateDirectory(Path.Combine(_tempDirectory, "root")).FullName;
+        CreateTempFile("secret.txt", "Content");
+        var traversal = Path.Combine(root, "..", "secret.txt");
+        var controller = CreateController(allowLocalFiles: true, roots: [root]);
+
+        // Act
+        var result = controller.GetFile(traversal);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public void GetFile_WithConfiguredRoot_ReturnsNotFoundForSiblingDirectoryWithRootAsPrefix()
+    {
+        // Arrange
+        var root = Directory.CreateDirectory(Path.Combine(_tempDirectory, "root")).FullName;
+        var siblingPrefix = Directory.CreateDirectory(root + "-secrets").FullName;
+        var filePath = Path.Combine(siblingPrefix, "key.pem");
+        File.WriteAllText(filePath, "Content");
+        var controller = CreateController(allowLocalFiles: true, roots: [root]);
+
+        // Act
+        var result = controller.GetFile(filePath);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public void GetFile_WithExtensionAllowlist_ServesAllowedExtension()
+    {
+        // Arrange
+        var filePath = CreateTempFile("photo.png", "Fake PNG content");
+        var controller = CreateController(allowLocalFiles: true, extensions: [".png"]);
+
+        // Act
+        var result = controller.GetFile(filePath);
+
+        // Assert
+        Assert.IsType<PhysicalFileResult>(result);
+    }
+
+    [Theory]
+    [InlineData("config.yml")]
+    [InlineData("key.pem")]
+    [InlineData("noextension")]
+    public void GetFile_WithExtensionAllowlist_ReturnsNotFoundForOtherExtensions(string fileName)
+    {
+        // Arrange
+        var filePath = CreateTempFile(fileName, "Content");
+        var controller = CreateController(allowLocalFiles: true, extensions: [".png"]);
+
+        // Act
+        var result = controller.GetFile(filePath);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+
     private string CreateTempFile(string fileName, string content)
     {
         var filePath = Path.Combine(_tempDirectory, fileName);
@@ -228,13 +321,24 @@ public class LocalFileControllerTests : IDisposable
         return filePath;
     }
 
-    private LocalFileController CreateController(bool allowLocalFiles)
+    private LocalFileController CreateController(
+        bool allowLocalFiles,
+        string[]? roots = null,
+        string[]? extensions = null)
     {
         var serverArgs = new ServerArgs
         {
             DangerouslyAllowLocalFiles = allowLocalFiles
         };
         var server = new Server(serverArgs);
+
+        // Configure through the builder methods, so these tests exercise the same normalization a
+        // real Program.cs gets.
+        if (roots is { Length: > 0 })
+            server.DangerouslyAllowLocalFiles(roots);
+        if (extensions is { Length: > 0 })
+            server.AllowLocalFileExtensions(extensions);
+
         var controller = new LocalFileController(server);
 
         // Set up HTTP context for the controller

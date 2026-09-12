@@ -32,7 +32,15 @@ public class LocalFileController(Server server) : Controller
         if (string.IsNullOrWhiteSpace(path))
             return BadRequest("Path is required");
 
-        var fullPath = Path.GetFullPath(path);
+        // Every rejection is a 404, never a 403 — the endpoint must not become an existence oracle
+        // for paths the caller may not read.
+        if (!LocalFileAccessPolicy.TryResolve(
+                path,
+                server.Args.LocalFileRoots,
+                server.Args.LocalFileExtensions,
+                out var fullPath))
+            return NotFound();
+
         if (!System.IO.File.Exists(fullPath))
             return NotFound();
 
