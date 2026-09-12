@@ -174,6 +174,8 @@ The server automatically reads configuration from environment variables:
 - `VERBOSE` - Enable verbose logging
 - `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS).
 - `IVY_CORS_ORIGINS` - Comma- or semicolon-separated list of origins the default CORS policy allows (for example `https://app.example.com,https://admin.example.com`). Applied only when `AllowedCorsOrigins` is empty.
+- `AllowedHosts` - Standard ASP.NET Core key, semicolon separated, e.g. `localhost;127.0.0.1`. Setting
+  it (including to `*`) overrides the loopback default described under CORS and Host Filtering.
 
 When `BasePath` is set (via `ServerArgs`, CLI, or environment variable), Ivy applies ASP.NET Core `UsePathBase()` middleware to ensure routing and link generation work correctly under that prefix.
 
@@ -235,14 +237,30 @@ server.AllowCorsOrigins("https://app.example.com");
 ```
 
 CORS cannot stop DNS rebinding: a page on a hostname rebound to `127.0.0.1` is *same-origin* with the
-server, so no CORS check runs. Validating the `Host` header is what rejects it. This is opt-in, because
-reverse proxies and tunnels forward their own public hostname:
+server, so no CORS check runs. Validating the `Host` header is what rejects it, so when the server
+binds loopback (the `dotnet run` default) Ivy validates it for you: `localhost`, `127.0.0.1` and
+`[::1]` are accepted and anything else answers 400 with `Bad Request - Invalid Hostname`. A server that
+binds `*`, `+` or a public address (a container, a hosted deployment, or anything started with `PORT`
+set) accepts any `Host` header, because a reverse proxy in front of it forwards its own public
+hostname.
+
+Name hosts explicitly to validate them on a non-loopback bind:
 
 ```csharp
-server.AllowHosts("localhost", "127.0.0.1", "[::1]");
+server.AllowHosts("app.example.com");
 ```
 
-With `AllowHosts` set, a request carrying any other `Host` header gets a 400.
+`AllowHosts` replaces the list rather than extending it, so include the loopback names when you still
+want them:
+
+```csharp
+server.AllowHosts("localhost", "127.0.0.1", "[::1]", "my-tunnel.ngrok-free.app");
+```
+
+That is the case to reach for when a tunnel (ngrok, Cloudflare, or editor port forwarding) forwards its
+own hostname to a loopback bind. The standard ASP.NET Core `AllowedHosts` configuration key is the
+other way out: it wins over Ivy's default entirely, so `AllowedHosts=*` in the environment or in
+`appsettings.json` turns the check off again.
 
 ### Metadata
 
