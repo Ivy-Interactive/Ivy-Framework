@@ -172,7 +172,7 @@ The server automatically reads configuration from environment variables:
 - `PORT` - Override the default port
 - `BASE_PATH` - Serve the app from a URL prefix
 - `VERBOSE` - Enable verbose logging
-- `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS).
+- `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS). Applied only when `ServerArgs.UseTls` is unset.
 - `IVY_CORS_ORIGINS` - Comma- or semicolon-separated list of origins the default CORS policy allows (for example `https://app.example.com,https://admin.example.com`). Applied only when `AllowedCorsOrigins` is empty.
 - `AllowedHosts` - Standard ASP.NET Core key, semicolon separated, e.g. `localhost;127.0.0.1`. Setting
   it (including to `*`) overrides the loopback default described under CORS and Host Filtering.
