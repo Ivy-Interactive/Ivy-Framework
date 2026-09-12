@@ -203,8 +203,11 @@ server.UseHttpRedirection();
 ### Local File Access
 
 `server.DangerouslyAllowLocalFiles()` enables the `/ivy/local-file` proxy endpoint that `Markdown` and
-`Image` use to render files from disk. The no-argument form serves **any readable file on the machine**,
-so pass the directories you actually need and Ivy answers 404 for everything outside them:
+`Image` use to render files from disk. **The endpoint is unauthenticated**, so the roots you pass are the
+only server-side confinement. The no-argument form serves **any readable file on the machine** and always
+warns on stderr; it is retained deliberately for consumers that mitigate the endpoint another way (e.g.,
+with middleware that validates the request origin and host). For most cases, pass the directories you
+actually need and Ivy answers 404 for everything outside them:
 
 ```csharp
 server.DangerouslyAllowLocalFiles("C:/Users/me/Photos", "D:/Screenshots");
@@ -217,7 +220,8 @@ server.AllowLocalFileExtensions(".png", ".jpg", ".webp");
 ```
 
 Both are additive, so repeated calls extend the sets. Every rejection is a 404 rather than a 403, so the
-endpoint never reveals whether a path exists.
+endpoint never reveals whether a path exists. Symlinks and junctions are resolved along the whole path, so a
+link inside a root that points outside it answers 404.
 
 ### CORS and Host Filtering
 

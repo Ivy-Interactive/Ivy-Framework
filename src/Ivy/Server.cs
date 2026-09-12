@@ -964,10 +964,10 @@ public class Server
             app.UsePathBase(_args.BasePath);
         }
 
-        if (_args.DangerouslyAllowLocalFiles && _args.LocalFileRoots.Length == 0 && !_args.Silent)
+        var unconfinedWarning = LocalFileAccessPolicy.DescribeUnconfinedAccess(_args);
+        if (unconfinedWarning != null)
         {
-            Console.WriteLine("[WARNING] DangerouslyAllowLocalFiles() with no roots serves any readable file on this machine over");
-            Console.WriteLine("          GET /ivy/local-file. Pass roots, e.g. DangerouslyAllowLocalFiles(\"C:/Users/me/Photos\").");
+            Console.Error.WriteLine(unconfinedWarning);
         }
 
         app.Use(async (context, next) =>
