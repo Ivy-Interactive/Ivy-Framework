@@ -333,7 +333,7 @@ public class LocalImagesView : ViewBase
 }
 ```
 
-> **Note:** The server must also opt in via `server.DangerouslyAllowLocalFiles()` in `Program.cs`. Images are served through a proxy endpoint (`/ivy/local-file`) — the browser never accesses `file://` URLs directly.
+> **Note:** The server must also opt in, in `Program.cs`. Prefer naming the directories you serve from — `server.DangerouslyAllowLocalFiles("C:/Users/me/Photos")` — because anything resolving outside them answers 404. The no-argument `server.DangerouslyAllowLocalFiles()` serves **every readable file on the machine** over `/ivy/local-file`, and prints a startup warning saying so. Images are served through that proxy endpoint — the browser never accesses `file://` URLs directly.
 
 ### Complete Example
 

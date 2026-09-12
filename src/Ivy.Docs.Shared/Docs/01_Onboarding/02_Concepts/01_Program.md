@@ -62,6 +62,9 @@ var server = new Server(new ServerArgs
 | `Browse` | `bool` | `false` | Automatically open browser on startup |
 | `Silent` | `bool` | `false` | Suppress startup messages |
 | `DefaultAppId` | `string?` | `null` | Set the default app to load |
+| `LocalFileRoots` | `string[]` | `[]` | Directories `GET /ivy/local-file` may serve from. Empty means any readable file on the machine. |
+| `LocalFileExtensions` | `string[]` | `[]` | File extensions `GET /ivy/local-file` may serve. Empty means any extension. |
+| `AllowedCorsOrigins` | `string[]` | `[]` | Cross-origin origins the default CORS policy reflects. Empty allows loopback origins only, and only when the server binds loopback. |
 | `Metadata.Title` | `string?` | `null` | HTML meta title |
 | `Metadata.Description` | `string?` | `null` | HTML meta description |
 | `Metadata.GitHubUrl` | `string?` | `null` | GitHub repository URL meta tag |
@@ -170,6 +173,7 @@ The server automatically reads configuration from environment variables:
 - `BASE_PATH` - Serve the app from a URL prefix
 - `VERBOSE` - Enable verbose logging
 - `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS).
+- `IVY_CORS_ORIGINS` - Comma- or semicolon-separated list of origins the default CORS policy allows (for example `https://app.example.com,https://admin.example.com`). Applied only when `AllowedCorsOrigins` is empty.
 
 When `BasePath` is set (via `ServerArgs`, CLI, or environment variable), Ivy applies ASP.NET Core `UsePathBase()` middleware to ensure routing and link generation work correctly under that prefix.
 
@@ -195,6 +199,46 @@ Enable HTTPS redirection for production:
 server.UseHttpRedirection();
 #endif
 ```
+
+### Local File Access
+
+`server.DangerouslyAllowLocalFiles()` enables the `/ivy/local-file` proxy endpoint that `Markdown` and
+`Image` use to render files from disk. The no-argument form serves **any readable file on the machine**,
+so pass the directories you actually need and Ivy answers 404 for everything outside them:
+
+```csharp
+server.DangerouslyAllowLocalFiles("C:/Users/me/Photos", "D:/Screenshots");
+```
+
+Narrow it further with an extension allowlist. Anything else — including an extensionless path — answers 404:
+
+```csharp
+server.AllowLocalFileExtensions(".png", ".jpg", ".webp");
+```
+
+Both are additive, so repeated calls extend the sets. Every rejection is a 404 rather than a 403, so the
+endpoint never reveals whether a path exists.
+
+### CORS and Host Filtering
+
+Ivy serves its own frontend, so browsers reach the hub and the controllers same-origin and never consult
+CORS. The default policy reflects loopback origins (which is what keeps the Vite dev server working) and
+only when the server itself binds loopback — a container or hosted server that binds `*` allows nothing
+it has not been told about. Add a genuinely cross-origin consumer explicitly:
+
+```csharp
+server.AllowCorsOrigins("https://app.example.com");
+```
+
+CORS cannot stop DNS rebinding: a page on a hostname rebound to `127.0.0.1` is *same-origin* with the
+server, so no CORS check runs. Validating the `Host` header is what rejects it. This is opt-in, because
+reverse proxies and tunnels forward their own public hostname:
+
+```csharp
+server.AllowHosts("localhost", "127.0.0.1", "[::1]");
+```
+
+With `AllowHosts` set, a request carrying any other `Host` header gets a 400.
 
 ### Metadata
 
