@@ -84,7 +84,7 @@ public class AppHub(
             var httpContext = Context.GetHttpContext()!;
             var parentId = AppRouter.GetParentId(httpContext);
 
-            var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
+            var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId, logger));
 
             if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
             {
@@ -246,7 +246,7 @@ public class AppHub(
             };
 
             var connectionAborted = Context.ConnectionAborted;
-            appState.EventQueue = new EventDispatchQueue(connectionAborted);
+            appState.EventQueue = new EventDispatchQueue(connectionAborted, logger, $"{routeResult.AppId}/{Context.ConnectionId}");
 
             if (parentId == null)
             {
@@ -1065,20 +1065,33 @@ public class AppHub(
 
 public class ClientSender : IClientSender, IDisposable
 {
+    private const int ChannelCapacity = 2048;
+    private const int DropLogIntervalMs = 5000;
     private readonly System.Threading.Channels.Channel<(string method, object? data)> _channel;
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _worker;
+    private readonly ILogger? _logger;
+    private readonly string _connectionId;
+    private long _droppedCount;
+    private long _lastDropLogTicks;
     private volatile bool _disposed;
 
+    internal long DroppedCount => Interlocked.Read(ref _droppedCount);
+
     public ClientSender(IClientNotifier clientNotifier, string connectionId)
+        : this(clientNotifier, connectionId, null) { }
+
+    internal ClientSender(IClientNotifier clientNotifier, string connectionId, ILogger? logger)
     {
-        var options = new System.Threading.Channels.BoundedChannelOptions(2048)
+        _logger = logger;
+        _connectionId = connectionId;
+        var options = new System.Threading.Channels.BoundedChannelOptions(ChannelCapacity)
         {
             SingleReader = true,
             SingleWriter = false,
             FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest
         };
-        _channel = System.Threading.Channels.Channel.CreateBounded<(string, object?)>(options);
+        _channel = System.Threading.Channels.Channel.CreateBounded<(string, object?)>(options, OnItemDropped);
 
         _worker = Task.Factory.StartNew(async () =>
         {
@@ -1103,13 +1116,33 @@ public class ClientSender : IClientSender, IDisposable
         }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 
+    private void OnItemDropped((string method, object? data) dropped)
+    {
+        var total = Interlocked.Increment(ref _droppedCount);
+        var now = Environment.TickCount64;
+        var last = Interlocked.Read(ref _lastDropLogTicks);
+        if (total != 1 && now - last < DropLogIntervalMs) return;
+        if (Interlocked.CompareExchange(ref _lastDropLogTicks, now, last) != last) return;
+
+        if (_logger is not null)
+        {
+            _logger.LogWarning(
+                "ClientSender for connection {ConnectionId} dropped {DroppedTotal} outbound message(s), capacity {Capacity}; client may be receiving stale content.",
+                _connectionId, total, ChannelCapacity);
+        }
+        else
+        {
+            Console.WriteLine($"WARN: ClientSender for connection {_connectionId} dropped {total} outbound message(s), capacity {ChannelCapacity}; client may be receiving stale content.");
+        }
+    }
+
     public void Send(string method, object? data)
     {
         if (_disposed) return;
 
         if (!_channel.Writer.TryWrite((method, data)))
         {
-            // Channel full or completed — try async write, but guard against disposal race
+            // DropOldest mode never reports a full channel; TryWrite fails only once the channel is completed
             if (_disposed) return;
             try
             {

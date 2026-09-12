@@ -1,24 +1,37 @@
 using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core;
 
 public sealed class EventDispatchQueue : IDisposable
 {
     private const int DefaultChannelCapacity = 1024;
+    private const int DropLogIntervalMs = 5000;
     private readonly Channel<Func<Task>> _channel;
     private readonly CancellationTokenSource _cts;
     private readonly Task _worker;
+    private readonly ILogger? _logger;
+    private readonly string _sessionLabel;
+    private long _droppedCount;
+    private long _lastDropLogTicks;
     private volatile bool _disposed;
 
+    internal long DroppedCount => Interlocked.Read(ref _droppedCount);
+
     public EventDispatchQueue(CancellationToken externalCancellation)
+        : this(externalCancellation, null, null) { }
+
+    internal EventDispatchQueue(CancellationToken externalCancellation, ILogger? logger, string? sessionLabel)
     {
+        _logger = logger;
+        _sessionLabel = sessionLabel ?? "unknown";
         var options = new BoundedChannelOptions(DefaultChannelCapacity)
         {
             SingleReader = true,
             SingleWriter = false,
             FullMode = BoundedChannelFullMode.DropOldest
         };
-        _channel = Channel.CreateBounded<Func<Task>>(options);
+        _channel = Channel.CreateBounded<Func<Task>>(options, OnItemDropped);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(externalCancellation);
 
         _worker = Task.Run(async () =>
@@ -42,6 +55,26 @@ public sealed class EventDispatchQueue : IDisposable
             }
             catch (OperationCanceledException) { }
         }, _cts.Token);
+    }
+
+    private void OnItemDropped(Func<Task> dropped)
+    {
+        var total = Interlocked.Increment(ref _droppedCount);
+        var now = Environment.TickCount64;
+        var last = Interlocked.Read(ref _lastDropLogTicks);
+        if (total != 1 && now - last < DropLogIntervalMs) return;
+        if (Interlocked.CompareExchange(ref _lastDropLogTicks, now, last) != last) return;
+
+        if (_logger is not null)
+        {
+            _logger.LogWarning(
+                "EventDispatchQueue for session {Session} dropped {DroppedTotal} queued UI update(s), capacity {Capacity}; this session may be rendering stale content.",
+                _sessionLabel, total, DefaultChannelCapacity);
+        }
+        else
+        {
+            Console.WriteLine($"WARN: EventDispatchQueue for session {_sessionLabel} dropped {total} queued UI update(s), capacity {DefaultChannelCapacity}; this session may be rendering stale content.");
+        }
     }
 
     public void Enqueue(Action action)
