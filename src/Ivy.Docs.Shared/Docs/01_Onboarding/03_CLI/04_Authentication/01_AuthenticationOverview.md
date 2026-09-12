@@ -351,7 +351,7 @@ Server.AuthCookiePrefix = "clerk";
 
 ## HTTPS in Development
 
-Ivy uses secure (`Secure = true`) authentication cookies, which means your browser will only send them over HTTPS. In local development, Ivy automatically serves over HTTPS using the ASP.NET Core development certificate.
+Ivy uses secure (`Secure = true`) authentication cookies, which means your browser will only send them over HTTPS. In local development on Windows, Ivy automatically serves over HTTPS using the ASP.NET Core development certificate. On macOS and Linux, set `IVY_TLS=true` after generating the certificate to enable HTTPS.
 
 ### macOS and Windows
 
@@ -365,7 +365,7 @@ After this, your app will be accessible at `https://localhost:5010`.
 
 ### Linux
 
-Linux requires additional manual steps to trust the development certificate — see [Installation](../../01_GettingStarted/02_Installation.md#prerequisites) for details.
+Linux requires additional manual steps to trust the development certificate. See [Installation](../../01_GettingStarted/02_Installation.md#prerequisites) for details.
 
 ## Best Practices
 
