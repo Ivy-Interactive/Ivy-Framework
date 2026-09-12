@@ -76,6 +76,7 @@
     <Antlr4 Include="Agent/Filter/Filters.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Ivy.Agent.Filter.Parser</CustomToolNamespace>
+      <AntlrToolJar Condition="'$(HOME)' != '' and Exists('$(HOME)/.m2/antlr4-4.13.1-complete.jar')">$(HOME)/.m2/antlr4-4.13.1-complete.jar</AntlrToolJar>
     </Antlr4>
     <EmbeddedResource Include="Agent/Filter/Filters.g4" />
   </ItemGroup>
@@ -216,6 +217,7 @@
   </ItemGroup>
 
   <Target Name="NpmInstallExternalWidgets" BeforeTargets="BuildExternalWidgetFrontends"
+          Condition="'$(IvyEnableExternalWidgets)' != 'false'"
           Inputs="Widgets/External/%(ExternalWidget.Identity)/frontend/package.json;Widgets/External/%(ExternalWidget.Identity)/frontend/pnpm-lock.yaml"
           Outputs="Widgets/External/%(ExternalWidget.Identity)/frontend/node_modules/.modules.yaml">
     <Exec Command="vp install -- --config.confirmModulesPurge=false"
@@ -224,6 +226,7 @@
   </Target>
 
   <Target Name="BuildExternalWidgetFrontends" BeforeTargets="AssignTargetPaths"
+          Condition="'$(IvyEnableExternalWidgets)' != 'false'"
           Inputs="Widgets/External/%(ExternalWidget.Identity)/frontend/src/**/*;Widgets/External/%(ExternalWidget.Identity)/frontend/package.json;Widgets/External/%(ExternalWidget.Identity)/frontend/pnpm-lock.yaml;Widgets/External/%(ExternalWidget.Identity)/frontend/tsconfig.json;Widgets/External/%(ExternalWidget.Identity)/frontend/vite.config.ts"
           Outputs="Widgets/External/%(ExternalWidget.Identity)/frontend/dist/.build-stamp">
     <Exec Command="vp build"

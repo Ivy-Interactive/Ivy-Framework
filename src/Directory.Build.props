@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesPath Condition="'$(RestorePackagesPath)' == '' and '$(HOME)' != '' and Exists('$(HOME)/.nuget/packages')">$(HOME)/.nuget/packages</RestorePackagesPath>
   </PropertyGroup>
 
   <!--
