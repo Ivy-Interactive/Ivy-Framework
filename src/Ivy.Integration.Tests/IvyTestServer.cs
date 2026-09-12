@@ -24,6 +24,9 @@ public class IvyTestServer : IAsyncDisposable
     /// </param>
     public static async Task<IvyTestServer> CreateAsync(Action<Server>? configure = null)
     {
+        // Pin to HTTP for CI - Windows runners may not have a trusted ASP.NET Core dev certificate
+        Environment.SetEnvironmentVariable("IVY_TLS", "0");
+
         var sessionStore = new AppSessionStore();
         var server = new Server(new ServerArgs { Port = 0, Silent = true, Host = "127.0.0.1" });
         server.AddApp(new AppDescriptor

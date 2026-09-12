@@ -27,12 +27,14 @@
   <Folder Name="/Auth/examples/">
     <Project Path="auth/examples/SliplaneExample/SliplaneExample.csproj" />
   </Folder>
+  <Project Path="Ivy.Analyser.Test/Ivy.Analyser.Test.csproj" />
   <Project Path="Ivy.Desktop/Ivy.Desktop.csproj" />
   <Project Path="Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
   <Project Path="Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />
   <Project Path="Ivy.Docs.Test/Ivy.Docs.Test.csproj" />
   <Project Path="Ivy.Docs/Ivy.Docs.csproj" />
   <Project Path="Ivy.Hooks.Pty.Test/Ivy.Hooks.Pty.Test.csproj" />
+  <Project Path="Ivy.Integration.Tests/Ivy.Integration.Tests.csproj" />
   <Project Path="Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" />
   <Project Path="Ivy.Samples/Ivy.Samples.csproj" />
   <Project Path="Ivy.Test/Ivy.Test.csproj" />
