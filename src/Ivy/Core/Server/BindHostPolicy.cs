@@ -46,12 +46,6 @@ internal static class BindHostPolicy
     /// True when the server should negotiate TLS. IVY_TLS decides when set; otherwise the default
     /// is TLS for local dev on Windows only.
     /// </summary>
-    internal static bool UseTls(BindEnvironment environment)
-    {
-        var ivyTls = environment.IvyTls;
-
-        return !string.IsNullOrEmpty(ivyTls)
-            ? ivyTls.ToLowerInvariant() is "1" or "true" or "yes" or "on"
-            : !environment.IsContainer && !environment.HasPortEnv && environment.IsWindows;
-    }
+    internal static bool UseTls(BindEnvironment environment) =>
+        TlsPolicy.IsEnabled(environment.IvyTls, fallback: !environment.IsContainer && !environment.HasPortEnv && environment.IsWindows);
 }
