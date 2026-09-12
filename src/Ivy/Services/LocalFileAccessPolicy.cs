@@ -9,6 +9,19 @@ namespace Ivy;
 internal static class LocalFileAccessPolicy
 {
     /// <summary>
+    /// Path comparison follows the platform instead of being hard-coded: Windows and macOS are
+    /// case-insensitive by default, Linux is not, and comparing case-insensitively there is more
+    /// permissive than the filesystem itself. A macOS volume can be formatted case-sensitive, so macOS
+    /// keeps the insensitive default rather than being probed.
+    /// </summary>
+    private static readonly StringComparison PathComparison =
+        OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+
+    private static readonly StringComparer PathComparer = StringComparer.FromComparison(PathComparison);
+
+    /// <summary>
     /// Normalizes configured roots to full paths without a trailing separator. Each root's own leaf
     /// link is resolved here, at configure time, so a symlinked root directory cannot cause a false
     /// mismatch against an already-resolved request path.
@@ -22,7 +35,7 @@ internal static class LocalFileAccessPolicy
             .Where(root => !string.IsNullOrWhiteSpace(root))
             .Select(root => Path.TrimEndingDirectorySeparator(ResolveLeafLink(Path.GetFullPath(root.Trim()))))
             .Where(root => root.Length > 0)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Distinct(PathComparer)
             .ToArray();
     }
 
@@ -87,12 +100,12 @@ internal static class LocalFileAccessPolicy
 
     private static bool IsWithin(string fullPath, string root)
     {
-        if (string.Equals(fullPath, root, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(fullPath, root, PathComparison))
             return true;
 
         // Requiring the separator is what stops root "/data/pub" from matching "/data/pub-secrets".
         return fullPath.Length > root.Length
-            && fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase)
+            && fullPath.StartsWith(root, PathComparison)
             && (fullPath[root.Length] == Path.DirectorySeparatorChar
                 || fullPath[root.Length] == Path.AltDirectorySeparatorChar);
     }

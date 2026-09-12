@@ -127,6 +127,37 @@ public class LocalFileAccessPolicyTests : IDisposable
         Assert.False(LocalFileAccessPolicy.TryResolve(link, roots, [], out _));
     }
 
+    [Fact]
+    public void TryResolve_InDifferentlyCasedSiblingDirectory_IsRejectedWhereTheFilesystemIsCaseSensitive()
+    {
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root]);
+
+        // The in-root half always runs, so the test measures something on every platform.
+        Assert.True(LocalFileAccessPolicy.TryResolve(CreateFile(_root, "photo.png"), roots, [], out _));
+
+        if (!OperatingSystem.IsLinux())
+            return; // "ROOT" and "root" are the same directory here; nothing to escape from.
+
+        // On a case-sensitive filesystem this is a genuinely different directory with its own
+        // contents, so the file really exists and the caller's File.Exists check would succeed.
+        var casedSibling = Directory.CreateDirectory(Path.Combine(_baseDirectory, "ROOT")).FullName;
+        var path = CreateFile(casedSibling, "id_rsa.png");
+
+        Assert.False(LocalFileAccessPolicy.TryResolve(path, roots, [], out _));
+    }
+
+    [Fact]
+    public void TryResolve_WithDifferentlyCasedRoot_IsAcceptedOnCaseInsensitivePlatforms()
+    {
+        if (OperatingSystem.IsLinux())
+            return; // An upper-cased root is a different directory here, so it must not confine.
+
+        var path = CreateFile(_root, "photo.png");
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root.ToUpperInvariant()]);
+
+        Assert.True(LocalFileAccessPolicy.TryResolve(path, roots, [], out _));
+    }
+
     #endregion
 
     #region Extensions
@@ -205,6 +236,24 @@ public class LocalFileAccessPolicyTests : IDisposable
         ]);
 
         Assert.Equal(new[] { _root }, roots);
+    }
+
+    [Fact]
+    public void NormalizeRoots_DeduplicatesDifferentlyCasedRootsOnlyOnCaseInsensitivePlatforms()
+    {
+        var upper = _root.ToUpperInvariant();
+
+        var roots = LocalFileAccessPolicy.NormalizeRoots([_root, upper]);
+
+        if (OperatingSystem.IsLinux())
+        {
+            // Two different directories on a case-sensitive filesystem, so both must survive.
+            Assert.Equal(new[] { _root, upper }, roots);
+        }
+        else
+        {
+            Assert.Equal(new[] { _root }, roots);
+        }
     }
 
     [Fact]
