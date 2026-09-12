@@ -290,8 +290,8 @@ public class LocalFileAccessPolicyTests : IDisposable
         // Assert the contract rather than the exact string, since on macOS the temp path itself may
         // contain a symlink (e.g. /var -> /private/var).
         Assert.Single(roots);
-        Assert.DoesNotEndWith(Path.DirectorySeparatorChar.ToString(), roots[0]);
-        Assert.DoesNotEndWith(Path.AltDirectorySeparatorChar.ToString(), roots[0]);
+        Assert.False(roots[0].EndsWith(Path.DirectorySeparatorChar));
+        Assert.False(roots[0].EndsWith(Path.AltDirectorySeparatorChar));
 
         // A file created under the original root path should resolve as inside it.
         var file = CreateFile(_root, "test.txt");
