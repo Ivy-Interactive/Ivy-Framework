@@ -87,4 +87,63 @@ public class LocalFileEndpointTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task WithMidPathDirectoryLinkPointingOutsideRoot_Returns404()
+    {
+        var link = Path.Combine(_root, "link");
+
+        if (!TryCreateDirectoryLink(link, _outside))
+            return; // Directory link creation not permitted here; skip test.
+
+        await using var server = await IvyTestServer.CreateAsync(s => s.DangerouslyAllowLocalFiles(_root));
+        using var client = new HttpClient { BaseAddress = new Uri(server.BaseUrl) };
+
+        var pathThroughLink = Path.Combine(link, "secret.txt");
+        Assert.True(File.Exists(pathThroughLink), "Link should allow access to target file");
+
+        var response = await client.GetAsync($"/ivy/local-file?path={Uri.EscapeDataString(pathThroughLink)}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    private static bool TryCreateDirectoryLink(string link, string target)
+    {
+        try
+        {
+            Directory.CreateSymbolicLink(link, target);
+            return true;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
+        {
+            // Symlink creation not permitted; try a Windows junction.
+        }
+
+        if (!OperatingSystem.IsWindows())
+            return false;
+
+        try
+        {
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c mklink /J \"{link}\" \"{target}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            process.WaitForExit(5000);
+
+            return Directory.Exists(link);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
