@@ -3,8 +3,8 @@ using System.Net;
 namespace Ivy.Integration.Tests;
 
 /// <summary>
-/// Host header validation is the DNS rebinding mitigation and is opt-in: these tests measure both
-/// the opted-in behaviour and the unchanged default.
+/// Host header validation is the DNS rebinding mitigation. A loopback bind validates the loopback
+/// names by default, and <c>AllowHosts</c> replaces that list: these tests measure both.
 /// </summary>
 public class HostFilteringTests
 {
@@ -22,20 +22,54 @@ public class HostFilteringTests
     }
 
     [Fact]
-    public async Task WithoutAllowHosts_ForeignHostHeader_IsAccepted()
+    public async Task LoopbackBound_ForeignHostHeader_ReturnsBadRequest()
     {
         await using var server = await IvyTestServer.CreateAsync();
         using var client = CreateClient(server);
 
         var response = await client.SendAsync(WithHost("evil.example"));
 
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("localhost")]
+    [InlineData("127.0.0.1")]
+    [InlineData("[::1]")]
+    public async Task LoopbackBound_LoopbackHostHeaders_AreAccepted(string host)
+    {
+        await using var server = await IvyTestServer.CreateAsync();
+        using var client = CreateClient(server);
+
+        var response = await client.SendAsync(WithHost(host));
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    /// <summary>
+    /// <c>AllowHosts</c> replaces the loopback default rather than extending it, so naming only a
+    /// tunnel hostname stops the loopback names from working.
+    /// </summary>
+    [Fact]
+    public async Task WithAllowHosts_ReplacesTheLoopbackDefault()
+    {
+        await using var server = await IvyTestServer.CreateAsync(s => s.AllowHosts("app.example.com"));
+        using var client = CreateClient(server);
+
+        var response = await client.SendAsync(WithHost("localhost"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     private static HttpRequestMessage WithHost(string host)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/ivy/health");
-        request.Headers.Host = host;
+
+        // A bracketed IPv6 literal does not survive the typed Host setter's validation, and the
+        // header has to reach the server verbatim for HostString to match it.
+        if (!request.Headers.TryAddWithoutValidation("Host", host))
+            request.Headers.Host = host;
+
         return request;
     }
 
