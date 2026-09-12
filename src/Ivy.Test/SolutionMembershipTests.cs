@@ -8,7 +8,7 @@ public class SolutionMembershipTests
 
     private static string FindSrcDirectory()
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        var dir = new DirectoryInfo(System.AppContext.BaseDirectory);
         while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Ivy-Framework.slnx")))
         {
             dir = dir.Parent;
