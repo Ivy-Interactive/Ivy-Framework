@@ -12,6 +12,7 @@ import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import { SelectInputWidgetProps } from "../../select-types";
 import {
+  filterOptionsBySearch,
   computeClearAllValues,
   computeSelectAllValues,
   convertValuesToOriginalType,
@@ -96,27 +97,10 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredOptions = useMemo(() => {
-    if (!searchable || !searchTerm) return validOptions;
-
-    return validOptions.filter((option) => {
-      if (searchMode === "Fuzzy") {
-        let i = 0;
-        let j = 0;
-        const searchLower = searchTerm.toLowerCase();
-        const labelLower = (option.label || "").toLowerCase();
-        while (i < searchLower.length && j < labelLower.length) {
-          if (searchLower[i] === labelLower[j]) i++;
-          j++;
-        }
-        return i === searchLower.length;
-      }
-      const term = searchMode === "CaseInsensitive" ? searchTerm.toLowerCase() : searchTerm;
-      const label =
-        searchMode === "CaseInsensitive" ? (option.label || "").toLowerCase() : option.label || "";
-      return label.includes(term);
-    });
-  }, [validOptions, searchable, searchTerm, searchMode]);
+  const filteredOptions = useMemo(
+    () => (searchable ? filterOptionsBySearch(validOptions, searchTerm, searchMode) : validOptions),
+    [validOptions, searchable, searchTerm, searchMode],
+  );
 
   const visibleEnabledForBulkList = useMemo(
     () => filteredOptions.filter((o) => !disabled && !loading && !o.disabled),
