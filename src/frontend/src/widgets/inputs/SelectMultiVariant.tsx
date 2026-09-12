@@ -34,6 +34,9 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   ghost = false,
   showActions = false,
   nullable = false,
+  searchable,
+  searchMode = "CaseInsensitive",
+  emptyMessage,
   density,
   "data-testid": dataTestId,
   width,
@@ -213,6 +216,9 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
       showActions={showActions && selectMany}
       maxSelections={maxSelections}
       minSelections={minSelections}
+      searchable={searchable}
+      searchMode={searchMode}
+      emptyIndicator={emptyMessage}
       onNullableClear={
         nullable
           ? () => {
