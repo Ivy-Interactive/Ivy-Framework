@@ -73,8 +73,10 @@ public class HostFilteringTests
     }
 
     /// <summary>
-    /// Overriding the Host header also changes the TLS SNI name the handler validates the
-    /// certificate against, so the dev certificate has to be accepted without a name match.
+    /// The harness pins HTTP (<c>ServerArgs.UseTls</c> is false), so this callback never fires today. It
+    /// stays because overriding the Host header also changes the TLS SNI name the handler validates the
+    /// certificate against: the day a server here opts into TLS, the dev certificate has to be accepted
+    /// without a name match, or every case in this class fails on the handshake instead of on its assertion.
     /// </summary>
     private static HttpClient CreateClient(IvyTestServer server)
     {
