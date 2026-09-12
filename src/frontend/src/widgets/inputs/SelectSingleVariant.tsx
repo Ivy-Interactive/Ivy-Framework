@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/input/text-input-variant";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { SelectInputWidgetProps } from "./select-types";
-import { useSelectValueHandler } from "./select-utils";
+import { filterOptionsBySearch, useSelectValueHandler } from "./select-utils";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
@@ -124,23 +124,11 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   const isSearchEnabled =
     searchable === true || (searchable !== false && validOptions.length >= SEARCH_THRESHOLD);
 
-  const filteredOptions = useMemo(() => {
-    if (!isSearchEnabled || !searchTerm) return validOptions;
-    return validOptions.filter((option) => {
-      const term = searchMode === "CaseInsensitive" ? searchTerm.toLowerCase() : searchTerm;
-      const label = (option.label || "").toLowerCase();
-      if (searchMode === "Fuzzy") {
-        let i = 0,
-          j = 0;
-        while (i < term.length && j < label.length) {
-          if (term[i] === label[j]) i++;
-          j++;
-        }
-        return i === term.length;
-      }
-      return label.includes(term);
-    });
-  }, [validOptions, isSearchEnabled, searchTerm, searchMode]);
+  const filteredOptions = useMemo(
+    () =>
+      isSearchEnabled ? filterOptionsBySearch(validOptions, searchTerm, searchMode) : validOptions,
+    [validOptions, isSearchEnabled, searchTerm, searchMode],
+  );
 
   // Radix Select runs focusSelectedItem in a child useEffect: it focuses the selected item, or the
   // listbox when there are no items — which steals focus from the header search field whenever the

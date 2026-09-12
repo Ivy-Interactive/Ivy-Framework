@@ -211,16 +211,19 @@ describe("filterOptionsBySearch", () => {
     expect(result).toHaveLength(0);
   });
 
+  it("matches uppercase term case insensitively with Fuzzy mode", () => {
+    const result = filterOptionsBySearch(options, "AKV", "Fuzzy");
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe("ArtemKhvorostianyi");
+  });
+
   it("returns empty array when no options match", () => {
     const result = filterOptionsBySearch(options, "xyz");
     expect(result).toEqual([]);
   });
 
   it("falls back to value when label is missing", () => {
-    const optionsNoLabel = [
-      { value: "rorychatt" },
-      { value: "artem" },
-    ];
+    const optionsNoLabel = [{ value: "rorychatt" }, { value: "artem" }];
     const result = filterOptionsBySearch(optionsNoLabel, "ror");
     expect(result).toHaveLength(1);
     expect(result[0].value).toBe("rorychatt");
