@@ -71,6 +71,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 id={column.id}
                 name={column.name}
                 color={column.color}
+                icon={column.icon}
                 width={columnWidth}
               >
                 <KanbanCards id={column.id}>

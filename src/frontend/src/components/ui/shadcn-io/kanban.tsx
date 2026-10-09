@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
+import { Circle, MoreHorizontal } from "lucide-react";
+import Icon from "@/components/Icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,7 @@ export interface Column {
   id: string;
   name: string;
   color: string;
+  icon?: string;
 }
 
 interface DropTarget {
@@ -131,8 +134,8 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn("inline-flex min-w-full h-full bg-background flex-row", className)}
-      style={{ minWidth: "fit-content", maxWidth: "100%" }}
+      className={cn("flex w-full h-full bg-background flex-row gap-2", className)}
+      style={{ maxWidth: "100%" }}
     >
       {children}
     </div>
@@ -143,12 +146,21 @@ interface KanbanColumnProps {
   id: string;
   name?: string;
   color?: string;
+  icon?: string;
   width?: string;
   children: ReactNode;
   className?: string;
 }
 
-export function KanbanColumn({ id, name, color, width, children, className }: KanbanColumnProps) {
+export function KanbanColumn({
+  id,
+  name,
+  color,
+  icon,
+  width,
+  children,
+  className,
+}: KanbanColumnProps) {
   const {
     onCardMove,
     data,
@@ -210,27 +222,38 @@ export function KanbanColumn({ id, name, color, width, children, className }: Ka
   return (
     <div
       className={cn(
-        "bg-background rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors",
-        hasExplicitWidth ? "flex-none shrink-0" : "flex-none shrink-0 min-w-70",
-        showDragOver && "bg-accent rounded-lg",
+        "bg-muted rounded-2xl px-0 pt-3 pb-1 min-h-0 flex flex-col transition-colors",
+        // Without an explicit width, columns share the full board width evenly:
+        // they shrink to fit the viewport (min-w-0 → no horizontal overflow) and
+        // never grow past 1600px.
+        hasExplicitWidth ? "flex-none shrink-0" : "flex-1 min-w-0 max-w-[100rem]",
+        showDragOver && "bg-accent ring-2 ring-primary/20",
         className,
       )}
-      style={{
-        ...widthStyles,
-        ...(hasExplicitWidth ? {} : { width: "max-content" }),
-      }}
+      style={widthStyles}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="px-2">
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          {color && <div className="size-3 rounded-full" style={{ backgroundColor: color }} />}
-          {name || id}
-          {showCounts && (
-            <span className="text-muted-foreground text-sm font-normal">({columnTaskCount})</span>
-          )}
-        </h3>
+      <div className="flex items-center gap-2 px-4 pb-1">
+        {icon ? (
+          <Icon name={icon} className="size-4 text-foreground" />
+        ) : color ? (
+          <span className="size-4 rounded-full border-[1.5px]" style={{ borderColor: color }} />
+        ) : (
+          <Circle className="size-4 text-muted-foreground/60" strokeWidth={1.5} />
+        )}
+        <h3 className="font-semibold text-sm text-foreground truncate">{name || id}</h3>
+        {showCounts && (
+          <span className="text-muted-foreground/70 text-sm font-normal">{columnTaskCount}</span>
+        )}
+        <button
+          type="button"
+          className="ml-auto text-muted-foreground/50 hover:text-foreground transition-colors"
+          aria-label="Column options"
+        >
+          <MoreHorizontal className="size-4" />
+        </button>
       </div>
       {children}
     </div>
@@ -253,8 +276,11 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
   const showLineIndicator = isTargetColumn && isSameColumnDrag;
 
   return (
-    <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-2 p-2 pt-3">
+    // The viewport's content wrapper defaults to display:table, which sizes to its
+    // content and lets wide cards overflow the fixed column width; force it to block
+    // so cards are laid out at the column width and truncate internally instead.
+    <ScrollArea className="flex-1 min-h-0" viewportClassName="[&>div]:!block">
+      <div className="flex flex-col gap-2 p-3">
         {columnTasks.map((task, index) => {
           const isDraggedCard = task.id === draggedCardId;
           const shouldShift =
