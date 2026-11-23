@@ -1,0 +1,106 @@
+# Dependabot version updates: one grouped pull request per ecosystem a week.
+# Security updates are switched on in the repository settings.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+  - package-ecosystem: "npm"
+    directories:
+      - "/src/Ivy/Widgets/External/ActivityHeatmap/frontend"
+      - "/src/Ivy/Widgets/External/AnimatedStatusLabel/frontend"
+      - "/src/Ivy/Widgets/External/DiffView/frontend"
+      - "/src/Ivy/Widgets/External/Leaflet/frontend"
+      - "/src/Ivy/Widgets/External/QRCode/frontend"
+      - "/src/Ivy/Widgets/External/ScreenshotFeedback"
+      - "/src/Ivy/Widgets/External/ScreenshotFeedback/frontend"
+      - "/src/Ivy/Widgets/External/Tiptap"
+      - "/src/Ivy/Widgets/External/Tiptap/frontend"
+      - "/src/Ivy/Widgets/External/Xterm/frontend"
+      - "/src/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      npm:
+        patterns:
+          - "*"
+  - package-ecosystem: "nuget"
+    directories:
+      - "/src/Ivy"
+      - "/src/Ivy.Agent.EfQuery"
+      - "/src/Ivy.Agent.EfQuery.Test"
+      - "/src/Ivy.Agent.Filter.Eval.Console"
+      - "/src/Ivy.Agent.Filter.Tests"
+      - "/src/Ivy.Analyser"
+      - "/src/Ivy.Analyser.Test"
+      - "/src/Ivy.Benchmarks"
+      - "/src/Ivy.Benchmarks.E2E"
+      - "/src/Ivy.Benchmarks.E2E/Host.Legacy"
+      - "/src/Ivy.Benchmarks.E2E/Host.Native"
+      - "/src/Ivy.Desktop"
+      - "/src/Ivy.Desktop.Samples"
+      - "/src/Ivy.Docs"
+      - "/src/Ivy.Docs.Helpers"
+      - "/src/Ivy.Docs.Shared"
+      - "/src/Ivy.Docs.Test"
+      - "/src/Ivy.Hooks.Pty.Test"
+      - "/src/Ivy.Integration.Tests"
+      - "/src/Ivy.Plugin.Abstractions"
+      - "/src/Ivy.Samples"
+      - "/src/Ivy.Samples.Shared"
+      - "/src/Ivy.Test"
+      - "/src/Ivy.XamlBuilder"
+      - "/src/Ivy.XamlBuilder.Test"
+      - "/src/Ivy/Widgets/External/ActivityHeatmap/.samples"
+      - "/src/Ivy/Widgets/External/DiffView/.samples"
+      - "/src/Ivy/Widgets/External/Leaflet/.samples"
+      - "/src/Ivy/Widgets/External/QRCode/.samples"
+      - "/src/Ivy/Widgets/External/ScreenshotFeedback/.samples"
+      - "/src/Ivy/Widgets/External/Tiptap/.samples"
+      - "/src/Ivy/Widgets/External/Xterm/.samples"
+      - "/src/Ivy/Widgets/External/Xterm/.samples/.console/HelloApp"
+      - "/src/auth/Ivy.Auth"
+      - "/src/auth/examples/Auth0Example"
+      - "/src/auth/examples/AutheliaExample"
+      - "/src/auth/examples/BasicAuthExample"
+      - "/src/auth/examples/ClerkExample"
+      - "/src/auth/examples/GitHubExample"
+      - "/src/auth/examples/Ivy.Auth.Examples.Shared"
+      - "/src/auth/examples/MicrosoftEntraExample"
+      - "/src/auth/examples/SliplaneExample"
+      - "/src/auth/examples/SupabaseExample"
+      - "/src/ivyml/Ivy.IvyML"
+      - "/src/ivyml/Ivy.IvyML.Console"
+      - "/src/ivyml/Ivy.IvyML.Studio"
+      - "/src/ivyml/Ivy.IvyML.Test"
+      - "/src/plugins/abstractions/Ivy.Plugin.HelloWorld.Abstractions"
+      - "/src/plugins/hosts/HelloWorldHost"
+      - "/src/plugins/plugins/Ivy.Plugin.Example.AppProvider"
+      - "/src/plugins/plugins/Ivy.Plugin.HelloWorld"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      nuget:
+        patterns:
+          - "*"
+  - package-ecosystem: "docker"
+    directories:
+      - "/.github/docker"
+      - "/src/Ivy.Docs"
+      - "/src/Ivy.Samples"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      docker:
+        patterns:
+          - "*"
