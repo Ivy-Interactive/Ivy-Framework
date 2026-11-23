@@ -10,22 +10,22 @@
   },
   "dependencies": {
     "@xterm/addon-canvas": "0.7.0",
-    "@xterm/addon-clipboard": "0.1.0",
-    "@xterm/addon-fit": "0.10.0",
-    "@xterm/addon-unicode11": "0.8.0",
-    "@xterm/addon-web-links": "0.11.0",
-    "@xterm/xterm": "5.5.0"
+    "@xterm/addon-clipboard": "0.2.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-unicode11": "0.9.0",
+    "@xterm/addon-web-links": "0.12.0",
+    "@xterm/xterm": "6.0.0"
   },
   "devDependencies": {
-    "@types/react": "19.2.8",
-    "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.1",
-    "autoprefixer": "10.4.23",
-    "postcss": "8.5.23",
-    "tailwindcss": "3.4.19",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "autoprefixer": "10.7.0",
+    "postcss": "8.5.33",
+    "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
-    "vite-plus": "0.3.0"
+    "vite-plus": "1.7.0"
   },
   "peerDependencies": {
     "react": "19.2.3",
@@ -41,7 +41,7 @@
       "lodash-es": "4.18.1",
       "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
       "vitest": "4.1.11",
-      "postcss": "8.5.23",
+      "postcss": "8.5.33",
       "browserslist": "4.28.7",
       "postcss-selector-parser": "6.1.3",
       "ws": "8.21.0",
