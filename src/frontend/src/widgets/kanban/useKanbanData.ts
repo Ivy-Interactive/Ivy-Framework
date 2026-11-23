@@ -1,6 +1,12 @@
 import React from "react";
 import { Task } from "@/components/ui/shadcn-io/kanban";
-import type { Column, TaskWithWidgetId, CardData, ExtractedKanbanData } from "./types";
+import type {
+  Column,
+  ProvidedColumn,
+  TaskWithWidgetId,
+  CardData,
+  ExtractedKanbanData,
+} from "./types";
 
 interface WidgetNodeChild {
   type: string;
@@ -51,13 +57,57 @@ function sortColumnKeysByBackendOrder(columnKeys: string[]): string[] {
   });
 }
 
+function normalizeProvidedColumns(columns: ProvidedColumn[]): Column[] {
+  return columns.map((column, index) => ({
+    id: String(column.id),
+    name: column.name ?? String(column.id),
+    color: column.color ?? "",
+    order: column.order ?? index,
+    icon: column.icon,
+  }));
+}
+
+/**
+ * Builds the final column list: provided (static) columns first in their
+ * declared order, followed by any extra columns discovered on the cards.
+ * Without provided columns, falls back to deriving columns from the cards.
+ */
+function buildColumns(
+  dataColumnKeys: string[],
+  columnNameMap: Map<string, string>,
+  providedColumns: Column[],
+): Column[] {
+  if (providedColumns.length > 0) {
+    const knownIds = new Set(providedColumns.map((c) => c.id));
+    const extras = dataColumnKeys.filter((key) => !knownIds.has(key));
+    return [
+      ...providedColumns,
+      ...extras.map((key, index) => ({
+        id: key,
+        name: columnNameMap.get(key) ?? key,
+        color: "",
+        order: providedColumns.length + index,
+      })),
+    ];
+  }
+
+  const sortedKeys = sortColumnKeysByBackendOrder(dataColumnKeys);
+  return sortedKeys.map((key, index) => ({
+    id: key,
+    name: columnNameMap.get(key) ?? key,
+    color: "",
+    order: index,
+  }));
+}
+
 export function useKanbanData(
   slots: { default?: React.ReactNode[] } | undefined,
   tasks: Task[],
-  columns: Column[],
+  columns: ProvidedColumn[],
   widgetNodeChildren?: WidgetNodeChild[],
 ): ExtractedKanbanData {
   return React.useMemo(() => {
+    const providedColumns = normalizeProvidedColumns(columns);
     const kanbanChildren = (widgetNodeChildren || []).filter((c) => c.type === "Ivy.KanbanCard");
     if (kanbanChildren.length > 0) {
       const extractedCards: CardData[] = [];
@@ -87,24 +137,18 @@ export function useKanbanData(
         const allColumnKeys = extractColumnKeysFromCards(extractedCards);
         const columnNameMap = buildColumnNameMap(extractedCards);
 
-        const finalColumnKeys = sortColumnKeysByBackendOrder(allColumnKeys);
-
-        const extractedColumns: Column[] = finalColumnKeys.map((key, index) => ({
-          id: key,
-          name: columnNameMap.get(key) ?? key,
-          color: "",
-          order: index,
-        }));
+        const extractedColumns = buildColumns(allColumnKeys, columnNameMap, providedColumns);
+        const columnIndexById = new Map(extractedColumns.map((c, i) => [c.id, i]));
 
         const extractedTasks: TaskWithWidgetId[] = extractedCards.map((card) => {
           const column = card.columnKey || "Default";
-          const columnIndex = finalColumnKeys.indexOf(column);
+          const columnIndex = columnIndexById.get(column) ?? 0;
 
           return {
             id: card.cardId,
             title: "",
             status: column,
-            statusOrder: columnIndex >= 0 ? columnIndex : 0,
+            statusOrder: columnIndex,
             priority: card.priority || 0,
             description: "",
             assignee: "",
@@ -130,14 +174,7 @@ export function useKanbanData(
       const statusKeys = Array.from(statusMap.keys());
       const columnNameMap = buildColumnNameMap(extractedCards);
 
-      const columnKeys = sortColumnKeysByBackendOrder(statusKeys);
-
-      const extractedColumns: Column[] = columnKeys.map((status, index) => ({
-        id: status,
-        name: columnNameMap.get(status) ?? status,
-        color: "",
-        order: index,
-      }));
+      const extractedColumns = buildColumns(statusKeys, columnNameMap, providedColumns);
 
       const cardToTaskMap = new Map<string, Task>();
       tasks.forEach((task) => {
@@ -161,7 +198,7 @@ export function useKanbanData(
 
     return {
       tasks: tasks.map((t) => ({ ...t, widgetId: t.id })),
-      columns,
+      columns: providedColumns,
       cards: [],
     };
   }, [slots, tasks, columns, widgetNodeChildren]);

@@ -20,10 +20,12 @@ public class KanbanBuilder<TModel, TGroupKey>(
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private Func<TGroupKey, string>? _columnHeaderSelector;
+    private Func<TGroupKey, string?>? _columnIconSelector;
     private object? _empty;
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
     private Size? _columnWidth;
+    private TGroupKey[]? _staticColumns;
 
     public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
@@ -111,6 +113,81 @@ public class KanbanBuilder<TModel, TGroupKey>(
         return this;
     }
 
+    /// <summary>
+    /// Maps a column group key to a Lucide icon name (e.g. "Feather") shown in the
+    /// column header. Only applies to fixed columns declared via <see cref="Columns"/>.
+    /// </summary>
+    public KanbanBuilder<TModel, TGroupKey> ColumnIcon(Func<TGroupKey, string?> iconSelector)
+    {
+        _columnIconSelector = iconSelector;
+        return this;
+    }
+
+    /// <summary>
+    /// Defines a fixed set of columns that always render, in the given order,
+    /// even when a column has no cards. Cards whose group key is not listed are
+    /// appended as extra columns after the fixed ones.
+    /// </summary>
+    public KanbanBuilder<TModel, TGroupKey> Columns(params TGroupKey[] columns)
+    {
+        _staticColumns = columns;
+        return this;
+    }
+
+    /// <summary>
+    /// Converts the raw ToColumn payload of a card-move event (a string, number, or
+    /// JsonElement/JsonNode from event deserialization) back into the board's group
+    /// key type. Enum keys round-trip as their serialized names, which
+    /// <see cref="Convert.ChangeType(object, Type)"/> cannot parse.
+    /// </summary>
+    private static bool TryConvertGroupKey(object toColumn, out TGroupKey key)
+    {
+        if (toColumn is TGroupKey typedKey)
+        {
+            key = typedKey;
+            return true;
+        }
+
+        // Unwrap JSON payloads to a plain string/number before converting.
+        var raw = toColumn switch
+        {
+            System.Text.Json.JsonElement je => je.ValueKind switch
+            {
+                System.Text.Json.JsonValueKind.String => je.GetString(),
+                System.Text.Json.JsonValueKind.Number => je.GetRawText(),
+                _ => je.ToString()
+            },
+            System.Text.Json.Nodes.JsonValue jv => jv.TryGetValue<string>(out var s) ? s : jv.ToString(),
+            System.Text.Json.Nodes.JsonNode jn => jn.ToString(),
+            _ => toColumn.ToString()
+        };
+
+        key = default!;
+        if (raw == null)
+            return false;
+
+        try
+        {
+            if (typeof(TGroupKey).IsEnum)
+            {
+                if (Enum.TryParse(typeof(TGroupKey), raw, ignoreCase: true, out var parsed) &&
+                    Enum.IsDefined(typeof(TGroupKey), parsed!))
+                {
+                    key = (TGroupKey)parsed!;
+                    return true;
+                }
+                return false;
+            }
+
+            key = (TGroupKey)Convert.ChangeType(raw, typeof(TGroupKey));
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static string HumanizeGroupKey(TGroupKey key)
     {
         if (key is Enum enumValue)
@@ -121,7 +198,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
     public override object? Build()
     {
-        if (!records.Any())
+        if (!records.Any() && _staticColumns == null)
         {
             return _empty ?? new Fragment();
         }
@@ -212,7 +289,14 @@ public class KanbanBuilder<TModel, TGroupKey>(
             ShowCounts = true,
             Width = _width ?? Size.Full(),
             Height = _height ?? Size.Full(),
-            ColumnWidth = _columnWidth
+            ColumnWidth = _columnWidth,
+            Columns = _staticColumns?
+                .Select((key, index) => new KanbanColumnDef(
+                    key,
+                    _columnHeaderSelector != null ? _columnHeaderSelector(key) : HumanizeGroupKey(key),
+                    index,
+                    _columnIconSelector?.Invoke(key)))
+                .ToArray()
         };
 
         if (_onMove != null)
@@ -221,29 +305,13 @@ public class KanbanBuilder<TModel, TGroupKey>(
             {
                 OnCardMove = new(e =>
                 {
-                    if (e.Value.ToColumn == null)
+                    if (e.Value.ToColumn == null || !TryConvertGroupKey(e.Value.ToColumn, out var groupKey))
                         return ValueTask.CompletedTask;
 
-                    if (e.Value.ToColumn is TGroupKey groupKey)
-                    {
-                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                            e.EventName,
-                            e.Sender,
-                            (e.Value.CardId, groupKey, e.Value.TargetIndex)));
-                    }
-
-                    try
-                    {
-                        var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
-                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                                e.EventName,
-                                e.Sender,
-                            (e.Value.CardId, convertedKey, e.Value.TargetIndex)));
-                    }
-                    catch
-                    {
-                        return ValueTask.CompletedTask;
-                    }
+                    return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                        e.EventName,
+                        e.Sender,
+                        (e.Value.CardId, groupKey, e.Value.TargetIndex)));
                 })
             };
         }
